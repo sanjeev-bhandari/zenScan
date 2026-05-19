@@ -28,8 +28,8 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
-mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
-mlkit-face-detection = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkitFaceDetection" }
+mlkit-text = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+mlkit-face = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkitFaceDetection" }
 coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 
 [plugins]

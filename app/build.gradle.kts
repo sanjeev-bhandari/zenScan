@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -30,9 +29,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -49,8 +46,8 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     
     // ZenScan AI & Image Dependencies
-    implementation(libs.mlkit.text.recognition)
-    implementation(libs.mlkit.face.detection)
+    implementation(libs.mlkit.text)
+    implementation(libs.mlkit.face)
     implementation(libs.coil)
 
     testImplementation(libs.junit)
