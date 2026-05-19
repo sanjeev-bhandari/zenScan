@@ -1,4 +1,4 @@
-package com.example.realsanjeev.ui.slideshow
+package com.example.zenscan.ui.gallery
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.realsanjeev.databinding.FragmentKatakanaBinding
+import com.example.zenscan.databinding.FragmentHiraganaBinding
 
-class KatakanaFragment : Fragment() {
+class HiraganaFragment : Fragment() {
 
-    private var _binding: FragmentKatakanaBinding? = null
+    private var _binding: FragmentHiraganaBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +22,14 @@ class KatakanaFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val katakanaViewModel =
-            ViewModelProvider(this).get(KatakanaViewModel::class.java)
+        val hiraganaViewModel =
+            ViewModelProvider(this).get(HiraganaViewModel::class.java)
 
-        _binding = FragmentKatakanaBinding.inflate(inflater, container, false)
+        _binding = FragmentHiraganaBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textKatakana
-        katakanaViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textHiragana
+        hiraganaViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root

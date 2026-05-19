@@ -1,4 +1,4 @@
-package com.example.realsanjeev
+package com.example.zenscan
 
 import org.junit.Test
 

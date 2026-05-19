@@ -1,13 +1,13 @@
-package com.example.realsanjeev.ui.slideshow
+package com.example.zenscan.ui.slideshow
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class KatakanaViewModel : ViewModel() {
+class SlideshowViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is Katakana Fragment"
+        value = "This is slideshow Fragment"
     }
     val text: LiveData<String> = _text
 }

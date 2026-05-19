@@ -1,13 +1,13 @@
-package com.example.realsanjeev.ui.gallery
+package com.example.zenscan.ui.gallery
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class HiraganaViewModel : ViewModel() {
+class GalleryViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
-        value = "This is Hiragana Fragment"
+        value = "This is gallery Fragment"
     }
     val text: LiveData<String> = _text
 }

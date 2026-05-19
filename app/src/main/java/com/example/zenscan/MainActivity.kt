@@ -1,4 +1,4 @@
-package com.example.realsanjeev
+package com.example.zenscan
 
 import android.net.Uri
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.example.realsanjeev.databinding.ActivityMainBinding
+import com.example.zenscan.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 

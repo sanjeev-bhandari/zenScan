@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Realsanjeev"
+rootProject.name = "ZenScan"
 include(":app")

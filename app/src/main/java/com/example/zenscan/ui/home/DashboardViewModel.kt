@@ -1,4 +1,4 @@
-package com.example.realsanjeev.ui.home
+package com.example.zenscan.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

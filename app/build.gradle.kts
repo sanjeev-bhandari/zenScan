@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.realsanjeev"
+    namespace = "com.example.zenscan"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.realsanjeev"
+        applicationId = "com.example.zenscan"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

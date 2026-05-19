@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Realsanjeev">
+        android:theme="@style/Theme.ZenScan">
 
         <!-- ML Kit OCR and Face Detection models download -->
         <meta-data
@@ -29,7 +29,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Realsanjeev.NoActionBar">
+            android:theme="@style/Theme.ZenScan.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

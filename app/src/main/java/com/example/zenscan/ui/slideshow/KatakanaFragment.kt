@@ -1,4 +1,4 @@
-package com.example.realsanjeev.ui.home
+package com.example.zenscan.ui.slideshow
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.example.realsanjeev.databinding.FragmentDashboardBinding
+import com.example.zenscan.databinding.FragmentKatakanaBinding
 
-class DashboardFragment : Fragment() {
+class KatakanaFragment : Fragment() {
 
-    private var _binding: FragmentDashboardBinding? = null
+    private var _binding: FragmentKatakanaBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +22,14 @@ class DashboardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(DashboardViewModel::class.java)
+        val katakanaViewModel =
+            ViewModelProvider(this).get(KatakanaViewModel::class.java)
 
-        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        _binding = FragmentKatakanaBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textKatakana
+        katakanaViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root
