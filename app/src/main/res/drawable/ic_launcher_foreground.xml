@@ -1,0 +1,41 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background circle (safe padding) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,12
+                          A42,42 0 1,1 53.9,12 Z"/>
+
+    <!-- Black swirl -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+            M54,12
+            A21,21 0 0,1 54,54
+            A21,21 0 0,0 54,96
+            A42,42 0 0,0 54,12 Z"/>
+
+    <!-- Top small circle -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+            M54,33
+            m-5,0
+            a5,5 0 1,0 10,0
+            a5,5 0 1,0 -10,0"/>
+
+    <!-- Bottom small circle -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M54,75
+            m-5,0
+            a5,5 0 1,0 10,0
+            a5,5 0 1,0 -10,0"/>
+
+</vector>
