@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Star 1 -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M7.5,9H8.5L9,10L9.5,9H10.5L9.5,8.5L9,7.5L8.5,8.5L7.5,9Z"/>
+    <!-- Star 2 -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M15,4H16L16.5,5L17,4H18L17,3.5L16.5,2.5L16,3.5L15,4Z"/>
+    <!-- Star 3 -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M19.5,10H20.5L21,11L21.5,10H22.5L21.5,9.5L21,8.5L20.5,9.5L19.5,10Z"/>
+    <!-- Magic Wand -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M18.83,6.33a1.49,1.49 0,0 0,-2.11 0L2.34,20.71a1.5,1.5 0,0 0,0 2.12c0.29,0.29 0.68,0.44 1.06,0.44s0.77,-0.15 1.06,-0.44L18.83,8.45a1.49,1.49 0,0 0,0 -2.12ZM16,11.27L12.73,8L15,5.73L18.27,9L16,11.27Z"/>
+</vector>

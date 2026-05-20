@@ -1,5 +1,6 @@
 package com.example.zenscan
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -15,8 +16,10 @@ class MainActivity : AppCompatActivity() {
     // Modern Photo Picker launcher
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            // TODO: Start RedactionActivity with this URI
-            Toast.makeText(this, "Image selected: $uri", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, PreviewActivity::class.java).apply {
+                data = uri
+            }
+            startActivity(intent)
         } else {
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
         }

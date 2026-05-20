@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:orientation="vertical"
+    tools:context=".PreviewActivity">
+
+    <!-- Sleek Custom Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bg_dark"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:title="@string/smart_scan"
+        app:titleTextColor="@color/text_dark_primary" />
+
+    <!-- Main Workspace Container -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#030712"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="4dp"
+        app:layout_scrollFlags="scroll|enterAlways">
+
+        <!-- Image Container -->
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <!-- High-fidelity AI Bounding Box Layer -->
+        <com.example.zenscan.view.DetectionOverlayView
+            android:id="@+id/overlayView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Modern Loading / Processing Overlay -->
+        <FrameLayout
+            android:id="@+id/loadingIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#B3030712"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ProgressBar
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:indeterminateTint="@color/accent_blue" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/detecting_content"
+                    android:textColor="@color/text_dark_primary"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Floating AI Detection Summary Badge -->
+        <TextView
+            android:id="@+id/summaryBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/badge_background"
+            android:backgroundTint="@color/accent_rose"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:elevation="6dp"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <!-- Bottom Controls Floating Sheet -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="@color/card_bg_dark"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="8dp"
+        app:strokeColor="#334155"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp">
+
+            <!-- Undo Action -->
+            <ImageButton
+                android:id="@+id/btnUndo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/badge_background"
+                android:backgroundTint="#2E3B4E"
+                android:contentDescription="@string/undo"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_undo"
+                app:tint="@color/text_dark_primary" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Redact All (AI Highlight Magic Wand) -->
+            <ImageButton
+                android:id="@+id/btnRedactAll"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:background="@drawable/badge_background"
+                android:backgroundTint="#1E1B4B"
+                android:contentDescription="@string/redact_all"
+                android:padding="14dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_auto_fix"
+                app:tint="#A5B4FC" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- Manual Brush Selection -->
+            <ImageButton
+                android:id="@+id/btnBrush"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/badge_background"
+                android:backgroundTint="#2E3B4E"
+                android:contentDescription="@string/brush_tool"
+                android:padding="12dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_brush"
+                app:tint="@color/text_dark_primary" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1.5" />
+
+            <!-- Primary CTA: Export Pill Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExport"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/accent_blue"
+                android:contentDescription="@string/export"
+                android:text="@string/export"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="24dp"
+                app:icon="@drawable/ic_export"
+                app:iconGravity="textStart"
+                app:iconPadding="6dp"
+                app:iconTint="@color/white"
+                app:rippleColor="#60A5FA" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

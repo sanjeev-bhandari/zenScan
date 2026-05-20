@@ -45,6 +45,8 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     
+    implementation(libs.androidx.recyclerview)
+
     // ZenScan AI & Image Dependencies
     implementation(libs.mlkit.text)
     implementation(libs.mlkit.face)

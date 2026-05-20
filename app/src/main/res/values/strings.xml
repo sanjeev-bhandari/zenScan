@@ -1,13 +1,17 @@
 <resources>
     <string name="app_name">ZenScan</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
 
-    <string name="menu_dashboard">Dashboard</string>
-    <string name="menu_hiragana">Hiragana</string>
-    <string name="menu_katakana">Katakana</string>
+    <string name="smart_scan">Smart Scan</string>
+    <string name="detecting_content">Detecting sensitive content…</string>
+    <string name="detection_complete">Detection complete.</string>
+    <string name="no_image_provided">No image provided</string>
+    <string name="failed_to_load_image">Failed to load image</string>
+    <string name="detection_failed">Detection failed</string>
+    <string name="no_sensitive_found">No sensitive content detected</string>
+    <string name="found_sensitive">Found %d sensitive item(s)</string>
+    <string name="undo">Undo</string>
+    <string name="redact_all">Redact All</string>
+    <string name="brush_tool">Brush</string>
+    <string name="export">Export</string>
+    <string name="recent_redactions">Recent Redactions</string>
 </resources>
