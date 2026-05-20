@@ -9,6 +9,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import android.view.ViewGroup.MarginLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.example.zenscan.databinding.ActivityPreviewBinding
 import com.example.zenscan.detection.DetectionPipeline
@@ -47,6 +51,7 @@ class PreviewActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         setupToolbarButtons()
+        setupOverlayCallbacks()
 
         val uri = intent.data
         if (uri != null) {
@@ -65,7 +70,7 @@ class PreviewActivity : AppCompatActivity() {
             applyRedactions()
         }
         binding.btnBrush.setOnClickListener {
-            Toast.makeText(this, "Brush tool coming soon!", Toast.LENGTH_SHORT).show()
+            toggleBrushMode()
         }
         binding.btnExport.setOnClickListener {
             exportAndShareImage()
@@ -73,6 +78,106 @@ class PreviewActivity : AppCompatActivity() {
 
         // Initialize undo button state
         updateUndoButtonState()
+
+        // Handle WindowInsets to prevent bottom gesture/navigation overlap dynamically
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomControlsCard) { view, windowInsets ->
+            val navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.updateLayoutParams<MarginLayoutParams> {
+                val baseMargin = (16 * resources.displayMetrics.density).toInt()
+                bottomMargin = navInsets.bottom + baseMargin
+                leftMargin = navInsets.left + baseMargin
+                rightMargin = navInsets.right + baseMargin
+            }
+            windowInsets
+        }
+    }
+
+    private fun setupOverlayCallbacks() {
+        binding.overlayView.onRegionToggled = { region ->
+            toggleRegionRedaction(region)
+        }
+        binding.overlayView.onBrushStrokeCompleted = { path ->
+            bakeBrushStroke(path)
+        }
+    }
+
+    private fun toggleRegionRedaction(region: DetectedRegion) {
+        detectedRegions = detectedRegions.map {
+            if (it.boundingBox == region.boundingBox && it.label == region.label) {
+                it.copy(isRedacted = !it.isRedacted)
+            } else {
+                it
+            }
+        }
+        originalBitmap?.let { bmp ->
+            binding.overlayView.setRegions(detectedRegions, bmp.width, bmp.height)
+        }
+
+        val activePii = detectedRegions.count { it.isRedacted && it.type == RegionType.PII_TEXT }
+        val activeFace = detectedRegions.count { it.isRedacted && it.type == RegionType.FACE }
+        val totalActive = activePii + activeFace
+        val badgeText = if (totalActive == 0) {
+            getString(R.string.no_sensitive_found)
+        } else {
+            getString(R.string.found_sensitive, totalActive)
+        }
+        binding.summaryBadge.text = badgeText
+
+        originalBitmap?.let { bmp ->
+            saveStateToHistory(bmp, detectedRegions, true, badgeText)
+        }
+    }
+
+    private fun toggleBrushMode() {
+        val isEnabled = !binding.overlayView.isBrushMode
+        binding.overlayView.isBrushMode = isEnabled
+
+        if (isEnabled) {
+            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1E3A8A")))
+            binding.btnBrush.setColorFilter(android.graphics.Color.WHITE)
+
+            binding.btnRedactAll.isEnabled = false
+            binding.btnRedactAll.alpha = 0.4f
+
+            Toast.makeText(this, "Brush Mode Enabled: Draw directly to redact", Toast.LENGTH_SHORT).show()
+        } else {
+            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2E3B4E")))
+            binding.btnBrush.setColorFilter(resources.getColor(R.color.text_dark_primary, theme))
+
+            binding.btnRedactAll.isEnabled = true
+            binding.btnRedactAll.alpha = 1.0f
+
+            Toast.makeText(this, "Brush Mode Disabled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun bakeBrushStroke(path: android.graphics.Path) {
+        val bitmap = originalBitmap ?: return
+
+        binding.loadingIndicator.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            val updatedBitmap = withContext(Dispatchers.Default) {
+                val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                val canvas = android.graphics.Canvas(result)
+                val paint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.BLACK
+                    style = android.graphics.Paint.Style.STROKE
+                    strokeWidth = 48f
+                    strokeCap = android.graphics.Paint.Cap.ROUND
+                    strokeJoin = android.graphics.Paint.Join.ROUND
+                    isAntiAlias = true
+                }
+                canvas.drawPath(path, paint)
+                result
+            }
+
+            originalBitmap = updatedBitmap
+            binding.imagePreview.setImageBitmap(updatedBitmap)
+            binding.loadingIndicator.visibility = View.GONE
+
+            saveStateToHistory(updatedBitmap, detectedRegions, binding.summaryBadge.visibility == View.VISIBLE, binding.summaryBadge.text?.toString())
+            Toast.makeText(this@PreviewActivity, "Redaction applied", Toast.LENGTH_SHORT).show()
+        }
     }
 
     // Capture and save deep copies of state in the history stack
@@ -222,18 +327,20 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun applyRedactions() {
         val bitmap = originalBitmap ?: return
-        if (detectedRegions.isEmpty()) {
-            Toast.makeText(this, R.string.no_sensitive_found, Toast.LENGTH_SHORT).show()
+        val activeRegions = detectedRegions.filter { it.isRedacted }
+        if (activeRegions.isEmpty()) {
+            Toast.makeText(this, "No active regions to redact", Toast.LENGTH_SHORT).show()
             return
         }
         binding.loadingIndicator.visibility = View.VISIBLE
         lifecycleScope.launch {
             val redacted = withContext(Dispatchers.Default) {
-                redactBitmap(bitmap, detectedRegions)
+                redactBitmap(bitmap, activeRegions)
             }
             originalBitmap = redacted
             binding.imagePreview.setImageBitmap(redacted)
             binding.overlayView.clear()
+            detectedRegions = emptyList()
             binding.summaryBadge.visibility = View.GONE
             binding.loadingIndicator.visibility = View.GONE
             

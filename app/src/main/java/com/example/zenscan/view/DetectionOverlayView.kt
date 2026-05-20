@@ -3,9 +3,13 @@ package com.example.zenscan.view
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.DashPathEffect
+import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegionType
@@ -19,6 +23,27 @@ class DetectionOverlayView @JvmOverloads constructor(
     private var regions: List<DetectedRegion> = emptyList()
     private var bitmapWidth: Int = 0
     private var bitmapHeight: Int = 0
+
+    // Callback variables for host Activity interaction
+    var onRegionToggled: ((DetectedRegion) -> Unit)? = null
+    var onBrushStrokeCompleted: ((Path) -> Unit)? = null
+    var isBrushMode: Boolean = false
+
+    // Manual Brush Drawing Engine
+    private val brushPath = Path()
+    private val brushPaint = Paint().apply {
+        color = Color.BLACK
+        style = Paint.Style.STROKE
+        strokeWidth = 48f
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        isAntiAlias = true
+    }
+
+    // Touch gesture helpers
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    private val touchSlop = 10f
 
     // Red accents for PII (Credit card, Email, Phone)
     private val piiFillPaint = Paint().apply {
@@ -58,6 +83,26 @@ class DetectionOverlayView @JvmOverloads constructor(
         isAntiAlias = true
     }
 
+    // Modern styling for bypassed (unselected) regions
+    private val bypassedFillPaint = Paint().apply {
+        color = Color.argb(12, 100, 116, 139) // Ultra light Slate translucent fill
+        style = Paint.Style.FILL
+    }
+
+    private val bypassedStrokePaint = Paint().apply {
+        color = Color.rgb(100, 116, 139) // Neutral Slate outline
+        style = Paint.Style.STROKE
+        strokeWidth = 3f
+        pathEffect = DashPathEffect(floatArrayOf(12f, 12f), 0f)
+        isAntiAlias = true
+    }
+
+    private val bypassedLabelBgPaint = Paint().apply {
+        color = Color.rgb(100, 116, 139) // Neutral Slate
+        style = Paint.Style.FILL
+        isAntiAlias = true
+    }
+
     // Standard Label Text Paint
     private val labelTextPaint = Paint().apply {
         color = Color.WHITE
@@ -78,8 +123,99 @@ class DetectionOverlayView @JvmOverloads constructor(
         invalidate()
     }
 
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (isBrushMode) {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    brushPath.reset()
+                    brushPath.moveTo(event.x, event.y)
+                    invalidate()
+                    return true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    brushPath.lineTo(event.x, event.y)
+                    invalidate()
+                    return true
+                }
+                MotionEvent.ACTION_UP -> {
+                    brushPath.lineTo(event.x, event.y)
+                    
+                    // Translate screen coordinates to Bitmap coordinates using Matrix transformation
+                    if (bitmapWidth > 0 && bitmapHeight > 0) {
+                        val scaleX = width.toFloat() / bitmapWidth
+                        val scaleY = height.toFloat() / bitmapHeight
+                        val scale = minOf(scaleX, scaleY)
+                        val offsetX = (width - bitmapWidth * scale) / 2f
+                        val offsetY = (height - bitmapHeight * scale) / 2f
+
+                        val matrix = Matrix()
+                        matrix.postTranslate(-offsetX, -offsetY)
+                        matrix.postScale(1f / scale, 1f / scale)
+
+                        val bitmapPath = Path()
+                        brushPath.transform(matrix, bitmapPath)
+                        onBrushStrokeCompleted?.invoke(bitmapPath)
+                    }
+
+                    brushPath.reset()
+                    invalidate()
+                    performClick()
+                    return true
+                }
+            }
+            return false
+        } else {
+            // Tap-to-toggle logic
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    lastTouchX = event.x
+                    lastTouchY = event.y
+                    return true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val dx = event.x - lastTouchX
+                    val dy = event.y - lastTouchY
+                    val distance = Math.sqrt((dx * dx + dy * dy).toDouble())
+                    if (distance < touchSlop) {
+                        // Clean tap gesture verified, map coordinates back to raw bitmap
+                        if (bitmapWidth > 0 && bitmapHeight > 0) {
+                            val scaleX = width.toFloat() / bitmapWidth
+                            val scaleY = height.toFloat() / bitmapHeight
+                            val scale = minOf(scaleX, scaleY)
+                            val offsetX = (width - bitmapWidth * scale) / 2f
+                            val offsetY = (height - bitmapHeight * scale) / 2f
+
+                            val bitmapX = ((event.x - offsetX) / scale).toInt()
+                            val bitmapY = ((event.y - offsetY) / scale).toInt()
+
+                            // Find and toggle the region containing this touch point
+                            val tappedRegion = regions.find { it.boundingBox.contains(bitmapX, bitmapY) }
+                            if (tappedRegion != null) {
+                                onRegionToggled?.invoke(tappedRegion)
+                            }
+                        }
+                    }
+                    performClick()
+                    return true
+                }
+            }
+            return false
+        }
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        
+        // Draw active brush path in real-time if drawing
+        if (isBrushMode && !brushPath.isEmpty) {
+            canvas.drawPath(brushPath, brushPaint)
+        }
+
         if (regions.isEmpty() || bitmapWidth == 0 || bitmapHeight == 0) return
 
         val scaleX = width.toFloat() / bitmapWidth
@@ -99,10 +235,20 @@ class DetectionOverlayView @JvmOverloads constructor(
 
             val isFace = region.type == RegionType.FACE
 
-            // Choose paints
-            val fillPaint = if (isFace) faceFillPaint else piiFillPaint
-            val strokePaint = if (isFace) faceStrokePaint else piiStrokePaint
-            val labelBgPaint = if (isFace) faceLabelBgPaint else piiLabelBgPaint
+            // Choose paints based on selection status (isRedacted) and type
+            val fillPaint: Paint
+            val strokePaint: Paint
+            val labelBgPaint: Paint
+
+            if (!region.isRedacted) {
+                fillPaint = bypassedFillPaint
+                strokePaint = bypassedStrokePaint
+                labelBgPaint = bypassedLabelBgPaint
+            } else {
+                fillPaint = if (isFace) faceFillPaint else piiFillPaint
+                strokePaint = if (isFace) faceStrokePaint else piiStrokePaint
+                labelBgPaint = if (isFace) faceLabelBgPaint else piiLabelBgPaint
+            }
 
             // 1. Draw rounded box fill (16dp rounded corner radius)
             canvas.drawRoundRect(rectF, 16f, 16f, fillPaint)

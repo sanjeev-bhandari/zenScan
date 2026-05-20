@@ -6,7 +6,8 @@ data class DetectedRegion(
     val boundingBox: Rect,
     val label: String,
     val type: RegionType,
-    val confidence: Float = 1.0f
+    val confidence: Float = 1.0f,
+    val isRedacted: Boolean = true
 )
 
 enum class RegionType {
