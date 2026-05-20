@@ -3,15 +3,25 @@ package com.example.zenscan
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.zenscan.databinding.ActivityMainBinding
+import com.example.zenscan.ui.RedactionHistoryAdapter
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var homeAdapter: RedactionHistoryAdapter
+    private lateinit var filesAdapter: RedactionHistoryAdapter
 
     // Modern Photo Picker launcher
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -31,18 +41,227 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Handle WindowInsets to prevent top Status Bar overlap on header bar
+        ViewCompat.setOnApplyWindowInsetsListener(binding.header) { view, windowInsets ->
+            val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val originalTopPadding = (18 * resources.displayMetrics.density).toInt()
+            view.setPadding(
+                view.paddingLeft,
+                statusInsets.top + originalTopPadding,
+                view.paddingRight,
+                view.paddingBottom
+            )
+            windowInsets
+        }
+
+        // Handle WindowInsets for bottom navigation view to clear gesture pill perfectly
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bottomNavigation) { view, windowInsets ->
+            val navInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                navInsets.bottom
+            )
+            windowInsets
+        }
+
+        setupRecyclerViews()
         setupClickListeners()
+        setupNavigation()
+        setupSettingsPanel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Always refresh history logs so they sync immediately on navigation return
+        loadHistoryData()
+    }
+
+    private fun setupRecyclerViews() {
+        homeAdapter = RedactionHistoryAdapter(emptyList(), { file ->
+            shareHistoryFile(file)
+        }, { file ->
+            promptDeleteFile(file)
+        })
+        binding.recentList.layoutManager = LinearLayoutManager(this)
+        binding.recentList.adapter = homeAdapter
+
+        filesAdapter = RedactionHistoryAdapter(emptyList(), { file ->
+            shareHistoryFile(file)
+        }, { file ->
+            promptDeleteFile(file)
+        })
+        binding.fullHistoryList.layoutManager = LinearLayoutManager(this)
+        binding.fullHistoryList.adapter = filesAdapter
     }
 
     private fun setupClickListeners() {
         binding.btnGallery.setOnClickListener {
-            // Launch the photo picker
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         binding.btnCamera.setOnClickListener {
-            // TODO: Implement Camera Scan
+            // Camera Scan - future crop features
             Toast.makeText(this, "Camera scan coming soon!", Toast.LENGTH_SHORT).show()
         }
+
+        // Empty state CTA click triggers Photo Picker
+        binding.btnEmptyStateAction.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+    }
+
+    private fun setupNavigation() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    binding.headerTitle.text = getString(R.string.app_name)
+                    binding.homeContainer.visibility = View.VISIBLE
+                    binding.filesContainer.visibility = View.GONE
+                    binding.settingsContainer.visibility = View.GONE
+                    true
+                }
+                R.id.nav_files -> {
+                    binding.headerTitle.text = getString(R.string.processed_files_title)
+                    binding.homeContainer.visibility = View.GONE
+                    binding.filesContainer.visibility = View.VISIBLE
+                    binding.settingsContainer.visibility = View.GONE
+                    loadHistoryData()
+                    true
+                }
+                R.id.nav_settings -> {
+                    binding.headerTitle.text = getString(R.string.settings_title)
+                    binding.homeContainer.visibility = View.GONE
+                    binding.filesContainer.visibility = View.GONE
+                    binding.settingsContainer.visibility = View.VISIBLE
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setupSettingsPanel() {
+        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+
+        // 1. Bind Redaction Style RadioGroup
+        val activeStyle = prefs.getString("redaction_style", "black")
+        when (activeStyle) {
+            "black" -> binding.rbStyleBlack.isChecked = true
+            "slate" -> binding.rbStyleSlate.isChecked = true
+            "blur" -> binding.rbStyleBlur.isChecked = true
+        }
+        binding.rgRedactionStyle.setOnCheckedChangeListener { _, checkedId ->
+            val styleValue = when (checkedId) {
+                R.id.rbStyleBlack -> "black"
+                R.id.rbStyleSlate -> "slate"
+                R.id.rbStyleBlur -> "blur"
+                else -> "black"
+            }
+            prefs.edit().putString("redaction_style", styleValue).apply()
+        }
+
+        // 2. Bind Export Quality RadioGroup
+        val activeQuality = prefs.getInt("export_quality", 95)
+        when (activeQuality) {
+            95 -> binding.rbQualityHigh.isChecked = true
+            85 -> binding.rbQualityMedium.isChecked = true
+            70 -> binding.rbQualityLow.isChecked = true
+        }
+        binding.rgExportQuality.setOnCheckedChangeListener { _, checkedId ->
+            val qualityValue = when (checkedId) {
+                R.id.rbQualityHigh -> 95
+                R.id.rbQualityMedium -> 85
+                R.id.rbQualityLow -> 70
+                else -> 95
+            }
+            prefs.edit().putInt("export_quality", qualityValue).apply()
+        }
+
+        // 3. Clear all logs button
+        binding.btnClearCache.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Wipe Redacted History")
+                .setMessage("Are you sure you want to permanently delete all redacted files from storage? This action cannot be undone.")
+                .setPositiveButton("Wipe All") { _, _ ->
+                    wipeAllHistoryFiles()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
+    private fun loadHistoryData() {
+        val historyDir = File(filesDir, "redacted_history")
+        val files = if (historyDir.exists()) {
+            historyDir.listFiles()
+                ?.filter { it.isFile && it.name.startsWith("ZenScan_") && it.name.endsWith(".jpg") }
+                ?.sortedByDescending { it.lastModified() }
+                ?: emptyList()
+        } else {
+            emptyList()
+        }
+
+        // Bind data models to both list levels
+        homeAdapter.updateData(files.take(3))
+        filesAdapter.updateData(files)
+
+        // Tweak visibility configurations depending on count
+        if (files.isEmpty()) {
+            binding.emptyStateView.visibility = View.VISIBLE
+            binding.fullHistoryList.visibility = View.GONE
+        } else {
+            binding.emptyStateView.visibility = View.GONE
+            binding.fullHistoryList.visibility = View.VISIBLE
+        }
+    }
+
+    private fun shareHistoryFile(file: File) {
+        try {
+            val contentUri = FileProvider.getUriForFile(
+                this,
+                "com.example.zenscan.fileprovider",
+                file
+            )
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, contentUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(shareIntent, "Share Redacted Image"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to share image", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun promptDeleteFile(file: File) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete History Item")
+            .setMessage("Do you want to permanently delete this redacted photo from your offline history?")
+            .setPositiveButton("Delete") { _, _ ->
+                if (file.delete()) {
+                    Toast.makeText(this, "Item deleted", Toast.LENGTH_SHORT).show()
+                    loadHistoryData()
+                } else {
+                    Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun wipeAllHistoryFiles() {
+        val historyDir = File(filesDir, "redacted_history")
+        if (historyDir.exists()) {
+            historyDir.listFiles()?.forEach { it.delete() }
+        }
+        val cacheDirShared = File(cacheDir, "shared_images")
+        if (cacheDirShared.exists()) {
+            cacheDirShared.listFiles()?.forEach { it.delete() }
+        }
+
+        Toast.makeText(this, R.string.clear_cache_success, Toast.LENGTH_SHORT).show()
+        loadHistoryData()
     }
 }

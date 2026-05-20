@@ -101,11 +101,20 @@ To maintain high standards, developer agents must follow these absolute rules:
 - Compressed images to high-quality JPEG to strip all EXIF metadata.
 - Implemented secure Android Share Sheet integration via `FileProvider`.
 
+### Phase 5: Navigation, Custom Preferences & History Logs 🟢 (Completed)
+- [x] Refactored dashboard root to modern `ConstraintLayout`.
+- [x] Integrated Material 3 `BottomNavigationView` with dynamic WindowInsets padding.
+- [x] Programmed interactive tab routing visibilities (Home vs. Files vs. Settings panels).
+- [x] Implemented secure, private persistent local files history (`filesDir/redacted_history/`).
+- [x] Formulated smart filename-encoded metadata parsing to keep history offline and DB-free.
+- [x] Engineered custom multi-threaded Gaussian Box Blur shaders in pure Kotlin.
+- [x] Created beautifully styled settings preferences panel with customizable style, quality, and wipe options.
+
 ---
 
 ## 5. Active Task
 
-We have **fully completed and verified Phase 3 (Interactive Redaction UI)**! Both tap-to-toggle bounding boxes and the high-fidelity manual brush tool are now functional and integrated with coordinate translation and the undo history stack. The project is completely set up and verified.
+We have **fully completed and verified Phase 5 (Navigation, Custom Preferences & History Logs)**! The core dashboard now routes between Home (welcome grid and compact recents), Files (full offline persistent log, share CTAs, and empty views), and Settings (SharedPreferences style, quality, and history purger). Immersive WindowInsets ensure layout integrity. The project compiles successfully with zero warnings!
 
 ---
 
@@ -118,4 +127,6 @@ We have **fully completed and verified Phase 3 (Interactive Redaction UI)**! Bot
 | 2026-05-20 | Created 7 detailed developer skill manuals documenting Android APIs, ML Kit Vision, Graphics/Canvas math, Coroutines, Memory recycling, Luhn checks, and FileProviders. | [SKILL.md (all 7 skills)](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/.agents/) | Completed |
 | 2026-05-20 | Implemented Phase 3 Interactive Redaction UI (tap-to-toggle regions and manual brush drawing). Verified compile via Gradle. | [DetectedRegion.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/model/DetectedRegion.kt), [DetectionOverlayView.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/view/DetectionOverlayView.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |
 | 2026-05-20 | Integrated programmatic WindowInsets handling on the bottom floating controls card to prevent system gesture/button navigation overlaps. | [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |
-| 2026-05-20 | Removed redundant label string from MainActivity in AndroidManifest to resolve the Android Open Source Project lint warning. | [AndroidManifest.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/AndroidManifest.xml) | Completed |
+| 2026-05-20 | Removed redundant label string from MainActivity in AndroidManifest to resolve the Android Open Source Project lint warning. | [AndroidManifest.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml) | Completed |
+| 2026-05-20 | Implemented programmatic top WindowInsets status bar padding on the main header and editor toolbar to avoid notch and system status bar overlaps. | [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |
+| 2026-05-20 | Implemented Phase 5 Bottom Navigation switcher, offline persistent history files log, dynamic settings preference cards, custom Kotlin box-blur shaders, and immersive system bar window offset rules. | [activity_main.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_main.xml), [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt), [RedactionHistoryAdapter.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/ui/RedactionHistoryAdapter.kt), [strings.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/values/strings.xml), icons | Completed |

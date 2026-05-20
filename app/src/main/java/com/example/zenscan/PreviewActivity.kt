@@ -6,13 +6,13 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import android.view.ViewGroup.MarginLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.example.zenscan.databinding.ActivityPreviewBinding
 import com.example.zenscan.detection.DetectionPipeline
@@ -31,12 +31,16 @@ class PreviewActivity : AppCompatActivity() {
     private var originalBitmap: Bitmap? = null
     private var detectedRegions: List<DetectedRegion> = emptyList()
 
-    // State definition for RAM-safe Undo History
+    // Counter tracks total edits made in the current session
+    private var appliedRedactionsCount = 0
+
+    // State definition for RAM-safe Undo History incorporating applied redaction counts
     private data class RedactionState(
         val bitmap: Bitmap,
         val regions: List<DetectedRegion>,
         val isBadgeVisible: Boolean,
-        val badgeText: String?
+        val badgeText: String?,
+        val redactionCount: Int
     )
 
     private val historyStack = mutableListOf<RedactionState>()
@@ -49,6 +53,13 @@ class PreviewActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
+
+        // Handle WindowInsets to prevent top Status Bar overlap on toolbar dynamically
+        ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { view, windowInsets ->
+            val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.setPadding(0, statusInsets.top, 0, 0)
+            windowInsets
+        }
 
         setupToolbarButtons()
         setupOverlayCallbacks()
@@ -171,6 +182,8 @@ class PreviewActivity : AppCompatActivity() {
                 result
             }
 
+            appliedRedactionsCount++ // Increment session counter
+
             originalBitmap = updatedBitmap
             binding.imagePreview.setImageBitmap(updatedBitmap)
             binding.loadingIndicator.visibility = View.GONE
@@ -189,11 +202,12 @@ class PreviewActivity : AppCompatActivity() {
     ) {
         try {
             val bmpCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            historyStack.add(RedactionState(bmpCopy, regions.toList(), isBadgeVisible, badgeText))
-            
+            historyStack.add(RedactionState(bmpCopy, regions.toList(), isBadgeVisible, badgeText, appliedRedactionsCount))
+
             // Limit memory usage by restricting undo depth
             if (historyStack.size > 15) {
-                historyStack.removeAt(0)
+                val removed = historyStack.removeAt(0)
+                removed.bitmap.recycle()
             }
             updateUndoButtonState()
         } catch (e: OutOfMemoryError) {
@@ -213,13 +227,14 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun performUndo() {
         if (historyStack.size > 1) {
-            // Remove the current active state
-            historyStack.removeAt(historyStack.lastIndex)
+            // Remove current active state
+            val current = historyStack.removeAt(historyStack.lastIndex)
+            current.bitmap.recycle()
 
             // Retrieve previous state
             val previousState = historyStack.last()
             val restoredBitmap = previousState.bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            
+
             originalBitmap = restoredBitmap
             binding.imagePreview.setImageBitmap(restoredBitmap)
 
@@ -243,6 +258,9 @@ class PreviewActivity : AppCompatActivity() {
                 binding.summaryBadge.visibility = View.GONE
             }
 
+            // Restore session count directly from history index
+            appliedRedactionsCount = previousState.redactionCount
+
             updateUndoButtonState()
             Toast.makeText(this, "Undo successful", Toast.LENGTH_SHORT).show()
         }
@@ -262,7 +280,7 @@ class PreviewActivity : AppCompatActivity() {
             }
             originalBitmap = bitmap
             binding.imagePreview.setImageBitmap(bitmap)
-            
+
             // Save initial loaded image state
             saveStateToHistory(bitmap, emptyList(), false, null)
             runDetection(bitmap)
@@ -315,10 +333,10 @@ class PreviewActivity : AppCompatActivity() {
         binding.summaryBadge.text = text
         binding.summaryBadge.visibility = View.VISIBLE
 
-        // Overwrite the initial history state with the completed scanned details,
-        // so that the first point of undo returns to the scanned bounding box state.
+        // Overwrite initial loaded state so first undo returns to scanned region boundaries
         if (historyStack.isNotEmpty()) {
-            historyStack.removeAt(historyStack.lastIndex)
+            val removed = historyStack.removeAt(historyStack.lastIndex)
+            removed.bitmap.recycle()
         }
         originalBitmap?.let {
             saveStateToHistory(it, regions, true, text)
@@ -332,6 +350,9 @@ class PreviewActivity : AppCompatActivity() {
             Toast.makeText(this, "No active regions to redact", Toast.LENGTH_SHORT).show()
             return
         }
+
+        appliedRedactionsCount += activeRegions.size // Accumulate count
+
         binding.loadingIndicator.visibility = View.VISIBLE
         lifecycleScope.launch {
             val redacted = withContext(Dispatchers.Default) {
@@ -343,7 +364,7 @@ class PreviewActivity : AppCompatActivity() {
             detectedRegions = emptyList()
             binding.summaryBadge.visibility = View.GONE
             binding.loadingIndicator.visibility = View.GONE
-            
+
             // Save redacted state to history
             saveStateToHistory(redacted, emptyList(), false, null)
             Toast.makeText(this@PreviewActivity, "Redactions applied", Toast.LENGTH_SHORT).show()
@@ -353,18 +374,108 @@ class PreviewActivity : AppCompatActivity() {
     private fun redactBitmap(bitmap: Bitmap, regions: List<DetectedRegion>): Bitmap {
         val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = android.graphics.Canvas(result)
+
+        // Read user preference configurations programmatically
+        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+        val redactionStyle = prefs.getString("redaction_style", "black") ?: "black"
+
         val paint = android.graphics.Paint().apply {
-            color = android.graphics.Color.BLACK
-            style = android.graphics.Paint.Style.FILL
+            this.style = android.graphics.Paint.Style.FILL
         }
+
+        when (redactionStyle) {
+            "black" -> {
+                paint.color = android.graphics.Color.BLACK
+            }
+            "slate" -> {
+                paint.color = android.graphics.Color.parseColor("#1E293B")
+            }
+        }
+
         for (region in regions) {
             val r = region.boundingBox
-            canvas.drawRoundRect(
-                r.left.toFloat(), r.top.toFloat(),
-                r.right.toFloat(), r.bottom.toFloat(),
-                12f, 12f, paint
-            )
+            val left = maxOf(0, r.left)
+            val top = maxOf(0, r.top)
+            val right = minOf(result.width, r.right)
+            val bottom = minOf(result.height, r.bottom)
+
+            if (right <= left || bottom <= top) continue
+
+            if (redactionStyle == "blur") {
+                try {
+                    val cropped = Bitmap.createBitmap(result, left, top, right - left, bottom - top)
+                    val blurred = blurBitmap(cropped, 10)
+                    canvas.drawBitmap(blurred, left.toFloat(), top.toFloat(), null)
+                    blurred.recycle()
+                    cropped.recycle()
+                } catch (e: Exception) {
+                    // Fail-safe layout fallback to solid black blocks on extreme memory failures
+                    val fallbackPaint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        this.style = android.graphics.Paint.Style.FILL
+                    }
+                    canvas.drawRoundRect(
+                        left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(),
+                        12f, 12f, fallbackPaint
+                    )
+                }
+            } else {
+                canvas.drawRoundRect(
+                    left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(),
+                    12f, 12f, paint
+                )
+            }
         }
+        return result
+    }
+
+    // High performance 2-pass vertical/horizontal custom box blur pixel shader
+    private fun blurBitmap(src: Bitmap, radius: Int): Bitmap {
+        val width = src.width
+        val height = src.height
+        val pixels = IntArray(width * height)
+        src.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        val temp = IntArray(width * height)
+
+        // 1. Horizontal Pass
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                var r = 0; var g = 0; var b = 0; var count = 0
+                for (dx in -radius..radius) {
+                    val nx = x + dx
+                    if (nx in 0 until width) {
+                        val p = pixels[y * width + nx]
+                        r += (p shr 16) and 0xFF
+                        g += (p shr 8) and 0xFF
+                        b += p and 0xFF
+                        count++
+                    }
+                }
+                temp[y * width + x] = (0xFF shl 24) or ((r / count) shl 16) or ((g / count) shl 8) or (b / count)
+            }
+        }
+
+        // 2. Vertical Pass
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                var r = 0; var g = 0; var b = 0; var count = 0
+                for (dy in -radius..radius) {
+                    val ny = y + dy
+                    if (ny in 0 until height) {
+                        val p = temp[ny * width + x]
+                        r += (p shr 16) and 0xFF
+                        g += (p shr 8) and 0xFF
+                        b += p and 0xFF
+                        count++
+                    }
+                }
+                pixels[y * width + x] = (0xFF shl 24) or ((r / count) shl 16) or ((g / count) shl 8) or (b / count)
+            }
+        }
+
+        val result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        result.setPixels(pixels, 0, width, 0, 0, width, height)
         return result
     }
 
@@ -381,15 +492,28 @@ class PreviewActivity : AppCompatActivity() {
             val sharedFile = withContext(Dispatchers.IO) {
                 try {
                     val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
-                    
-                    // Clean up previous exports to conserve user device memory
+
+                    // Clean up previous temporary exports to conserve user device space
                     sharedDir.listFiles()?.forEach { it.delete() }
-                    
+
                     val file = File(sharedDir, "zenscan_redacted_${System.currentTimeMillis()}.jpg")
+
+                    // Load user's export compression preferences
+                    val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+                    val quality = prefs.getInt("export_quality", 95)
+
                     FileOutputStream(file).use { out ->
                         // This native compression strips original camera & location EXIF metadata
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
                     }
+
+                    // Save a persistent copy in local secure history folder for bottom tab history view
+                    val historyDir = File(filesDir, "redacted_history").apply { mkdirs() }
+                    val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
+                    FileOutputStream(historyFile).use { outHistory ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                    }
+
                     file
                 } catch (e: Exception) {
                     null
@@ -405,13 +529,13 @@ class PreviewActivity : AppCompatActivity() {
                         "com.example.zenscan.fileprovider",
                         sharedFile
                     )
-                    
+
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "image/jpeg"
                         putExtra(Intent.EXTRA_STREAM, contentUri)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    
+
                     startActivity(Intent.createChooser(shareIntent, "Share Redacted Image"))
                 } catch (e: Exception) {
                     Toast.makeText(this@PreviewActivity, "Failed to share image", Toast.LENGTH_SHORT).show()
