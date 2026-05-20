@@ -41,6 +41,17 @@
             android:name=".PreviewActivity"
             android:exported="false"
             android:theme="@style/Theme.ZenScan.Editor" />
+
+        <!-- Secure file sharing provider -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.zenscan.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>
