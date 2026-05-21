@@ -37,10 +37,10 @@
         android:theme="@style/Theme.ZenScan"
         tools:targetApi="34">
 
-        <!-- ML Kit OCR model -->
+        <!-- ML Kit OCR and Face models pre-download at install time -->
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr" />
+            android:value="ocr,face" />
 
         <!-- Main launcher activity -->
         <activity

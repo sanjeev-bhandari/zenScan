@@ -200,29 +200,34 @@ class PreviewActivity : AppCompatActivity() {
 
         binding.loadingIndicator.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val updatedBitmap = withContext(Dispatchers.Default) {
-                val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                val canvas = android.graphics.Canvas(result)
-                val paint = android.graphics.Paint().apply {
-                    color = android.graphics.Color.BLACK
-                    style = android.graphics.Paint.Style.STROKE
-                    this.strokeWidth = strokeWidth
-                    strokeCap = android.graphics.Paint.Cap.ROUND
-                    strokeJoin = android.graphics.Paint.Join.ROUND
-                    isAntiAlias = true
+            try {
+                val updatedBitmap = withContext(Dispatchers.Default) {
+                    val result = bitmap.copy(Bitmap.Config.ARGB_8888, true) ?: throw OutOfMemoryError("Failed to allocate bitmap copy")
+                    val canvas = android.graphics.Canvas(result)
+                    val paint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        style = android.graphics.Paint.Style.STROKE
+                        this.strokeWidth = strokeWidth
+                        strokeCap = android.graphics.Paint.Cap.ROUND
+                        strokeJoin = android.graphics.Paint.Join.ROUND
+                        isAntiAlias = true
+                    }
+                    canvas.drawPath(path, paint)
+                    result
                 }
-                canvas.drawPath(path, paint)
-                result
+
+                appliedRedactionsCount++ // Increment session counter
+
+                originalBitmap = updatedBitmap
+                binding.imagePreview.setImageBitmap(updatedBitmap)
+                binding.loadingIndicator.visibility = View.GONE
+
+                saveStateToHistory(updatedBitmap, detectedRegions, binding.summaryBadge.isVisible, binding.summaryBadge.text?.toString())
+                Toast.makeText(this@PreviewActivity, "Redaction applied", Toast.LENGTH_SHORT).show()
+            } catch (e: OutOfMemoryError) {
+                binding.loadingIndicator.visibility = View.GONE
+                Toast.makeText(this@PreviewActivity, "Low memory: Unable to apply brush stroke", Toast.LENGTH_LONG).show()
             }
-
-            appliedRedactionsCount++ // Increment session counter
-
-            originalBitmap = updatedBitmap
-            binding.imagePreview.setImageBitmap(updatedBitmap)
-            binding.loadingIndicator.visibility = View.GONE
-
-            saveStateToHistory(updatedBitmap, detectedRegions, binding.summaryBadge.isVisible, binding.summaryBadge.text?.toString())
-            Toast.makeText(this@PreviewActivity, "Redaction applied", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -269,13 +274,17 @@ class PreviewActivity : AppCompatActivity() {
 
     private fun performUndo() {
         if (historyStack.size > 1) {
-            // Remove current active state
+            val previousState = historyStack[historyStack.lastIndex - 1]
+            val restoredBitmap = try {
+                previousState.bitmap.copy(Bitmap.Config.ARGB_8888, true)
+            } catch (e: OutOfMemoryError) {
+                Toast.makeText(this, "Low memory: Unable to perform Undo", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Remove and recycle current state only after safe copy of previous state is created
             val current = historyStack.removeAt(historyStack.lastIndex)
             current.bitmap.recycle()
-
-            // Retrieve previous state
-            val previousState = historyStack.last()
-            val restoredBitmap = previousState.bitmap.copy(Bitmap.Config.ARGB_8888, true)
 
             originalBitmap = restoredBitmap
             binding.imagePreview.setImageBitmap(restoredBitmap)
@@ -444,25 +453,36 @@ class PreviewActivity : AppCompatActivity() {
 
         binding.loadingIndicator.visibility = View.VISIBLE
         lifecycleScope.launch {
-            val redacted = withContext(Dispatchers.Default) {
-                redactBitmap(bitmap, activeRegions)
-            }
-            originalBitmap = redacted
-            binding.imagePreview.setImageBitmap(redacted)
-            binding.overlayView.clear()
-            detectedRegions = emptyList()
-            binding.summaryBadge.visibility = View.GONE
-            binding.loadingIndicator.visibility = View.GONE
+            try {
+                val redacted = withContext(Dispatchers.Default) {
+                    redactBitmap(bitmap, activeRegions)
+                } ?: throw OutOfMemoryError("Failed to allocate redacted bitmap copy")
+                
+                originalBitmap = redacted
+                binding.imagePreview.setImageBitmap(redacted)
+                binding.overlayView.clear()
+                detectedRegions = emptyList()
+                binding.summaryBadge.visibility = View.GONE
+                binding.loadingIndicator.visibility = View.GONE
 
-            // Save redacted state to history
-            saveStateToHistory(redacted, emptyList(), false, null)
-            updateRedactAllButtonState()
-            Toast.makeText(this@PreviewActivity, "Redactions applied", Toast.LENGTH_SHORT).show()
+                // Save redacted state to history
+                saveStateToHistory(redacted, emptyList(), false, null)
+                updateRedactAllButtonState()
+                Toast.makeText(this@PreviewActivity, "Redactions applied", Toast.LENGTH_SHORT).show()
+            } catch (e: OutOfMemoryError) {
+                binding.loadingIndicator.visibility = View.GONE
+                appliedRedactionsCount -= activeRegions.size // Revert session count since actions failed
+                Toast.makeText(this@PreviewActivity, "Low memory: Unable to apply redactions", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
-    private fun redactBitmap(bitmap: Bitmap, regions: List<DetectedRegion>): Bitmap {
-        val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+    private fun redactBitmap(bitmap: Bitmap, regions: List<DetectedRegion>): Bitmap? {
+        val result = try {
+            bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        } catch (e: OutOfMemoryError) {
+            return null
+        }
         val canvas = android.graphics.Canvas(result)
 
         // Read user preference configurations programmatically
@@ -498,8 +518,8 @@ class PreviewActivity : AppCompatActivity() {
                     canvas.drawBitmap(blurred, left.toFloat(), top.toFloat(), null)
                     blurred.recycle()
                     cropped.recycle()
-                } catch (e: Exception) {
-                    // Fail-safe layout fallback to solid black blocks on extreme memory failures
+                } catch (e: Throwable) {
+                    // Fail-safe layout fallback to solid black blocks on extreme memory failures or OOMs
                     val fallbackPaint = android.graphics.Paint().apply {
                         color = android.graphics.Color.BLACK
                         this.style = android.graphics.Paint.Style.FILL
