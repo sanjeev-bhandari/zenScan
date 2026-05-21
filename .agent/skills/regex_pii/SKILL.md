@@ -1,3 +1,8 @@
+---
+name: regex_pii
+description: Regex patterns for credit cards/emails/phones, Luhn algorithm checksum validations, and flat string-to-block coordinate mapping.
+---
+
 # Regex & PII Algorithm Parsing Skill
 
 This skill documents regular expression specifications, checksum algorithms, and index-to-block coordinate mapping mechanisms used in **ZenScan** to detect sensitive PII texts (credit cards, emails, phone numbers).

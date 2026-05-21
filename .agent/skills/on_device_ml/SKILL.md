@@ -1,3 +1,8 @@
+---
+name: on_device_ml
+description: Google ML Kit vision SDK configurations, parallel OCR/Face detector engines, and clean resources destruction.
+---
+
 # On-Device Machine Learning (ML Kit) Skill
 
 This skill documents the on-device Artificial Intelligence and Machine Learning implementation guidelines in **ZenScan**. It covers configuring Google ML Kit SDKs, optimizing concurrent detection pipelines, and safely managing vision resources.

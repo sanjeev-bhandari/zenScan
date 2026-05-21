@@ -1,3 +1,8 @@
+---
+name: memory_oom
+description: Android bitmap memory consumption tracking, RAM-safe undo state stack eviction, and export cache cleaning.
+---
+
 # Memory Management & OOM Safeguards Skill
 
 This skill documents performance practices, RAM-safe bitmap allocations, and Out-of-Memory (OOM) guards implemented in **ZenScan**.

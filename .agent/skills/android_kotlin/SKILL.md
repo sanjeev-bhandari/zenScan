@@ -1,3 +1,8 @@
+---
+name: android_kotlin
+description: Core Android & Kotlin Systems Development practices including ViewBinding, Activity Result Contracts, and lifecycleScope.
+---
+
 # Core Android & Kotlin Systems Development Skill
 
 This skill documents the foundational Android Jetpack and Kotlin development practices used in **ZenScan**. It covers standard Jetpack APIs, Activity Result Contracts, ViewBinding, and Lifecycle coordination.

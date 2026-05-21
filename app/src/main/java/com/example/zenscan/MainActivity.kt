@@ -219,10 +219,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun shareHistoryFile(file: File) {
         try {
+            // Secure sharing solution: Copy persistent history file to the authorized shared cache folder first
+            val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
+            // Clean up previous temporary exports to conserve user device space
+            sharedDir.listFiles()?.forEach { it.delete() }
+
+            val tempSharedFile = File(sharedDir, file.name)
+            file.inputStream().use { input ->
+                tempSharedFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
             val contentUri = FileProvider.getUriForFile(
                 this,
-                "com.example.zenscan.fileprovider",
-                file
+                "${packageName}.fileprovider",
+                tempSharedFile
             )
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "image/jpeg"
@@ -234,6 +246,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Failed to share image", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun promptDeleteFile(file: File) {
         AlertDialog.Builder(this)

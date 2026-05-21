@@ -1,3 +1,8 @@
+---
+name: async_concurrency
+description: Asynchronous thread management and coroutines optimization using Dispatchers, thread swaps, and parallel async jobs.
+---
+
 # Advanced Asynchronous Concurrency Skill
 
 This skill documents asynchronous thread handling and coroutine execution patterns in **ZenScan**. It covers Kotlin Coroutine Dispatchers, lifecycle-bound thread safety, and concurrent parallel jobs.

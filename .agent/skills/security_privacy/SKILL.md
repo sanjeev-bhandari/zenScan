@@ -1,3 +1,8 @@
+---
+name: security_privacy
+description: EXIF metadata scrubbing, FileProvider sandbox configurations, and secure inter-app sharing Intent creation.
+---
+
 # Security, Sandboxing & Privacy Skill
 
 This skill documents safety parameters, EXIF metadata stripping, local sandbox configurations, and secure Android inter-app sharing integrations in **ZenScan**.

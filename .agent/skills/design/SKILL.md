@@ -1,3 +1,8 @@
+---
+name: zenscan_design
+description: Visual design guidelines, layout architectures, Material Design 3 rules, and mockup specifications.
+---
+
 # ZenScan UI Design Guidelines
 
 This document outlines the core visual design principles, layout architecture, and specific UI mockups to be strictly adhered to whenever implementing or modifying frontend features for the ZenScan application.

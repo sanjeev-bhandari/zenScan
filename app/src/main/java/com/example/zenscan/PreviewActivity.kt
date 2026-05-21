@@ -489,6 +489,7 @@ class PreviewActivity : AppCompatActivity() {
 
         binding.loadingIndicator.visibility = View.VISIBLE
         lifecycleScope.launch {
+            var exceptionMessage: String? = null
             val sharedFile = withContext(Dispatchers.IO) {
                 try {
                     val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
@@ -516,6 +517,7 @@ class PreviewActivity : AppCompatActivity() {
 
                     file
                 } catch (e: Exception) {
+                    exceptionMessage = "Export error: " + e.toString()
                     null
                 }
             }
@@ -526,7 +528,7 @@ class PreviewActivity : AppCompatActivity() {
                 try {
                     val contentUri = FileProvider.getUriForFile(
                         this@PreviewActivity,
-                        "com.example.zenscan.fileprovider",
+                        "${packageName}.fileprovider",
                         sharedFile
                     )
 
@@ -538,10 +540,10 @@ class PreviewActivity : AppCompatActivity() {
 
                     startActivity(Intent.createChooser(shareIntent, "Share Redacted Image"))
                 } catch (e: Exception) {
-                    Toast.makeText(this@PreviewActivity, "Failed to share image", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@PreviewActivity, "Failed to share image: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             } else {
-                Toast.makeText(this@PreviewActivity, "Failed to export image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@PreviewActivity, exceptionMessage ?: "Failed to export image", Toast.LENGTH_LONG).show()
             }
         }
     }

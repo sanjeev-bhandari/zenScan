@@ -1,3 +1,8 @@
+---
+name: graphics_canvas
+description: Custom canvas overlay painting, coordinate translation/scaling mathematics, and invalidation rendering loops.
+---
+
 # High-Performance Graphics & Custom Canvas Skill
 
 This skill documents custom view rendering, canvas painting techniques, and layout-to-bitmap scaling math used in the **ZenScan** editor.
