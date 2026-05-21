@@ -31,6 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_shield"
+                android:contentDescription="@null"
                 app:tint="@color/accent_green" />
         </FrameLayout>
 
@@ -136,14 +137,15 @@
                                 android:backgroundTint="#EFF6FF"
                                 android:padding="12dp">
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_gallery"
-                                    app:tint="@color/accent_blue" />
-                            </FrameLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_gallery"
+                                android:contentDescription="@null"
+                                app:tint="@color/accent_blue" />
+                        </FrameLayout>
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
@@ -194,14 +196,15 @@ android:text="@string/select_photo"
                                 android:backgroundTint="#ECFDF5"
                                 android:padding="12dp">
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_camera"
-                                    app:tint="@color/accent_green" />
-                            </FrameLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_camera"
+                                android:contentDescription="@null"
+                                app:tint="@color/accent_green" />
+                        </FrameLayout>
 
-                            <TextView
+                        <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
@@ -289,6 +292,7 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:src="@drawable/ic_shield"
+                        android:contentDescription="@null"
                         app:tint="@color/accent_blue" />
                 </FrameLayout>
 
@@ -375,14 +379,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="#EFF6FF"
                                 android:padding="8dp">
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_brush"
-                                    app:tint="@color/accent_blue" />
-                            </FrameLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_brush"
+                                android:contentDescription="@null"
+                                app:tint="@color/accent_blue" />
+                        </FrameLayout>
 
-                            <LinearLayout
+                        <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"
@@ -478,14 +483,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="#ECFDF5"
                                 android:padding="8dp">
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_export"
-                                    app:tint="@color/accent_green" />
-                            </FrameLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_export"
+                                android:contentDescription="@null"
+                                app:tint="@color/accent_green" />
+                        </FrameLayout>
 
-                            <LinearLayout
+                        <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"
@@ -581,14 +587,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="#FEF2F2"
                                 android:padding="8dp">
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_shield"
-                                    app:tint="@color/accent_rose" />
-                            </FrameLayout>
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_shield"
+                                android:contentDescription="@null"
+                                app:tint="@color/accent_rose" />
+                        </FrameLayout>
 
-                            <LinearLayout
+                        <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"

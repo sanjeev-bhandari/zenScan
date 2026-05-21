@@ -30,7 +30,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="#F1F5F9" />
+                android:background="#F1F5F9"
+                android:contentDescription="@string/content_desc_thumbnail" />
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
@@ -69,6 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_shield"
+                android:contentDescription="@null"
                 app:tint="@color/accent_green" />
         </FrameLayout>
 

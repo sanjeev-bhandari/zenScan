@@ -22,6 +22,8 @@
     <string name="scan_camera_desc">Capture and crop physical documents.</string>
     <string name="wipe_history_files">Wipe All History Files</string>
     <string name="info">Info</string>
+    <string name="content_desc_thumbnail">Redacted image thumbnail</string>
+    <string name="content_desc_preview">Image preview</string>
 
     <string name="undo">Undo</string>
     <string name="redact_all">Redact All</string>
