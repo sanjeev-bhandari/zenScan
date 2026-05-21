@@ -116,11 +116,13 @@ To maintain high standards, developer agents must follow these absolute rules:
 - [x] Rewired local redacted history dashboard items to open directly in the Editor (`PreviewActivity`) as a secure viewer rather than immediately triggering standard share intents.
 - [x] Configured automatic duplicate prevention logic using custom intent parameter (`is_from_history = true`) to skip local filesystem writes upon subsequent exports of history items.
 - [x] Built dynamically stateful 'Redact All' wand controls updating enabled status and alpha opacity based on active selections and manual brush tools.
+- [x] Redesigned the editor preview screen to match `zenscan_editor_mockup.png` visual guidelines by shifting the workspace to a full-bleed layout, floating a transparent toolbar header on top of the image container, and mathematically centering the floating badges.
+- [x] Configured a standard three-dot vertical overflow menu inside the transparent toolbar for visual parity.
 
 ---
 
 ## 5. Active Task
-We have successfully resolved all major UX bottlenecks across the editor flow and secure local history viewer! The overlay displays a translucent Material 3 progress spinner card while AI scans run, clicking history list items launches the editor directly, subsequent history item exports are protected from redundant copies, and the 'Redact All' button updates dynamically. All features are complete, and the build compiles perfectly!
+We have successfully resolved all visual and aesthetic guidelines from the `zenscan_editor_mockup.png` design specifications! The editor now hosts a gorgeous full-bleed workspace, a floating transparent toolbar with a vertical three-dot action menu, and a dynamically-inset floating center badge that sits perfectly below the status bar in absolute horizontal and vertical alignment with the back and menu controls. The visual layout matches the mockup perfectly, and the app compiles with zero errors!
 
 ---
 
@@ -128,6 +130,7 @@ We have successfully resolved all major UX bottlenecks across the editor flow an
 
 | Date | Task / Change Description | Affected Files | Status |
 | :--- | :--- | :--- | :--- |
+| 2026-05-21 | Redesigned top toolbar and workspace to match zenscan_editor_mockup.png visual guidelines; floated transparent toolbar, centered floating badge mathematically with status bar window insets, and configured overflow menus. | [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt), [menu_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/menu/menu_preview.xml) | Completed |
 | 2026-05-20 | Created standard `PROJECT_CONTEXT.md` to establish project identity, architecture patterns, and constraints. | [PROJECT_CONTEXT.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT.md) | Completed |
 | 2026-05-20 | Created `PROJECT_CONTEXT_WORKFLOW.md` to define strict startup, execution, and finishing rules for agent pair-programming sessions. | [PROJECT_CONTEXT_WORKFLOW.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT_WORKFLOW.md) | Completed |
 | 2026-05-20 | Created 7 detailed developer skill manuals documenting Android APIs, ML Kit Vision, Graphics/Canvas math, Coroutines, Memory recycling, Luhn checks, and FileProviders. | [SKILL.md (all 7 skills)](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/.agent/skills/) | Completed |

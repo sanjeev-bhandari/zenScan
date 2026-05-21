@@ -8,39 +8,59 @@
     android:orientation="vertical"
     tools:context=".PreviewActivity">
 
-    <!-- Sleek Custom Toolbar -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/bg_dark"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="@string/smart_scan"
-        app:titleTextColor="@color/text_dark_primary" />
-
-    <!-- Main Workspace Container -->
+    <!-- Outer overlay FrameLayout wrapping workspace and floated toolbar controls -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#030712"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="4dp"
-        app:layout_scrollFlags="scroll|enterAlways">
+        android:layout_weight="1">
 
-        <!-- Image Container -->
-        <ImageView
-            android:id="@+id/imagePreview"
+        <!-- Main Workspace Container (Full bleed) -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitCenter" />
+            android:background="#030712">
 
-        <!-- High-fidelity AI Bounding Box Layer -->
-        <com.example.zenscan.view.DetectionOverlayView
-            android:id="@+id/overlayView"
+            <!-- Image Container -->
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter" />
+
+            <!-- High-fidelity AI Bounding Box Layer -->
+            <com.example.zenscan.view.DetectionOverlayView
+                android:id="@+id/overlayView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <!-- Sleek Transparent Custom Toolbar floated on top -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title="" />
+
+        <!-- Floating AI Detection Summary Badge floated on top -->
+        <TextView
+            android:id="@+id/summaryBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/badge_background"
+            android:backgroundTint="@color/accent_rose"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:elevation="6dp"
+            android:visibility="gone" />
 
         <!-- Modern Loading / Processing Overlay -->
         <FrameLayout
@@ -84,23 +104,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
-
-        <!-- Floating AI Detection Summary Badge -->
-        <TextView
-            android:id="@+id/summaryBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/badge_background"
-            android:backgroundTint="@color/accent_rose"
-            android:paddingHorizontal="18dp"
-            android:paddingVertical="8dp"
-            android:textColor="@color/white"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif-medium"
-            android:elevation="6dp"
-            android:visibility="gone" />
     </FrameLayout>
 
     <!-- Bottom Controls Floating Sheet -->

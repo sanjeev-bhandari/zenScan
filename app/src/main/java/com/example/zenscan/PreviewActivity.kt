@@ -55,12 +55,22 @@ class PreviewActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false) // Hide default activity title
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        // Handle WindowInsets to prevent top Status Bar overlap on toolbar dynamically
+        // Handle WindowInsets to prevent top Status Bar overlap on toolbar and badge dynamically
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { view, windowInsets ->
             val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.setPadding(0, statusInsets.top, 0, 0)
+
+            // Mathematically align the floating summaryBadge vertically in the center of the toolbar (56dp height)
+            binding.summaryBadge.updateLayoutParams<MarginLayoutParams> {
+                val density = resources.displayMetrics.density
+                val toolbarHeight = 56 * density
+                val badgeHeight = 36 * density // estimated wrap_content height with padding
+                val topOffset = ((toolbarHeight - badgeHeight) / 2).toInt()
+                topMargin = statusInsets.top + maxOf(0, topOffset)
+            }
             windowInsets
         }
 
@@ -73,6 +83,21 @@ class PreviewActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, R.string.no_image_provided, Toast.LENGTH_SHORT).show()
             finish()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: android.view.Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_preview, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_placeholder -> {
+                Toast.makeText(this, "ZenScan Safe Share Active", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

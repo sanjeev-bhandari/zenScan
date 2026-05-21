@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- Placing a menu item that is forced to overflow, causing the system to automatically draw the 3-dot vertical icon -->
+    <item
+        android:id="@+id/action_placeholder"
+        android:title="Info"
+        app:showAsAction="never" />
+</menu>
