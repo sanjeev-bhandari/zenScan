@@ -1,15 +1,28 @@
 <resources>
     <string name="app_name">ZenScan</string>
+    <string name="app_subtitle">ZenScan Privacy Redactor</string>
+    <string name="app_description">Secure, on-device AI redaction. Protect your files, credit cards, emails, and faces before sharing.</string>
 
     <string name="detecting_content">Detecting sensitive content…</string>
     <string name="no_image_provided">No image provided</string>
     <string name="failed_to_load_image">Failed to load image</string>
     <string name="detection_failed">Detection failed</string>
     <string name="no_sensitive_found">No sensitive content detected</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_files">Files</string>
+    <string name="nav_settings">Settings</string>
+
     <plurals name="found_sensitive">
         <item quantity="one">Found %d sensitive item</item>
         <item quantity="other">Found %d sensitive items</item>
     </plurals>
+    <string name="select_photo">Select Photo</string>
+    <string name="select_photo_desc">Import screenshot or picture from gallery.</string>
+    <string name="scan_camera">Scan Camera</string>
+    <string name="scan_camera_desc">Capture and crop physical documents.</string>
+    <string name="wipe_history_files">Wipe All History Files</string>
+    <string name="info">Info</string>
+
     <string name="undo">Undo</string>
     <string name="redact_all">Redact All</string>
     <string name="brush_tool">Brush</string>

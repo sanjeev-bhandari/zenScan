@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="14dp"
             android:fontFamily="sans-serif-black"
-            android:text="ZenScan"
+            android:text="@string/app_name"
             android:textColor="@color/text_primary"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -81,7 +81,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-black"
-                        android:text="ZenScan Privacy Redactor"
+                        android:text="@string/app_subtitle"
                         android:textColor="@color/text_primary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
@@ -92,7 +92,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:fontFamily="sans-serif"
-                        android:text="Secure, on-device AI redaction. Protect your files, credit cards, emails, and faces before sharing."
+                        android:text="@string/app_description"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp"
                         android:lineSpacingMultiplier="1.2" />
@@ -148,16 +148,16 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
                                 android:fontFamily="sans-serif-medium"
-                                android:text="Select Photo"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp" />
+android:text="@string/select_photo"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:fontFamily="sans-serif"
-                                android:text="Import screenshot or picture from gallery."
+                                android:text="@string/select_photo_desc"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="11sp"
                                 android:lineSpacingMultiplier="1.1" />
@@ -206,16 +206,16 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
                                 android:fontFamily="sans-serif-medium"
-                                android:text="Scan Camera"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp" />
+android:text="@string/scan_camera"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:fontFamily="sans-serif"
-                                android:text="Capture and crop physical documents."
+                                android:text="@string/scan_camera_desc"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="11sp"
                                 android:lineSpacingMultiplier="1.1" />
@@ -619,7 +619,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:backgroundTint="@color/accent_rose"
-                            android:text="Wipe All History Files"
+                            android:text="@string/wipe_history_files"
                             android:textColor="@color/white"
                             app:cornerRadius="14dp"
                             android:paddingVertical="10dp"

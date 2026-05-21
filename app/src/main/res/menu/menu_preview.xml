@@ -4,6 +4,6 @@
     <!-- Placing a menu item that is forced to overflow, causing the system to automatically draw the 3-dot vertical icon -->
     <item
         android:id="@+id/action_placeholder"
-        android:title="Info"
+        android:title="@string/info"
         app:showAsAction="never" />
 </menu>
