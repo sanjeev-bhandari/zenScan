@@ -12,6 +12,7 @@
     <style name="Theme.ZenScan.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/bg_light</item>
     </style>
 
     <style name="Theme.ZenScan.Editor" parent="Theme.ZenScan.NoActionBar">

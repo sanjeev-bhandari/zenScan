@@ -1,9 +1,7 @@
 <resources>
     <string name="app_name">ZenScan</string>
 
-    <string name="smart_scan">Smart Scan</string>
     <string name="detecting_content">Detecting sensitive content…</string>
-    <string name="detection_complete">Detection complete.</string>
     <string name="no_image_provided">No image provided</string>
     <string name="failed_to_load_image">Failed to load image</string>
     <string name="detection_failed">Detection failed</string>
@@ -17,11 +15,6 @@
     <string name="brush_tool">Brush</string>
     <string name="export">Export</string>
     <string name="recent_redactions">Recent Redactions</string>
-
-    <!-- Bottom Navigation Tabs -->
-    <string name="nav_home">Home</string>
-    <string name="nav_files">Files</string>
-    <string name="nav_settings">Settings</string>
 
     <!-- Header Titles -->
     <string name="processed_files_title">Processed Files</string>

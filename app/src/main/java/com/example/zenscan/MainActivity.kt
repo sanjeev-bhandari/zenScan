@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViews() {
-        homeAdapter = RedactionHistoryAdapter(emptyList(), { file ->
+        homeAdapter = RedactionHistoryAdapter({ file ->
             openHistoryFile(file)
         }, { file ->
             promptDeleteFile(file)
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         binding.recentList.layoutManager = LinearLayoutManager(this)
         binding.recentList.adapter = homeAdapter
 
-        filesAdapter = RedactionHistoryAdapter(emptyList(), { file ->
+        filesAdapter = RedactionHistoryAdapter({ file ->
             openHistoryFile(file)
         }, { file ->
             promptDeleteFile(file)

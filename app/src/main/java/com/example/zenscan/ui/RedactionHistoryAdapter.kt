@@ -2,6 +2,8 @@ package com.example.zenscan.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.example.zenscan.databinding.ItemRecentRedactionBinding
@@ -11,14 +13,20 @@ import java.util.Date
 import java.util.Locale
 
 class RedactionHistoryAdapter(
-    private var files: List<File>,
     private val onItemClick: (File) -> Unit,
     private val onItemLongClick: (File) -> Unit
-) : RecyclerView.Adapter<RedactionHistoryAdapter.ViewHolder>() {
+) : ListAdapter<File, RedactionHistoryAdapter.ViewHolder>(DiffCallback()) {
 
     fun updateData(newFiles: List<File>) {
-        files = newFiles
-        notifyDataSetChanged()
+        submitList(newFiles)
+    }
+
+    private class DiffCallback : DiffUtil.ItemCallback<File>() {
+        override fun areItemsTheSame(oldItem: File, newItem: File): Boolean =
+            oldItem.absolutePath == newItem.absolutePath
+
+        override fun areContentsTheSame(oldItem: File, newItem: File): Boolean =
+            oldItem.lastModified() == newItem.lastModified() && oldItem.length() == newItem.length()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,10 +39,8 @@ class RedactionHistoryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(files[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount(): Int = files.size
 
     inner class ViewHolder(
         private val binding: ItemRecentRedactionBinding

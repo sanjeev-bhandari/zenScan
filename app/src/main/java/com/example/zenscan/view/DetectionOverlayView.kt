@@ -111,6 +111,9 @@ class DetectionOverlayView @JvmOverloads constructor(
         isFakeBoldText = true
     }
 
+    private val reuseRect = RectF()
+    private val reuseBadgeRect = RectF()
+
     private var animationProgress = 0f
     private var animator: android.animation.ValueAnimator? = null
 
@@ -262,12 +265,13 @@ class DetectionOverlayView @JvmOverloads constructor(
 
         for (region in regions) {
             val r = region.boundingBox
-            val rectF = RectF(
+            reuseRect.set(
                 r.left * scale + offsetX,
                 r.top * scale + offsetY,
                 r.right * scale + offsetX,
                 r.bottom * scale + offsetY
             )
+            val rectF = reuseRect
 
             val isFace = region.type == RegionType.FACE
 
@@ -302,12 +306,13 @@ class DetectionOverlayView @JvmOverloads constructor(
             val badgePaddingY = 8f
 
             // Position badge directly above the bounding box top, but offset inward slightly or offset up
-            val badgeRect = RectF(
+            reuseBadgeRect.set(
                 rectF.left,
                 rectF.top - textHeight - badgePaddingY * 2f,
                 rectF.left + textWidth + badgePaddingX * 2f,
                 rectF.top
             )
+            val badgeRect = reuseBadgeRect
 
             // If badge goes off-screen vertically, draw it inside the bounding box
             if (badgeRect.top < 0) {
