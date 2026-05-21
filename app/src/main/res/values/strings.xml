@@ -54,4 +54,11 @@
     <string name="quality_high">High Quality (95%)</string>
     <string name="quality_medium">Medium Balanced (85%)</string>
     <string name="quality_low">Max Compression (70%)</string>
+
+    <!-- Theme Settings -->
+    <string name="theme_mode">App Theme</string>
+    <string name="theme_mode_desc">Control whether ZenScan uses dark, light, or system default colors.</string>
+    <string name="theme_system">System Default</string>
+    <string name="theme_light">Light Theme</string>
+    <string name="theme_dark">Dark Theme</string>
 </resources>

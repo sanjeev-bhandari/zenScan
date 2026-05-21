@@ -11,7 +11,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/card_bg"
         android:elevation="2dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -24,7 +24,7 @@
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:background="@drawable/badge_background"
-            android:backgroundTint="#0F172A"
+            android:backgroundTint="@color/badge_logo_bg"
             android:padding="8dp">
 
             <ImageView
@@ -116,12 +116,12 @@
                         android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
-                        app:cardBackgroundColor="@color/white"
+                        app:cardBackgroundColor="@color/card_bg"
                         app:cardCornerRadius="24dp"
                         app:cardElevation="0dp"
-                        app:strokeColor="#E2E8F0"
+                        app:strokeColor="@color/border_color"
                         app:strokeWidth="1dp"
-                        app:rippleColor="#F1F5F9">
+                        app:rippleColor="@color/ripple_color">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -134,7 +134,7 @@
                                 android:layout_width="48dp"
                                 android:layout_height="48dp"
                                 android:background="@drawable/badge_background"
-                                android:backgroundTint="#EFF6FF"
+                                android:backgroundTint="@color/badge_blue_bg"
                                 android:padding="12dp">
 
                             <ImageView
@@ -175,12 +175,12 @@ android:text="@string/select_photo"
                         android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
-                        app:cardBackgroundColor="@color/white"
+                        app:cardBackgroundColor="@color/card_bg"
                         app:cardCornerRadius="24dp"
                         app:cardElevation="0dp"
-                        app:strokeColor="#E2E8F0"
+                        app:strokeColor="@color/border_color"
                         app:strokeWidth="1dp"
-                        app:rippleColor="#F1F5F9">
+                        app:rippleColor="@color/ripple_color">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -193,7 +193,7 @@ android:text="@string/select_photo"
                                 android:layout_width="48dp"
                                 android:layout_height="48dp"
                                 android:background="@drawable/badge_background"
-                                android:backgroundTint="#ECFDF5"
+                                android:backgroundTint="@color/badge_green_bg"
                                 android:padding="12dp">
 
                             <ImageView
@@ -285,7 +285,7 @@ android:text="@string/scan_camera"
                     android:layout_width="84dp"
                     android:layout_height="84dp"
                     android:background="@drawable/badge_background"
-                    android:backgroundTint="#EFF6FF"
+                    android:backgroundTint="@color/badge_blue_bg"
                     android:padding="20dp">
 
                     <ImageView
@@ -349,15 +349,15 @@ android:text="@string/scan_camera"
                 android:paddingTop="20dp"
                 android:paddingBottom="24dp">
 
-                <!-- Redaction Style Section -->
+                <!-- Theme Mode Section -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="#E2E8F0"
+                    app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -376,7 +376,111 @@ android:text="@string/scan_camera"
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:background="@drawable/badge_background"
-                                android:backgroundTint="#EFF6FF"
+                                android:backgroundTint="@color/badge_blue_bg"
+                                android:padding="8dp">
+
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_theme"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_blue" />
+                            </FrameLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="14dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/theme_mode"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:fontFamily="sans-serif"
+                                    android:text="@string/theme_mode_desc"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Radio Group Selector -->
+                        <RadioGroup
+                            android:id="@+id/rgThemeMode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="vertical">
+
+                            <RadioButton
+                                android:id="@+id/rbThemeSystem"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="8dp"
+                                android:text="@string/theme_system"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:buttonTint="@color/accent_blue" />
+
+                            <RadioButton
+                                android:id="@+id/rbThemeLight"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="8dp"
+                                android:text="@string/theme_light"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:buttonTint="@color/accent_blue" />
+
+                            <RadioButton
+                                android:id="@+id/rbThemeDark"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="8dp"
+                                android:text="@string/theme_dark"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:buttonTint="@color/accent_blue" />
+                        </RadioGroup>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Redaction Style Section -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border_color"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <FrameLayout
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="@drawable/badge_background"
+                                android:backgroundTint="@color/badge_blue_bg"
                                 android:padding="8dp">
 
                             <ImageView
@@ -458,10 +562,10 @@ android:text="@string/scan_camera"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="#E2E8F0"
+                    app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -480,7 +584,7 @@ android:text="@string/scan_camera"
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:background="@drawable/badge_background"
-                                android:backgroundTint="#ECFDF5"
+                                android:backgroundTint="@color/badge_green_bg"
                                 android:padding="8dp">
 
                             <ImageView
@@ -562,10 +666,10 @@ android:text="@string/scan_camera"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@color/white"
+                    app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="#FEE2E2"
+                    app:strokeColor="@color/border_red"
                     app:strokeWidth="1dp">
 
                     <LinearLayout
@@ -584,7 +688,7 @@ android:text="@string/scan_camera"
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:background="@drawable/badge_background"
-                                android:backgroundTint="#FEF2F2"
+                                android:backgroundTint="@color/badge_red_bg"
                                 android:padding="8dp">
 
                             <ImageView
@@ -645,13 +749,13 @@ android:text="@string/scan_camera"
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/card_bg"
         android:elevation="8dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="@color/primary"
-        app:itemTextColor="@color/primary"
-        app:itemRippleColor="#F1F5F9"
+        app:itemIconTint="@color/nav_item_color"
+        app:itemTextColor="@color/nav_item_color"
+        app:itemRippleColor="@color/ripple_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -50,6 +50,16 @@ class PreviewActivity : AppCompatActivity() {
     private var isFromHistory = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply saved theme settings before super.onCreate to prevent flickering/state issues
+        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+        val themeMode = prefs.getString("theme_mode", "system")
+        val targetMode = when (themeMode) {
+            "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
+
         super.onCreate(savedInstanceState)
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)

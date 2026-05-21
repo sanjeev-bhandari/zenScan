@@ -63,6 +63,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Apply saved theme settings before super.onCreate to prevent flickering/state issues
+        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+        val themeMode = prefs.getString("theme_mode", "system")
+        val targetMode = when (themeMode) {
+            "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+            else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
+
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -97,6 +107,17 @@ class MainActivity : AppCompatActivity() {
         setupClickListeners()
         setupNavigation()
         setupSettingsPanel()
+
+        // Restore bottom navigation tab state (crucial for dynamic theme recreation)
+        val restoredNavId = savedInstanceState?.getInt("selected_nav_id") ?: R.id.nav_home
+        binding.bottomNavigation.selectedItemId = restoredNavId
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::binding.isInitialized) {
+            outState.putInt("selected_nav_id", binding.bottomNavigation.selectedItemId)
+        }
     }
 
     override fun onResume() {
@@ -194,6 +215,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupSettingsPanel() {
         val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+
+        // 0. Bind Theme Mode RadioGroup
+        val activeTheme = prefs.getString("theme_mode", "system")
+        when (activeTheme) {
+            "system" -> binding.rbThemeSystem.isChecked = true
+            "light" -> binding.rbThemeLight.isChecked = true
+            "dark" -> binding.rbThemeDark.isChecked = true
+        }
+        binding.rgThemeMode.setOnCheckedChangeListener { _, checkedId ->
+            val themeValue = when (checkedId) {
+                R.id.rbThemeSystem -> "system"
+                R.id.rbThemeLight -> "light"
+                R.id.rbThemeDark -> "dark"
+                else -> "system"
+            }
+            prefs.edit { putString("theme_mode", themeValue) }
+
+            // Apply theme instantly
+            val targetMode = when (themeValue) {
+                "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
+        }
 
         // 1. Bind Redaction Style RadioGroup
         val activeStyle = prefs.getString("redaction_style", "black")

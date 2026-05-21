@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text Color overrides for dark mode -->
+    <color name="text_primary">#F8FAFC</color>
+    <color name="text_secondary">#94A3B8</color>
+
+    <!-- Semantic Night Colors -->
+    <color name="window_background">@color/bg_dark</color>
+    <color name="card_bg">@color/card_bg_dark</color>
+    <color name="border_color">#334155</color>
+    <color name="ripple_color">#334155</color>
+    <color name="badge_blue_bg">#1E293B</color>
+    <color name="badge_green_bg">#064E3B</color>
+    <color name="badge_red_bg">#7F1D1D</color>
+    <color name="badge_logo_bg">#1E293B</color>
+    <color name="border_red">#7F1D1D</color>
+</resources>

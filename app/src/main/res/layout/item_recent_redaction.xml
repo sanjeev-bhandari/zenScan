@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/card_bg"
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
-    app:strokeColor="#E2E8F0"
+    app:strokeColor="@color/border_color"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="#F1F5F9"
+                android:background="@color/ripple_color"
                 android:contentDescription="@string/content_desc_thumbnail" />
         </com.google.android.material.card.MaterialCardView>
 
@@ -63,7 +63,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="@drawable/badge_background"
-            android:backgroundTint="#ECFDF5"
+            android:backgroundTint="@color/badge_green_bg"
             android:padding="8dp">
 
             <ImageView
