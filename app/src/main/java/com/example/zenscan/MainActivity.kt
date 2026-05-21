@@ -35,6 +35,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var tempCameraUri: Uri? = null
+
+    // Request CAMERA permission contract
+    private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            launchCamera()
+        } else {
+            Toast.makeText(this, "Camera permission is required to scan physical documents", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // Capture photo contract
+    private val capturePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            val uri = tempCameraUri
+            if (uri != null) {
+                val intent = Intent(this, PreviewActivity::class.java).apply {
+                    data = uri
+                }
+                startActivity(intent)
+            }
+        } else {
+            Toast.makeText(this, "Camera capture cancelled or failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -80,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRecyclerViews() {
         homeAdapter = RedactionHistoryAdapter(emptyList(), { file ->
-            shareHistoryFile(file)
+            openHistoryFile(file)
         }, { file ->
             promptDeleteFile(file)
         })
@@ -88,12 +114,29 @@ class MainActivity : AppCompatActivity() {
         binding.recentList.adapter = homeAdapter
 
         filesAdapter = RedactionHistoryAdapter(emptyList(), { file ->
-            shareHistoryFile(file)
+            openHistoryFile(file)
         }, { file ->
             promptDeleteFile(file)
         })
         binding.fullHistoryList.layoutManager = LinearLayoutManager(this)
         binding.fullHistoryList.adapter = filesAdapter
+    }
+
+    private fun openHistoryFile(file: File) {
+        try {
+            val contentUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                file
+            )
+            val intent = Intent(this, PreviewActivity::class.java).apply {
+                data = contentUri
+                putExtra("is_from_history", true)
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to open image", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupClickListeners() {
@@ -102,8 +145,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnCamera.setOnClickListener {
-            // Camera Scan - future crop features
-            Toast.makeText(this, "Camera scan coming soon!", Toast.LENGTH_SHORT).show()
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                launchCamera()
+            } else {
+                requestCameraPermission.launch(android.Manifest.permission.CAMERA)
+            }
         }
 
         // Empty state CTA click triggers Photo Picker
@@ -247,6 +294,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun launchCamera() {
+        try {
+            val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
+            val tempFile = File(sharedDir, "camera_capture_${System.currentTimeMillis()}.jpg")
+            val contentUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                tempFile
+            )
+            tempCameraUri = contentUri
+            capturePhoto.launch(contentUri)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Failed to initialize camera storage: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun promptDeleteFile(file: File) {
         AlertDialog.Builder(this)

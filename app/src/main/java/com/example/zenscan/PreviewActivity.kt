@@ -44,11 +44,14 @@ class PreviewActivity : AppCompatActivity() {
     )
 
     private val historyStack = mutableListOf<RedactionState>()
+    private var isFromHistory = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        isFromHistory = intent.getBooleanExtra("is_from_history", false)
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -87,8 +90,9 @@ class PreviewActivity : AppCompatActivity() {
             exportAndShareImage()
         }
 
-        // Initialize undo button state
+        // Initialize button states
         updateUndoButtonState()
+        updateRedactAllButtonState()
 
         // Handle WindowInsets to prevent bottom gesture/navigation overlap dynamically
         ViewCompat.setOnApplyWindowInsetsListener(binding.bottomControlsCard) { view, windowInsets ->
@@ -107,8 +111,8 @@ class PreviewActivity : AppCompatActivity() {
         binding.overlayView.onRegionToggled = { region ->
             toggleRegionRedaction(region)
         }
-        binding.overlayView.onBrushStrokeCompleted = { path ->
-            bakeBrushStroke(path)
+        binding.overlayView.onBrushStrokeCompleted = { path, strokeWidth ->
+            bakeBrushStroke(path, strokeWidth)
         }
     }
 
@@ -137,6 +141,7 @@ class PreviewActivity : AppCompatActivity() {
         originalBitmap?.let { bmp ->
             saveStateToHistory(bmp, detectedRegions, true, badgeText)
         }
+        updateRedactAllButtonState()
     }
 
     private fun toggleBrushMode() {
@@ -147,22 +152,17 @@ class PreviewActivity : AppCompatActivity() {
             binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1E3A8A")))
             binding.btnBrush.setColorFilter(android.graphics.Color.WHITE)
 
-            binding.btnRedactAll.isEnabled = false
-            binding.btnRedactAll.alpha = 0.4f
-
             Toast.makeText(this, "Brush Mode Enabled: Draw directly to redact", Toast.LENGTH_SHORT).show()
         } else {
             binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2E3B4E")))
             binding.btnBrush.setColorFilter(resources.getColor(R.color.text_dark_primary, theme))
 
-            binding.btnRedactAll.isEnabled = true
-            binding.btnRedactAll.alpha = 1.0f
-
             Toast.makeText(this, "Brush Mode Disabled", Toast.LENGTH_SHORT).show()
         }
+        updateRedactAllButtonState()
     }
 
-    private fun bakeBrushStroke(path: android.graphics.Path) {
+    private fun bakeBrushStroke(path: android.graphics.Path, strokeWidth: Float) {
         val bitmap = originalBitmap ?: return
 
         binding.loadingIndicator.visibility = View.VISIBLE
@@ -173,7 +173,7 @@ class PreviewActivity : AppCompatActivity() {
                 val paint = android.graphics.Paint().apply {
                     color = android.graphics.Color.BLACK
                     style = android.graphics.Paint.Style.STROKE
-                    strokeWidth = 48f
+                    this.strokeWidth = strokeWidth
                     strokeCap = android.graphics.Paint.Cap.ROUND
                     strokeJoin = android.graphics.Paint.Join.ROUND
                     isAntiAlias = true
@@ -225,6 +225,15 @@ class PreviewActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateRedactAllButtonState() {
+        val isBrushMode = binding.overlayView.isBrushMode
+        val hasActiveRedactions = detectedRegions.any { it.isRedacted }
+        val shouldEnable = !isBrushMode && hasActiveRedactions
+
+        binding.btnRedactAll.isEnabled = shouldEnable
+        binding.btnRedactAll.alpha = if (shouldEnable) 1.0f else 0.4f
+    }
+
     private fun performUndo() {
         if (historyStack.size > 1) {
             // Remove current active state
@@ -262,6 +271,7 @@ class PreviewActivity : AppCompatActivity() {
             appliedRedactionsCount = previousState.redactionCount
 
             updateUndoButtonState()
+            updateRedactAllButtonState()
             Toast.makeText(this, "Undo successful", Toast.LENGTH_SHORT).show()
         }
     }
@@ -341,6 +351,7 @@ class PreviewActivity : AppCompatActivity() {
         originalBitmap?.let {
             saveStateToHistory(it, regions, true, text)
         }
+        updateRedactAllButtonState()
     }
 
     private fun applyRedactions() {
@@ -367,6 +378,7 @@ class PreviewActivity : AppCompatActivity() {
 
             // Save redacted state to history
             saveStateToHistory(redacted, emptyList(), false, null)
+            updateRedactAllButtonState()
             Toast.makeText(this@PreviewActivity, "Redactions applied", Toast.LENGTH_SHORT).show()
         }
     }
@@ -508,11 +520,13 @@ class PreviewActivity : AppCompatActivity() {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
                     }
 
-                    // Save a persistent copy in local secure history folder for bottom tab history view
-                    val historyDir = File(filesDir, "redacted_history").apply { mkdirs() }
-                    val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
-                    FileOutputStream(historyFile).use { outHistory ->
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                    // Save a persistent copy in local secure history folder for bottom tab history view if not already opened from history
+                    if (!isFromHistory) {
+                        val historyDir = File(filesDir, "redacted_history").apply { mkdirs() }
+                        val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
+                        FileOutputStream(historyFile).use { outHistory ->
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                        }
                     }
 
                     file

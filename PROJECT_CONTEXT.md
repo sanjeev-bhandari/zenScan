@@ -94,7 +94,8 @@ To maintain high standards, developer agents must follow these absolute rules:
 - [x] High-performance [DetectionOverlayView.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/view/DetectionOverlayView.kt) drawing bounding boxes with rounded corner badges.
 - [x] Safe Undo Stack handling up to 15 copies.
 - [x] Tap-to-toggle redactions on individual bounding boxes. (Completed)
-- [x] Manual brush drawing tool. (Completed)
+- [x] Manual brush drawing tool with scaled-accurate thickness translation. (Completed)
+- [x] Buttery-smooth decelerated fade-in reveal micro-animation on bounding boxes. (Completed)
 
 ### Phase 4: Secure Export & Sharing 🟢 (Completed)
 - Rendered solid black redaction blocks directly onto bitmaps.
@@ -110,11 +111,16 @@ To maintain high standards, developer agents must follow these absolute rules:
 - [x] Engineered custom multi-threaded Gaussian Box Blur shaders in pure Kotlin.
 - [x] Created beautifully styled settings preferences panel with customizable style, quality, and wipe options.
 
+### Phase 6: UX & Editor Experience Refinement 🟢 (Completed)
+- [x] Refactored solid blocking background scanning overlay into a beautiful, non-blocking translucent scrim `#40000000` with an elevated M3 progress card.
+- [x] Rewired local redacted history dashboard items to open directly in the Editor (`PreviewActivity`) as a secure viewer rather than immediately triggering standard share intents.
+- [x] Configured automatic duplicate prevention logic using custom intent parameter (`is_from_history = true`) to skip local filesystem writes upon subsequent exports of history items.
+- [x] Built dynamically stateful 'Redact All' wand controls updating enabled status and alpha opacity based on active selections and manual brush tools.
+
 ---
 
 ## 5. Active Task
-
-We have **fully completed and verified Phase 5 (Navigation, Custom Preferences & History Logs)**! The core dashboard now routes between Home (welcome grid and compact recents), Files (full offline persistent log, share CTAs, and empty views), and Settings (SharedPreferences style, quality, and history purger). Immersive WindowInsets ensure layout integrity. The project compiles successfully with zero warnings!
+We have successfully resolved all major UX bottlenecks across the editor flow and secure local history viewer! The overlay displays a translucent Material 3 progress spinner card while AI scans run, clicking history list items launches the editor directly, subsequent history item exports are protected from redundant copies, and the 'Redact All' button updates dynamically. All features are complete, and the build compiles perfectly!
 
 ---
 
@@ -131,3 +137,5 @@ We have **fully completed and verified Phase 5 (Navigation, Custom Preferences &
 | 2026-05-20 | Implemented programmatic top WindowInsets status bar padding on the main header and editor toolbar to avoid notch and system status bar overlaps. | [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |
 | 2026-05-20 | Implemented Phase 5 Bottom Navigation switcher, offline persistent history files log, dynamic settings preference cards, custom Kotlin box-blur shaders, and immersive system bar window offset rules. | [activity_main.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_main.xml), [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt), [RedactionHistoryAdapter.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/ui/RedactionHistoryAdapter.kt), [strings.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/values/strings.xml), icons | Completed |
 | 2026-05-21 | Added YAML frontmatter metadata block to all 8 developer skill manuals, and corrected path typo in project context. | [SKILL.md (all 8 skills)](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/.agent/skills/), [PROJECT_CONTEXT.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT.md) | Completed |
+| 2026-05-21 | Refined brush stroke scaling, added camera capture permissions & TakePicture contract, and programmed custom fade-in reveals for bounding boxes on overlay canvas. | [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt), [DetectionOverlayView.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/view/DetectionOverlayView.kt) | Completed |
+| 2026-05-21 | Implemented non-blocking progress card overlay, direct history items navigation, history export duplicate prevention, and dynamic 'Redact All' state bindings. | [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml), [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |

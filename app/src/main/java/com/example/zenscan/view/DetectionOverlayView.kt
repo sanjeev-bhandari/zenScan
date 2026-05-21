@@ -26,7 +26,7 @@ class DetectionOverlayView @JvmOverloads constructor(
 
     // Callback variables for host Activity interaction
     var onRegionToggled: ((DetectedRegion) -> Unit)? = null
-    var onBrushStrokeCompleted: ((Path) -> Unit)? = null
+    var onBrushStrokeCompleted: ((Path, Float) -> Unit)? = null
     var isBrushMode: Boolean = false
 
     // Manual Brush Drawing Engine
@@ -111,15 +111,30 @@ class DetectionOverlayView @JvmOverloads constructor(
         isFakeBoldText = true
     }
 
+    private var animationProgress = 0f
+    private var animator: android.animation.ValueAnimator? = null
+
     fun setRegions(regions: List<DetectedRegion>, bmpWidth: Int, bmpHeight: Int) {
         this.regions = regions
         this.bitmapWidth = bmpWidth
         this.bitmapHeight = bmpHeight
-        invalidate()
+        
+        animator?.cancel()
+        animator = android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 350
+            interpolator = android.view.animation.DecelerateInterpolator()
+            addUpdateListener { valueAnimator ->
+                animationProgress = valueAnimator.animatedValue as Float
+                invalidate()
+            }
+            start()
+        }
     }
 
     fun clear() {
+        animator?.cancel()
         regions = emptyList()
+        animationProgress = 0f
         invalidate()
     }
 
@@ -159,7 +174,9 @@ class DetectionOverlayView @JvmOverloads constructor(
 
                         val bitmapPath = Path()
                         brushPath.transform(matrix, bitmapPath)
-                        onBrushStrokeCompleted?.invoke(bitmapPath)
+
+                        val strokeWidthOnBitmap = brushPaint.strokeWidth / scale
+                        onBrushStrokeCompleted?.invoke(bitmapPath, strokeWidthOnBitmap)
                     }
 
                     brushPath.reset()
@@ -217,6 +234,25 @@ class DetectionOverlayView @JvmOverloads constructor(
         }
 
         if (regions.isEmpty() || bitmapWidth == 0 || bitmapHeight == 0) return
+
+        // Dynamic fade-in animation alpha adjustments
+        val currentFillAlpha = (30 * animationProgress).toInt()
+        val currentBypassedFillAlpha = (12 * animationProgress).toInt()
+        val currentStrokeAlpha = (255 * animationProgress).toInt()
+
+        piiFillPaint.alpha = currentFillAlpha
+        piiStrokePaint.alpha = currentStrokeAlpha
+        piiLabelBgPaint.alpha = currentStrokeAlpha
+
+        faceFillPaint.alpha = currentFillAlpha
+        faceStrokePaint.alpha = currentStrokeAlpha
+        faceLabelBgPaint.alpha = currentStrokeAlpha
+
+        bypassedFillPaint.alpha = currentBypassedFillAlpha
+        bypassedStrokePaint.alpha = currentStrokeAlpha
+        bypassedLabelBgPaint.alpha = currentStrokeAlpha
+
+        labelTextPaint.alpha = currentStrokeAlpha
 
         val scaleX = width.toFloat() / bitmapWidth
         val scaleY = height.toFloat() / bitmapHeight
