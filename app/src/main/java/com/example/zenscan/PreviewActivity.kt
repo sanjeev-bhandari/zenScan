@@ -164,7 +164,7 @@ class PreviewActivity : AppCompatActivity() {
         val badgeText = if (totalActive == 0) {
             getString(R.string.no_sensitive_found)
         } else {
-            getString(R.string.found_sensitive, totalActive)
+            resources.getQuantityString(R.plurals.found_sensitive, totalActive, totalActive)
         }
         binding.summaryBadge.text = badgeText
 
@@ -413,7 +413,7 @@ class PreviewActivity : AppCompatActivity() {
         val text = if (total == 0) {
             getString(R.string.no_sensitive_found)
         } else {
-            getString(R.string.found_sensitive, total)
+            resources.getQuantityString(R.plurals.found_sensitive, total, total)
         }
         binding.summaryBadge.text = text
         binding.summaryBadge.visibility = View.VISIBLE

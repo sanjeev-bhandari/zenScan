@@ -8,7 +8,10 @@
     <string name="failed_to_load_image">Failed to load image</string>
     <string name="detection_failed">Detection failed</string>
     <string name="no_sensitive_found">No sensitive content detected</string>
-    <string name="found_sensitive">Found %d sensitive item(s)</string>
+    <plurals name="found_sensitive">
+        <item quantity="one">Found %d sensitive item</item>
+        <item quantity="other">Found %d sensitive items</item>
+    </plurals>
     <string name="undo">Undo</string>
     <string name="redact_all">Redact All</string>
     <string name="brush_tool">Brush</string>
