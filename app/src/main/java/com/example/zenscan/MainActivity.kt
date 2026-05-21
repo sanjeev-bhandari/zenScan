@@ -132,6 +132,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, PreviewActivity::class.java).apply {
                 data = contentUri
                 putExtra("is_from_history", true)
+                putExtra("history_file_name", file.name)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivity(intent)
         } catch (e: Exception) {

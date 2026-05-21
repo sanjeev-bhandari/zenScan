@@ -43,6 +43,7 @@
             android:background="@android:color/transparent"
             android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
             app:navigationIcon="?attr/homeAsUpIndicator"
+            app:titleTextColor="@color/text_dark_primary"
             app:title="" />
 
         <!-- Floating AI Detection Summary Badge floated on top -->

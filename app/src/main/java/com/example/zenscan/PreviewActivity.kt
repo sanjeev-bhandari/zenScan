@@ -55,7 +55,14 @@ class PreviewActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false) // Hide default activity title
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+        
+        if (isFromHistory) {
+            supportActionBar?.title = "Redacted History"
+        } else {
+            supportActionBar?.title = "Smart Scan"
+        }
+        
         binding.toolbar.setNavigationOnClickListener { finish() }
 
         // Handle WindowInsets to prevent top Status Bar overlap on toolbar and badge dynamically
@@ -63,13 +70,11 @@ class PreviewActivity : AppCompatActivity() {
             val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.setPadding(0, statusInsets.top, 0, 0)
 
-            // Mathematically align the floating summaryBadge vertically in the center of the toolbar (56dp height)
+            // Position the floating summaryBadge cleanly below the toolbar (56dp height) to avoid title/menu overlaps
             binding.summaryBadge.updateLayoutParams<MarginLayoutParams> {
                 val density = resources.displayMetrics.density
                 val toolbarHeight = 56 * density
-                val badgeHeight = 36 * density // estimated wrap_content height with padding
-                val topOffset = ((toolbarHeight - badgeHeight) / 2).toInt()
-                topMargin = statusInsets.top + maxOf(0, topOffset)
+                topMargin = statusInsets.top + toolbarHeight.toInt() + (8 * density).toInt()
             }
             windowInsets
         }
@@ -288,6 +293,11 @@ class PreviewActivity : AppCompatActivity() {
             if (previousState.isBadgeVisible) {
                 binding.summaryBadge.text = previousState.badgeText
                 binding.summaryBadge.visibility = View.VISIBLE
+                if (isFromHistory) {
+                    binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_green, theme))
+                } else {
+                    binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_rose, theme))
+                }
             } else {
                 binding.summaryBadge.visibility = View.GONE
             }
@@ -316,9 +326,49 @@ class PreviewActivity : AppCompatActivity() {
             originalBitmap = bitmap
             binding.imagePreview.setImageBitmap(bitmap)
 
-            // Save initial loaded image state
-            saveStateToHistory(bitmap, emptyList(), false, null)
-            runDetection(bitmap)
+            if (isFromHistory) {
+                binding.loadingIndicator.visibility = View.GONE
+                showHistoryBadge()
+            } else {
+                // Save initial loaded image state
+                saveStateToHistory(bitmap, emptyList(), false, null)
+                runDetection(bitmap)
+            }
+        }
+    }
+
+    private fun showHistoryBadge() {
+        val fileName = intent.getStringExtra("history_file_name")
+        var detailsText = "Redacted History File"
+        
+        if (fileName != null && fileName.startsWith("ZenScan_") && fileName.endsWith(".jpg")) {
+            try {
+                val payload = fileName.removePrefix("ZenScan_").removeSuffix(".jpg")
+                val parts = payload.split("_")
+                if (parts.size >= 2) {
+                    val count = parts[1].toIntOrNull()
+                    detailsText = if (count != null && count > 0) {
+                        "$count sensitive item(s) protected"
+                    } else {
+                        "Custom brush/manual redaction"
+                    }
+                }
+            } catch (e: java.lang.Exception) {
+                // Keep default detailsText
+            }
+        }
+        
+        binding.summaryBadge.text = detailsText
+        binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_green, theme))
+        binding.summaryBadge.visibility = View.VISIBLE
+        
+        // Disable 'Redact All' since it's already redacted
+        binding.btnRedactAll.isEnabled = false
+        binding.btnRedactAll.alpha = 0.4f
+        
+        // Save the loaded history state into the undo history stack with the badge set to true
+        originalBitmap?.let { bmp ->
+            saveStateToHistory(bmp, emptyList(), true, detailsText)
         }
     }
 

@@ -118,11 +118,13 @@ To maintain high standards, developer agents must follow these absolute rules:
 - [x] Built dynamically stateful 'Redact All' wand controls updating enabled status and alpha opacity based on active selections and manual brush tools.
 - [x] Redesigned the editor preview screen to match `zenscan_editor_mockup.png` visual guidelines by shifting the workspace to a full-bleed layout, floating a transparent toolbar header on top of the image container, and mathematically centering the floating badges.
 - [x] Configured a standard three-dot vertical overflow menu inside the transparent toolbar for visual parity.
+- [x] Restored high-contrast dynamically toggling toolbar titles ("Smart Scan" vs "Redacted History") to address the missing "upper info" feedback.
+- [x] Engineered secure filename-metadata parsing in the editor to immediately skip ML Kit runs and display green reassurance status badges for pre-redacted history files.
 
 ---
 
 ## 5. Active Task
-We have successfully resolved all visual and aesthetic guidelines from the `zenscan_editor_mockup.png` design specifications! The editor now hosts a gorgeous full-bleed workspace, a floating transparent toolbar with a vertical three-dot action menu, and a dynamically-inset floating center badge that sits perfectly below the status bar in absolute horizontal and vertical alignment with the back and menu controls. The visual layout matches the mockup perfectly, and the app compiles with zero errors!
+We have successfully resolved the feedback regarding the missing "upper info" by restoring high-contrast, start-aligned toolbar titles ("Smart Scan" vs. "Redacted History") that dynamically shift according to the editor's operational state. Furthermore, we refined the UX of opening redacted history files by bypassing redundant ML Kit OCR/face scans, and instead parsing filename-encoded metadata to present a reassuring green-themed secure status badge (e.g. "3 sensitive item(s) protected") directly in the floating header.
 
 ---
 
@@ -130,6 +132,7 @@ We have successfully resolved all visual and aesthetic guidelines from the `zens
 
 | Date | Task / Change Description | Affected Files | Status |
 | :--- | :--- | :--- | :--- |
+| 2026-05-21 | Restored start-aligned high-contrast dynamically toggling toolbar titles and implemented secure filename-metadata badge parsing with green status indicators for pre-redacted history files. | [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/MainActivity.kt), [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt) | Completed |
 | 2026-05-21 | Redesigned top toolbar and workspace to match zenscan_editor_mockup.png visual guidelines; floated transparent toolbar, centered floating badge mathematically with status bar window insets, and configured overflow menus. | [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/layout/activity_preview.xml), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/java/com/example/zenscan/PreviewActivity.kt), [menu_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/main/res/menu/menu_preview.xml) | Completed |
 | 2026-05-20 | Created standard `PROJECT_CONTEXT.md` to establish project identity, architecture patterns, and constraints. | [PROJECT_CONTEXT.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT.md) | Completed |
 | 2026-05-20 | Created `PROJECT_CONTEXT_WORKFLOW.md` to define strict startup, execution, and finishing rules for agent pair-programming sessions. | [PROJECT_CONTEXT_WORKFLOW.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT_WORKFLOW.md) | Completed |
