@@ -2,6 +2,7 @@ package com.example.zenscan
 
 import android.content.Intent
 import android.net.Uri
+import androidx.core.content.edit
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -208,7 +209,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.rbStyleBlur -> "blur"
                 else -> "black"
             }
-            prefs.edit().putString("redaction_style", styleValue).apply()
+            prefs.edit { putString("redaction_style", styleValue) }
         }
 
         // 2. Bind Export Quality RadioGroup
@@ -225,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.rbQualityLow -> 70
                 else -> 95
             }
-            prefs.edit().putInt("export_quality", qualityValue).apply()
+            prefs.edit { putInt("export_quality", qualityValue) }
         }
 
         // 3. Clear all logs button

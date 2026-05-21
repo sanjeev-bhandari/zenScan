@@ -10,8 +10,11 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.example.zenscan.databinding.ActivityPreviewBinding
@@ -179,12 +182,12 @@ class PreviewActivity : AppCompatActivity() {
         binding.overlayView.isBrushMode = isEnabled
 
         if (isEnabled) {
-            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#1E3A8A")))
+            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf("#1E3A8A".toColorInt()))
             binding.btnBrush.setColorFilter(android.graphics.Color.WHITE)
 
             Toast.makeText(this, "Brush Mode Enabled: Draw directly to redact", Toast.LENGTH_SHORT).show()
         } else {
-            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2E3B4E")))
+            binding.btnBrush.setBackgroundTintList(android.content.res.ColorStateList.valueOf("#2E3B4E".toColorInt()))
             binding.btnBrush.setColorFilter(resources.getColor(R.color.text_dark_primary, theme))
 
             Toast.makeText(this, "Brush Mode Disabled", Toast.LENGTH_SHORT).show()
@@ -218,7 +221,7 @@ class PreviewActivity : AppCompatActivity() {
             binding.imagePreview.setImageBitmap(updatedBitmap)
             binding.loadingIndicator.visibility = View.GONE
 
-            saveStateToHistory(updatedBitmap, detectedRegions, binding.summaryBadge.visibility == View.VISIBLE, binding.summaryBadge.text?.toString())
+            saveStateToHistory(updatedBitmap, detectedRegions, binding.summaryBadge.isVisible, binding.summaryBadge.text?.toString())
             Toast.makeText(this@PreviewActivity, "Redaction applied", Toast.LENGTH_SHORT).show()
         }
     }
@@ -475,7 +478,7 @@ class PreviewActivity : AppCompatActivity() {
                 paint.color = android.graphics.Color.BLACK
             }
             "slate" -> {
-                paint.color = android.graphics.Color.parseColor("#1E293B")
+                paint.color = "#1E293B".toColorInt()
             }
         }
 
@@ -561,7 +564,7 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
 
-        val result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val result = createBitmap(width, height)
         result.setPixels(pixels, 0, width, 0, 0, width, height)
         return result
     }
