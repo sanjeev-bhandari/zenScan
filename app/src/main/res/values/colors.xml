@@ -4,6 +4,7 @@
     <color name="primary">#0F172A</color>
     <color name="primary_dark">#1E293B</color>
     <color name="colorAccent">#2563EB</color>
+    <color name="dialog_button_text">#2563EB</color>
 
     <color name="accent_blue">#2563EB</color>
     <color name="accent_green">#10B981</color>

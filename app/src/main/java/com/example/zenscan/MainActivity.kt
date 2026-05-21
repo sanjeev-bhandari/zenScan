@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
@@ -277,7 +277,7 @@ class MainActivity : AppCompatActivity() {
 
         // 3. Clear all logs button
         binding.btnClearCache.setOnClickListener {
-            AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(this)
                 .setTitle("Wipe Redacted History")
                 .setMessage("Are you sure you want to permanently delete all redacted files from storage? This action cannot be undone.")
                 .setPositiveButton("Wipe All") { _, _ ->
@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun promptDeleteFile(file: File) {
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Delete History Item")
             .setMessage("Do you want to permanently delete this redacted photo from your offline history?")
             .setPositiveButton("Delete") { _, _ ->

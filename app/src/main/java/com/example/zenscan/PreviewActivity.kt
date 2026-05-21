@@ -78,17 +78,10 @@ class PreviewActivity : AppCompatActivity() {
         
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        // Handle WindowInsets to prevent top Status Bar overlap on toolbar and badge dynamically
+        // Handle WindowInsets to prevent top Status Bar overlap on toolbar dynamically
         ViewCompat.setOnApplyWindowInsetsListener(binding.toolbar) { view, windowInsets ->
             val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.setPadding(0, statusInsets.top, 0, 0)
-
-            // Position the floating summaryBadge cleanly below the toolbar (56dp height) to avoid title/menu overlaps
-            binding.summaryBadge.updateLayoutParams<MarginLayoutParams> {
-                val density = resources.displayMetrics.density
-                val toolbarHeight = 56 * density
-                topMargin = statusInsets.top + toolbarHeight.toInt() + (8 * density).toInt()
-            }
             windowInsets
         }
 
@@ -180,6 +173,7 @@ class PreviewActivity : AppCompatActivity() {
             resources.getQuantityString(R.plurals.found_sensitive, totalActive, totalActive)
         }
         binding.summaryBadge.text = badgeText
+        updateToolbarSubtitle(badgeText, isVisible = true, isRoseColor = totalActive > 0)
 
         originalBitmap?.let { bmp ->
             saveStateToHistory(bmp, detectedRegions, true, badgeText)
@@ -280,6 +274,22 @@ class PreviewActivity : AppCompatActivity() {
 
         binding.btnRedactAll.isEnabled = shouldEnable
         binding.btnRedactAll.alpha = if (shouldEnable) 1.0f else 0.4f
+
+        if (shouldEnable) {
+            val pulseAnim = android.view.animation.ScaleAnimation(
+                1f, 1.06f, 1f, 1.06f,
+                android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
+                android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
+            ).apply {
+                duration = 1000
+                repeatMode = android.view.animation.Animation.REVERSE
+                repeatCount = android.view.animation.Animation.INFINITE
+                interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            }
+            binding.btnRedactAll.startAnimation(pulseAnim)
+        } else {
+            binding.btnRedactAll.clearAnimation()
+        }
     }
 
     private fun performUndo() {
@@ -317,11 +327,14 @@ class PreviewActivity : AppCompatActivity() {
                 binding.summaryBadge.visibility = View.VISIBLE
                 if (isFromHistory) {
                     binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_green, theme))
+                    updateToolbarSubtitle(previousState.badgeText, isVisible = true, isRoseColor = false)
                 } else {
                     binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_rose, theme))
+                    updateToolbarSubtitle(previousState.badgeText, isVisible = true, isRoseColor = true)
                 }
             } else {
                 binding.summaryBadge.visibility = View.GONE
+                updateToolbarSubtitle(null, isVisible = false)
             }
 
             // Restore session count directly from history index
@@ -383,6 +396,7 @@ class PreviewActivity : AppCompatActivity() {
         binding.summaryBadge.text = detailsText
         binding.summaryBadge.backgroundTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.accent_green, theme))
         binding.summaryBadge.visibility = View.VISIBLE
+        updateToolbarSubtitle(detailsText, isVisible = true, isRoseColor = false)
         
         // Disable 'Redact All' since it's already redacted
         binding.btnRedactAll.isEnabled = false
@@ -439,6 +453,7 @@ class PreviewActivity : AppCompatActivity() {
         }
         binding.summaryBadge.text = text
         binding.summaryBadge.visibility = View.VISIBLE
+        updateToolbarSubtitle(text, isVisible = true, isRoseColor = total > 0)
 
         // Overwrite initial loaded state so first undo returns to scanned region boundaries
         if (historyStack.isNotEmpty()) {
@@ -473,6 +488,7 @@ class PreviewActivity : AppCompatActivity() {
                 binding.overlayView.clear()
                 detectedRegions = emptyList()
                 binding.summaryBadge.visibility = View.GONE
+                updateToolbarSubtitle(null, isVisible = false)
                 binding.loadingIndicator.visibility = View.GONE
 
                 // Save redacted state to history
@@ -667,6 +683,21 @@ class PreviewActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this@PreviewActivity, exceptionMessage ?: "Failed to export image", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun updateToolbarSubtitle(text: String?, isVisible: Boolean, isRoseColor: Boolean = true) {
+        if (isVisible && !text.isNullOrEmpty()) {
+            supportActionBar?.subtitle = text
+            if (isRoseColor) {
+                // Light rose/red for sensitive items detected (#FDA4AF)
+                binding.toolbar.setSubtitleTextColor(android.graphics.Color.parseColor("#FDA4AF"))
+            } else {
+                // Light green for all clear / protected (#A7F3D0)
+                binding.toolbar.setSubtitleTextColor(android.graphics.Color.parseColor("#A7F3D0"))
+            }
+        } else {
+            supportActionBar?.subtitle = null
         }
     }
 

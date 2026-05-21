@@ -7,6 +7,12 @@
         <item name="colorSecondaryVariant">@color/accent_blue</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.ZenScan.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorPrimary">@color/dialog_button_text</item>
     </style>
 
     <style name="Theme.ZenScan.NoActionBar">
