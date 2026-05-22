@@ -1,6 +1,8 @@
 package com.example.zenscan
 
+import android.content.ContentValues
 import android.content.Intent
+import android.provider.MediaStore
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -104,8 +106,20 @@ class PreviewActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_save -> {
+                saveToGallery()
+                true
+            }
+            R.id.action_strip_metadata -> {
+                exportAndShareImage(showMetadataToast = true)
+                true
+            }
             R.id.action_placeholder -> {
-                Toast.makeText(this, "ZenScan Safe Share Active", Toast.LENGTH_SHORT).show()
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                    .setTitle("About Safe Share")
+                    .setMessage("ZenScan Privacy Redactor uses state-of-the-art on-device AI models to find and censor sensitive details like faces, credit cards, and emails. Everything runs 100% offline inside your device's sandboxed environment, keeping your personal data completely private.")
+                    .setPositiveButton("Got It", null)
+                    .show()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -555,6 +569,23 @@ class PreviewActivity : AppCompatActivity() {
                         12f, 12f, fallbackPaint
                     )
                 }
+            } else if (redactionStyle == "pixelate") {
+                try {
+                    val cropped = Bitmap.createBitmap(result, left, top, right - left, bottom - top)
+                    val pixelated = pixelateBitmap(cropped, 12)
+                    canvas.drawBitmap(pixelated, left.toFloat(), top.toFloat(), null)
+                    pixelated.recycle()
+                    cropped.recycle()
+                } catch (e: Throwable) {
+                    val fallbackPaint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        this.style = android.graphics.Paint.Style.FILL
+                    }
+                    canvas.drawRoundRect(
+                        left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(),
+                        12f, 12f, fallbackPaint
+                    )
+                }
             } else {
                 canvas.drawRoundRect(
                     left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(),
@@ -562,6 +593,27 @@ class PreviewActivity : AppCompatActivity() {
                 )
             }
         }
+        return result
+    }
+
+    // Optimized pixelation logic: Downscale and upscale without filtering
+    private fun pixelateBitmap(src: Bitmap, pixelSize: Int): Bitmap {
+        val width = src.width
+        val height = src.height
+        
+        // Ensure pixelSize is at least 1 and doesn't exceed dimensions
+        val safePixelSize = pixelSize.coerceIn(1, minOf(width, height))
+        
+        val scaledWidth = (width / safePixelSize).coerceAtLeast(1)
+        val scaledHeight = (height / safePixelSize).coerceAtLeast(1)
+        
+        // 1. Create a tiny version of the bitmap
+        val tiny = Bitmap.createScaledBitmap(src, scaledWidth, scaledHeight, false)
+        
+        // 2. Scale it back up using nearest-neighbor (false for filter)
+        val result = Bitmap.createScaledBitmap(tiny, width, height, false)
+        
+        tiny.recycle()
         return result
     }
 
@@ -616,11 +668,15 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     // Compress raw bitmap to clean JPEG, stripping source metadata, then share
-    private fun exportAndShareImage() {
+    private fun exportAndShareImage(showMetadataToast: Boolean = false) {
         val bitmap = originalBitmap
         if (bitmap == null) {
             Toast.makeText(this, "No image to export", Toast.LENGTH_SHORT).show()
             return
+        }
+
+        if (showMetadataToast) {
+            Toast.makeText(this, "Stripping GPS & EXIF data...", Toast.LENGTH_SHORT).show()
         }
 
         binding.loadingIndicator.visibility = View.VISIBLE
@@ -682,6 +738,81 @@ class PreviewActivity : AppCompatActivity() {
                 }
             } else {
                 Toast.makeText(this@PreviewActivity, exceptionMessage ?: "Failed to export image", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun saveToGallery() {
+        val bitmap = originalBitmap
+        if (bitmap == null) {
+            Toast.makeText(this, "No image to save", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.loadingIndicator.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            var isSuccess = false
+            var savedPath: String? = null
+            withContext(Dispatchers.IO) {
+                try {
+                    val resolver = contentResolver
+                    val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
+                    val quality = prefs.getInt("export_quality", 95)
+                    val filename = "ZenScan_${System.currentTimeMillis()}.jpg"
+
+                    val imageCollection = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                        MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                    } else {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    }
+
+                    val contentValues = ContentValues().apply {
+                        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+                        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/ZenScan")
+                            put(MediaStore.Images.Media.IS_PENDING, 1)
+                        }
+                    }
+
+                    val imageUri = resolver.insert(imageCollection, contentValues)
+                    if (imageUri != null) {
+                        resolver.openOutputStream(imageUri).use { out ->
+                            if (out != null) {
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                                isSuccess = true
+                            }
+                        }
+
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                            contentValues.clear()
+                            contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+                            resolver.update(imageUri, contentValues, null, null)
+                        }
+                        
+                        savedPath = "Pictures/ZenScan/$filename"
+                    }
+
+                    // Save a persistent copy in local secure history folder too for consistency
+                    if (!isFromHistory) {
+                        val historyDir = File(filesDir, "redacted_history").apply { mkdirs() }
+                        val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
+                        FileOutputStream(historyFile).use { outHistory ->
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            binding.loadingIndicator.visibility = View.GONE
+            if (isSuccess) {
+                Toast.makeText(this@PreviewActivity, "Saved to gallery: ${savedPath ?: "Successfully"}", Toast.LENGTH_LONG).show()
+                finish()
+            } else {
+                Toast.makeText(this@PreviewActivity, "Failed to save image to gallery", Toast.LENGTH_LONG).show()
             }
         }
     }

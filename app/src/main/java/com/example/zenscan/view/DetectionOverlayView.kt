@@ -298,7 +298,7 @@ class DetectionOverlayView @JvmOverloads constructor(
 
             // 3. Draw clean label badge tab
             val rawLabel = region.label.replace("_", " ")
-            val labelText = if (isFace) "FACE" else rawLabel.uppercase()
+            val labelText = if (isFace) com.example.zenscan.detection.DetectionPipeline.FACE_LABEL else rawLabel.uppercase()
             val textWidth = labelTextPaint.measureText(labelText)
             val textHeight = labelTextPaint.textSize
 

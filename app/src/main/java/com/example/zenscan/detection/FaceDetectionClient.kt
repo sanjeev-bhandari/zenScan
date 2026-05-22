@@ -2,12 +2,14 @@ package com.example.zenscan.detection
 
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetector
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
 class FaceDetectionClient {
+    private val TAG = "FaceDetectionClient"
 
     private val detector: FaceDetector
 
@@ -28,9 +30,11 @@ class FaceDetectionClient {
                 val rects = faces.mapNotNull { face ->
                     face.boundingBox
                 }
+                Log.d(TAG, "detectFaces() succeeded, ${rects.size} faces")
                 onSuccess(rects)
             }
             .addOnFailureListener { e ->
+                Log.e(TAG, "detectFaces() failed", e)
                 onFailure(e)
             }
     }

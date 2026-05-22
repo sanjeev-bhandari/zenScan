@@ -2,6 +2,7 @@ package com.example.zenscan.detection
 
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import com.example.zenscan.model.TextBlockBounds
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -9,6 +10,7 @@ import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 class TextRecognitionClient {
+    private val TAG = "TextRecognitionClient"
 
     private val recognizer: TextRecognizer =
         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -28,9 +30,11 @@ class TextRecognitionClient {
                         }
                     }
                 }
+                Log.d(TAG, "recognizeText() succeeded, ${blocks.size} elements")
                 onSuccess(blocks)
             }
             .addOnFailureListener { e ->
+                Log.e(TAG, "recognizeText() failed", e)
                 onFailure(e)
             }
     }

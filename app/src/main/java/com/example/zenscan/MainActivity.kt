@@ -247,12 +247,14 @@ class MainActivity : AppCompatActivity() {
             "black" -> binding.rbStyleBlack.isChecked = true
             "slate" -> binding.rbStyleSlate.isChecked = true
             "blur" -> binding.rbStyleBlur.isChecked = true
+            "pixelate" -> binding.rbStylePixelate.isChecked = true
         }
         binding.rgRedactionStyle.setOnCheckedChangeListener { _, checkedId ->
             val styleValue = when (checkedId) {
                 R.id.rbStyleBlack -> "black"
                 R.id.rbStyleSlate -> "slate"
                 R.id.rbStyleBlur -> "blur"
+                R.id.rbStylePixelate -> "pixelate"
                 else -> "black"
             }
             prefs.edit { putString("redaction_style", styleValue) }

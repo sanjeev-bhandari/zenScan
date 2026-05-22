@@ -2,31 +2,47 @@ package com.example.zenscan.detection
 
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegionType
 import com.example.zenscan.model.TextBlockBounds
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 class DetectionPipeline {
+    companion object {
+        private const val TAG = "DetectionPipeline"
+        const val FACE_LABEL = "FACE"
+    }
 
     private val textClient = TextRecognitionClient()
     private val faceClient = FaceDetectionClient()
 
     suspend fun detect(bitmap: Bitmap): List<DetectedRegion> {
+        Log.d(TAG, "detect() started, bitmap=${bitmap.width}x${bitmap.height}")
         val textBlocks = recognizeText(bitmap)
+        Log.d(TAG, "recognizeText() returned ${textBlocks.size} blocks")
+        currentCoroutineContext().ensureActive()
         val piiRegions = detectPII(textBlocks)
+        Log.d(TAG, "detectPII() found ${piiRegions.size} regions")
+        currentCoroutineContext().ensureActive()
         val faceRegions = detectFaces(bitmap)
+        Log.d(TAG, "detectFaces() found ${faceRegions.size} regions")
+        currentCoroutineContext().ensureActive()
         val allRegions = piiRegions + faceRegions
-        return deduplicate(allRegions)
+        val result = deduplicate(allRegions)
+        Log.d(TAG, "detect() complete, ${result.size} regions after dedup")
+        return result
     }
 
     private suspend fun recognizeText(bitmap: Bitmap): List<TextBlockBounds> =
         suspendCancellableCoroutine { continuation ->
             textClient.recognizeText(
                 bitmap,
-                onSuccess = { blocks -> continuation.resume(blocks) },
-                onFailure = { e -> continuation.resume(emptyList()) }
+                onSuccess = { blocks -> if (continuation.isActive) continuation.resume(blocks) },
+                onFailure = { e -> if (continuation.isActive) continuation.resume(emptyList()) }
             )
         }
 
@@ -48,30 +64,27 @@ class DetectionPipeline {
         val matches = PiiPatternMatcher.findPII(fullText)
         if (matches.isEmpty()) return emptyList()
 
-        return matches.map { (match, label) ->
+        return matches.mapNotNull { (match, label) ->
             val matchedBlocks = (match.startIndex until match.endIndex)
                 .mapNotNull { i -> blockIndex.firstOrNull { it.first == i }?.second }
                 .distinct()
 
-            val combinedRect = if (matchedBlocks.isEmpty()) {
-                Rect(0, 0, 0, 0)
-            } else {
-                var left = Int.MAX_VALUE
-                var top = Int.MAX_VALUE
-                var right = Int.MIN_VALUE
-                var bottom = Int.MIN_VALUE
-                for (block in matchedBlocks) {
-                    val r = block.boundingBox
-                    left = minOf(left, r.left)
-                    top = minOf(top, r.top)
-                    right = maxOf(right, r.right)
-                    bottom = maxOf(bottom, r.bottom)
-                }
-                Rect(left, top, right, bottom)
+            if (matchedBlocks.isEmpty()) return@mapNotNull null
+
+            var left = Int.MAX_VALUE
+            var top = Int.MAX_VALUE
+            var right = Int.MIN_VALUE
+            var bottom = Int.MIN_VALUE
+            for (block in matchedBlocks) {
+                val r = block.boundingBox
+                left = minOf(left, r.left)
+                top = minOf(top, r.top)
+                right = maxOf(right, r.right)
+                bottom = maxOf(bottom, r.bottom)
             }
 
             DetectedRegion(
-                boundingBox = combinedRect,
+                boundingBox = Rect(left, top, right, bottom),
                 label = label,
                 type = RegionType.PII_TEXT
             )
@@ -83,16 +96,17 @@ class DetectionPipeline {
             faceClient.detectFaces(
                 bitmap,
                 onSuccess = { rects ->
+                    if (!continuation.isActive) return@detectFaces
                     val regions = rects.map { rect ->
                         DetectedRegion(
                             boundingBox = rect,
-                            label = "FACE",
+                            label = FACE_LABEL,
                             type = RegionType.FACE
                         )
                     }
                     continuation.resume(regions)
                 },
-                onFailure = { continuation.resume(emptyList()) }
+                onFailure = { if (continuation.isActive) continuation.resume(emptyList()) }
             )
         }
 

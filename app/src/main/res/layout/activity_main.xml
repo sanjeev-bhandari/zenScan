@@ -553,6 +553,16 @@ android:text="@string/scan_camera"
                                 android:textColor="@color/text_primary"
                                 android:textSize="14sp"
                                 android:buttonTint="@color/accent_blue" />
+
+                            <RadioButton
+                                android:id="@+id/rbStylePixelate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingVertical="8dp"
+                                android:text="@string/style_pixelate"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:buttonTint="@color/accent_blue" />
                         </RadioGroup>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

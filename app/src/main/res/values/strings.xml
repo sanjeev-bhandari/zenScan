@@ -51,6 +51,7 @@
     <string name="style_black">Solid Black Block</string>
     <string name="style_slate">Dark Slate Gray</string>
     <string name="style_blur">Gaussian Pixel Blur</string>
+    <string name="style_pixelate">Retro Pixelate</string>
     <string name="quality_high">High Quality (95%)</string>
     <string name="quality_medium">Medium Balanced (85%)</string>
     <string name="quality_low">Max Compression (70%)</string>
@@ -61,4 +62,9 @@
     <string name="theme_system">System Default</string>
     <string name="theme_light">Light Theme</string>
     <string name="theme_dark">Dark Theme</string>
+
+    <!-- Overflow menu options -->
+    <string name="menu_save_to_gallery">Save to Gallery</string>
+    <string name="menu_strip_metadata">Strip Metadata &amp; Share</string>
+    <string name="menu_about_safe_share">About Safe Share</string>
 </resources>

@@ -1,16 +1,17 @@
 package com.example.zenscan.detection
 
-import android.graphics.Rect
-import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegexMatch
-import com.example.zenscan.model.RegionType
-import com.example.zenscan.model.TextBlockBounds
 
 object PiiPatternMatcher {
+    const val LABEL_CREDIT_CARD = "CREDIT_CARD"
+    const val LABEL_EMAIL = "EMAIL"
+    const val LABEL_PHONE = "PHONE"
+    const val LABEL_SSN = "SSN"
 
     private val creditCardRegex = Regex("""\b(?:\d[ -]*?){13,19}\b""")
     private val emailRegex = Regex("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")
-    private val phoneRegex = Regex("""\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}""")
+    private val phoneRegex = Regex("""\+?\d{1,3}[-.\s]?\(?\d{2,4}\)?[-.\s]?\d{2,4}[-.\s]?\d{4,12}\b""")
+    private val ssnRegex = Regex("""\b\d{3}-\d{2}-\d{4}\b""")
 
     fun findCreditCards(text: String): List<RegexMatch> =
         creditCardRegex.findAll(text)
@@ -29,59 +30,24 @@ object PiiPatternMatcher {
             .map { RegexMatch(it.value, it.range.first, it.range.last + 1) }
             .toList()
 
+    fun findSSNs(text: String): List<RegexMatch> =
+        ssnRegex.findAll(text)
+            .map { RegexMatch(it.value, it.range.first, it.range.last + 1) }
+            .toList()
+
     fun findPII(text: String): List<Pair<RegexMatch, String>> {
         val results = mutableListOf<Pair<RegexMatch, String>>()
-        results.addAll(findCreditCards(text).map { it to "CREDIT_CARD" })
-        results.addAll(findEmails(text).map { it to "EMAIL" })
-        results.addAll(findPhoneNumbers(text).map { it to "PHONE" })
+        val creditCardMatches = findCreditCards(text)
+        results.addAll(creditCardMatches.map { it to LABEL_CREDIT_CARD })
+        results.addAll(findEmails(text).map { it to LABEL_EMAIL })
+        results.addAll(findSSNs(text).map { it to LABEL_SSN })
+        val phoneMatches = findPhoneNumbers(text).filter { phone ->
+            creditCardMatches.none { cc ->
+                phone.startIndex < cc.endIndex && phone.endIndex > cc.startIndex
+            }
+        }
+        results.addAll(phoneMatches.map { it to LABEL_PHONE })
         return results
-    }
-
-    fun mapMatchesToRegions(
-        matches: List<Pair<RegexMatch, String>>,
-        textBlocks: List<TextBlockBounds>
-    ): List<DetectedRegion> {
-        val charToBlock = mutableListOf<Pair<Int, TextBlockBounds>>()
-        var globalIndex = 0
-        for (block in textBlocks) {
-            for (i in block.text.indices) {
-                charToBlock.add(globalIndex to block)
-                globalIndex++
-            }
-            charToBlock.add(globalIndex to block)
-            globalIndex++
-        }
-
-        return matches.map { (match, label) ->
-            val matchedBlocks = charToBlock
-                .filter { (idx, _) -> idx in match.startIndex until match.endIndex }
-                .map { it.second }
-                .distinct()
-
-            val combinedRect = if (matchedBlocks.isEmpty()) {
-                Rect(0, 0, 0, 0)
-            } else {
-                val first = matchedBlocks.first().boundingBox
-                var left = first.left
-                var top = first.top
-                var right = first.right
-                var bottom = first.bottom
-                for (block in matchedBlocks) {
-                    val r = block.boundingBox
-                    left = minOf(left, r.left)
-                    top = minOf(top, r.top)
-                    right = maxOf(right, r.right)
-                    bottom = maxOf(bottom, r.bottom)
-                }
-                Rect(left, top, right, bottom)
-            }
-
-            DetectedRegion(
-                boundingBox = combinedRect,
-                label = label,
-                type = RegionType.PII_TEXT
-            )
-        }
     }
 
     fun isValidLuhn(number: String): Boolean {
