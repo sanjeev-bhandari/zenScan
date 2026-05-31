@@ -60,6 +60,20 @@ sealed interface PreviewUiEvent {
     object FinishActivity : PreviewUiEvent
 }
 
+sealed interface RedactionCommand {
+    data class DrawBrushStroke(val path: Path, val strokeWidth: Float) : RedactionCommand
+    data class ApplyRegionRedactions(val regions: List<DetectedRegion>, val style: String) : RedactionCommand
+}
+
+data class RedactionHistoryState(
+    val commands: List<RedactionCommand>,
+    val detectedRegions: List<DetectedRegion>,
+    val isBadgeVisible: Boolean,
+    val badgeText: String?,
+    val isSummaryRoseColor: Boolean,
+    val redactionCount: Int
+)
+
 class PreviewViewModel(
     application: Application,
     private val preferencesManager: PreferencesManager,
@@ -74,15 +88,8 @@ class PreviewViewModel(
     private val _event = MutableSharedFlow<PreviewUiEvent>()
     val event: SharedFlow<PreviewUiEvent> = _event.asSharedFlow()
 
-    private data class RedactionState(
-        val bitmap: Bitmap,
-        val regions: List<DetectedRegion>,
-        val isBadgeVisible: Boolean,
-        val badgeText: String?,
-        val redactionCount: Int
-    )
-
-    private val historyStack = mutableListOf<RedactionState>()
+    private var cleanBitmap: Bitmap? = null
+    private val historyStack = mutableListOf<RedactionHistoryState>()
     private var appliedRedactionsCount = 0
 
     fun initImage(uri: Uri, isFromHistory: Boolean, historyFileName: String?) {
@@ -107,6 +114,9 @@ class PreviewViewModel(
                 loadExifFromUri(uri)
             }
 
+            // Keep a clean copy of the original bitmap to apply commands on-the-fly
+            cleanBitmap = loadedBitmap.copy(Bitmap.Config.ARGB_8888, false)
+
             _uiState.update {
                 it.copy(
                     bitmap = loadedBitmap,
@@ -118,7 +128,7 @@ class PreviewViewModel(
                 _uiState.update { it.copy(isLoading = false) }
                 showHistoryBadge(loadedBitmap, historyFileName)
             } else {
-                saveStateToHistory(loadedBitmap, emptyList(), false, null)
+                saveStateToHistory(emptyList(), emptyList(), false, null, true)
                 runDetection(loadedBitmap)
             }
         }
@@ -201,21 +211,24 @@ class PreviewViewModel(
     }
 
     private fun showHistoryBadge(bitmap: Bitmap, fileName: String?) {
-        var detailsText = "Redacted History File"
-        if (fileName != null && fileName.startsWith("ZenScan_") && fileName.endsWith(".jpg")) {
-            try {
-                val payload = fileName.removePrefix("ZenScan_").removeSuffix(".jpg")
-                val parts = payload.split("_")
-                if (parts.size >= 2) {
-                    val count = parts[1].toIntOrNull()
-                    detailsText = if (count != null && count > 0) {
-                        "$count sensitive item(s) protected"
-                    } else {
-                        "Custom brush/manual redaction"
+        var detailsText = preferencesManager.getHistoryMetadata(fileName ?: "")
+        if (detailsText == null) {
+            detailsText = "Redacted History File"
+            if (fileName != null && fileName.startsWith("ZenScan_") && fileName.endsWith(".jpg")) {
+                try {
+                    val payload = fileName.removePrefix("ZenScan_").removeSuffix(".jpg")
+                    val parts = payload.split("_")
+                    if (parts.size >= 2) {
+                        val count = parts[1].toIntOrNull()
+                        detailsText = if (count != null && count > 0) {
+                            "$count sensitive item(s) protected"
+                        } else {
+                            "Custom brush/manual redaction"
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing metadata from filename", e)
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error parsing metadata from filename", e)
             }
         }
 
@@ -228,7 +241,7 @@ class PreviewViewModel(
             )
         }
 
-        saveStateToHistory(bitmap, emptyList(), true, detailsText)
+        saveStateToHistory(emptyList(), emptyList(), true, detailsText, false)
     }
 
     private fun runDetection(bitmap: Bitmap) {
@@ -274,36 +287,35 @@ class PreviewViewModel(
 
         // Overwrite initial loaded state so first undo returns to scanned region boundaries
         if (historyStack.isNotEmpty()) {
-            val removed = historyStack.removeAt(historyStack.lastIndex)
-            removed.bitmap.recycle()
+            historyStack.removeAt(historyStack.lastIndex)
         }
 
-        _uiState.value.bitmap?.let {
-            saveStateToHistory(it, regions, true, text)
-        }
+        saveStateToHistory(emptyList(), regions, true, text, total > 0)
         updateRedactAllButtonState()
     }
 
     private fun saveStateToHistory(
-        bitmap: Bitmap,
+        commands: List<RedactionCommand>,
         regions: List<DetectedRegion>,
         isBadgeVisible: Boolean,
-        badgeText: String?
+        badgeText: String?,
+        isRoseColor: Boolean
     ) {
-        try {
-            val bmpCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            historyStack.add(RedactionState(bmpCopy, regions.toList(), isBadgeVisible, badgeText, appliedRedactionsCount))
+        historyStack.add(
+            RedactionHistoryState(
+                commands = commands.toList(),
+                detectedRegions = regions.toList(),
+                isBadgeVisible = isBadgeVisible,
+                badgeText = badgeText,
+                isSummaryRoseColor = isRoseColor,
+                redactionCount = appliedRedactionsCount
+            )
+        )
 
-            if (historyStack.size > 15) {
-                val removed = historyStack.removeAt(0)
-                removed.bitmap.recycle()
-            }
-            _uiState.update { it.copy(undoAvailable = historyStack.size > 1) }
-        } catch (e: OutOfMemoryError) {
-            viewModelScope.launch {
-                _event.emit(PreviewUiEvent.ShowToast("Memory full, unable to save undo state"))
-            }
+        if (historyStack.size > 25) {
+            historyStack.removeAt(0)
         }
+        _uiState.update { it.copy(undoAvailable = historyStack.size > 1) }
     }
 
     fun toggleRegionRedaction(region: DetectedRegion) {
@@ -336,9 +348,10 @@ class PreviewViewModel(
             )
         }
 
-        _uiState.value.bitmap?.let { bmp ->
-            saveStateToHistory(bmp, updatedRegions, true, badgeText)
-        }
+        val lastState = historyStack.lastOrNull()
+        val currentCommands = lastState?.commands ?: emptyList()
+
+        saveStateToHistory(currentCommands, updatedRegions, true, badgeText, isRose)
         updateRedactAllButtonState()
     }
 
@@ -349,28 +362,31 @@ class PreviewViewModel(
     }
 
     fun bakeBrushStroke(path: Path, strokeWidth: Float) {
-        val bitmap = _uiState.value.bitmap ?: return
         _uiState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             try {
-                val updatedBitmap = withContext(Dispatchers.Default) {
-                    val result = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-                        ?: throw OutOfMemoryError("Failed to allocate bitmap copy")
-                    val canvas = Canvas(result)
-                    val paint = Paint().apply {
-                        color = Color.BLACK
-                        style = Paint.Style.STROKE
-                        this.strokeWidth = strokeWidth
-                        strokeCap = Paint.Cap.ROUND
-                        strokeJoin = Paint.Join.ROUND
-                        isAntiAlias = true
-                    }
-                    canvas.drawPath(path, paint)
-                    result
-                }
+                val lastState = historyStack.lastOrNull()
+                val currentCommands = lastState?.commands ?: emptyList()
+                val newCommands = currentCommands + RedactionCommand.DrawBrushStroke(path, strokeWidth)
 
                 appliedRedactionsCount++
+
+                val nextState = RedactionHistoryState(
+                    commands = newCommands,
+                    detectedRegions = _uiState.value.detectedRegions,
+                    isBadgeVisible = _uiState.value.isSummaryBadgeVisible,
+                    badgeText = _uiState.value.summaryBadgeText,
+                    isSummaryRoseColor = _uiState.value.isSummaryBadgeRoseColor,
+                    redactionCount = appliedRedactionsCount
+                )
+
+                val updatedBitmap = withContext(Dispatchers.Default) {
+                    renderBitmapForState(nextState) ?: throw OutOfMemoryError("Failed to render bitmap")
+                }
+
+                historyStack.add(nextState)
+                _uiState.update { it.copy(undoAvailable = historyStack.size > 1) }
 
                 _uiState.update {
                     it.copy(
@@ -379,12 +395,6 @@ class PreviewViewModel(
                     )
                 }
 
-                saveStateToHistory(
-                    updatedBitmap,
-                    _uiState.value.detectedRegions,
-                    _uiState.value.isSummaryBadgeVisible,
-                    _uiState.value.summaryBadgeText
-                )
                 _event.emit(PreviewUiEvent.ShowToast("Redaction applied"))
             } catch (e: OutOfMemoryError) {
                 _uiState.update { it.copy(isLoading = false) }
@@ -395,33 +405,31 @@ class PreviewViewModel(
 
     fun performUndo() {
         if (historyStack.size > 1) {
-            val previousState = historyStack[historyStack.lastIndex - 1]
+            historyStack.removeAt(historyStack.lastIndex)
+            val previousState = historyStack.last()
+
             val restoredBitmap = try {
-                previousState.bitmap.copy(Bitmap.Config.ARGB_8888, true)
+                renderBitmapForState(previousState)
             } catch (e: OutOfMemoryError) {
+                null
+            }
+
+            if (restoredBitmap == null) {
                 viewModelScope.launch {
                     _event.emit(PreviewUiEvent.ShowToast("Low memory: Unable to perform Undo"))
                 }
                 return
             }
 
-            // Remove and recycle current state only after safe copy of previous state is created
-            val current = historyStack.removeAt(historyStack.lastIndex)
-            current.bitmap.recycle()
-
             appliedRedactionsCount = previousState.redactionCount
 
             _uiState.update {
                 it.copy(
                     bitmap = restoredBitmap,
-                    detectedRegions = previousState.regions,
+                    detectedRegions = previousState.detectedRegions,
                     summaryBadgeText = previousState.badgeText,
                     isSummaryBadgeVisible = previousState.isBadgeVisible,
-                    isSummaryBadgeRoseColor = if (_uiState.value.isFromHistory) false else {
-                        val activePii = previousState.regions.count { r -> r.isRedacted && r.type == RegionType.PII_TEXT }
-                        val activeFace = previousState.regions.count { r -> r.isRedacted && r.type == RegionType.FACE }
-                        (activePii + activeFace) > 0
-                    },
+                    isSummaryBadgeRoseColor = previousState.isSummaryRoseColor,
                     undoAvailable = historyStack.size > 1
                 )
             }
@@ -434,7 +442,6 @@ class PreviewViewModel(
     }
 
     fun applyRedactions() {
-        val bitmap = _uiState.value.bitmap ?: return
         val activeRegions = _uiState.value.detectedRegions.filter { it.isRedacted }
         if (activeRegions.isEmpty()) {
             viewModelScope.launch {
@@ -448,9 +455,26 @@ class PreviewViewModel(
 
         viewModelScope.launch {
             try {
+                val lastState = historyStack.lastOrNull()
+                val currentCommands = lastState?.commands ?: emptyList()
+                val style = preferencesManager.getRedactionStyle()
+                val newCommands = currentCommands + RedactionCommand.ApplyRegionRedactions(activeRegions, style)
+
+                val nextState = RedactionHistoryState(
+                    commands = newCommands,
+                    detectedRegions = emptyList(),
+                    isBadgeVisible = false,
+                    badgeText = null,
+                    isSummaryRoseColor = false,
+                    redactionCount = appliedRedactionsCount
+                )
+
                 val redacted = withContext(Dispatchers.Default) {
-                    redactBitmap(bitmap, activeRegions)
-                } ?: throw OutOfMemoryError("Failed to allocate redacted bitmap copy")
+                    renderBitmapForState(nextState) ?: throw OutOfMemoryError("Failed to render redacted bitmap")
+                }
+
+                historyStack.add(nextState)
+                _uiState.update { it.copy(undoAvailable = historyStack.size > 1) }
 
                 _uiState.update {
                     it.copy(
@@ -462,7 +486,6 @@ class PreviewViewModel(
                     )
                 }
 
-                saveStateToHistory(redacted, emptyList(), false, null)
                 updateRedactAllButtonState()
                 _event.emit(PreviewUiEvent.ShowToast("Redactions applied"))
             } catch (e: OutOfMemoryError) {
@@ -473,15 +496,41 @@ class PreviewViewModel(
         }
     }
 
-    private fun redactBitmap(bitmap: Bitmap, regions: List<DetectedRegion>): Bitmap? {
+    private fun renderBitmapForState(state: RedactionHistoryState): Bitmap? {
+        val base = cleanBitmap ?: return null
         val result = try {
-            bitmap.copy(Bitmap.Config.ARGB_8888, true)
+            base.copy(Bitmap.Config.ARGB_8888, true)
         } catch (e: OutOfMemoryError) {
             return null
         }
-        val canvas = Canvas(result)
+        for (command in state.commands) {
+            applyCommandToBitmap(result, command)
+        }
+        return result
+    }
 
-        val redactionStyle = preferencesManager.getRedactionStyle()
+    private fun applyCommandToBitmap(bitmap: Bitmap, command: RedactionCommand) {
+        val canvas = Canvas(bitmap)
+        when (command) {
+            is RedactionCommand.DrawBrushStroke -> {
+                val paint = Paint().apply {
+                    color = Color.BLACK
+                    style = Paint.Style.STROKE
+                    strokeWidth = command.strokeWidth
+                    strokeCap = Paint.Cap.ROUND
+                    strokeJoin = Paint.Join.ROUND
+                    isAntiAlias = true
+                }
+                canvas.drawPath(command.path, paint)
+            }
+            is RedactionCommand.ApplyRegionRedactions -> {
+                redactBitmapInPlace(bitmap, command.regions, command.style)
+            }
+        }
+    }
+
+    private fun redactBitmapInPlace(bitmap: Bitmap, regions: List<DetectedRegion>, redactionStyle: String) {
+        val canvas = Canvas(bitmap)
         val paint = Paint().apply {
             this.style = Paint.Style.FILL
         }
@@ -495,14 +544,14 @@ class PreviewViewModel(
             val r = region.boundingBox
             val left = maxOf(0, r.left)
             val top = maxOf(0, r.top)
-            val right = minOf(result.width, r.right)
-            val bottom = minOf(result.height, r.bottom)
+            val right = minOf(bitmap.width, r.right)
+            val bottom = minOf(bitmap.height, r.bottom)
 
             if (right <= left || bottom <= top) continue
 
             if (redactionStyle == "blur") {
                 try {
-                    val cropped = Bitmap.createBitmap(result, left, top, right - left, bottom - top)
+                    val cropped = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
                     val blurred = blurBitmap(cropped, 10)
                     canvas.drawBitmap(blurred, left.toFloat(), top.toFloat(), null)
                     blurred.recycle()
@@ -516,7 +565,7 @@ class PreviewViewModel(
                 }
             } else if (redactionStyle == "pixelate") {
                 try {
-                    val cropped = Bitmap.createBitmap(result, left, top, right - left, bottom - top)
+                    val cropped = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
                     val pixelated = pixelateBitmap(cropped, 12)
                     canvas.drawBitmap(pixelated, left.toFloat(), top.toFloat(), null)
                     pixelated.recycle()
@@ -532,7 +581,6 @@ class PreviewViewModel(
                 canvas.drawRoundRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), 12f, 12f, paint)
             }
         }
-        return result
     }
 
     private fun pixelateBitmap(src: Bitmap, pixelSize: Int): Bitmap {
@@ -629,10 +677,18 @@ class PreviewViewModel(
 
                     if (!_uiState.value.isFromHistory) {
                         val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                        val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
+                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg"
+                        val historyFile = File(historyDir, historyFileName)
                         FileOutputStream(historyFile).use { outHistory ->
                             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
                         }
+
+                        val detailsText = if (appliedRedactionsCount > 0) {
+                            "$appliedRedactionsCount sensitive item(s) protected"
+                        } else {
+                            "Custom brush/manual redaction"
+                        }
+                        preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
                     }
                     file
                 } catch (e: Exception) {
@@ -718,10 +774,18 @@ class PreviewViewModel(
 
                     if (!_uiState.value.isFromHistory) {
                         val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                        val historyFile = File(historyDir, "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg")
+                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg"
+                        val historyFile = File(historyDir, historyFileName)
                         FileOutputStream(historyFile).use { outHistory ->
                             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
                         }
+
+                        val detailsText = if (appliedRedactionsCount > 0) {
+                            "$appliedRedactionsCount sensitive item(s) protected"
+                        } else {
+                            "Custom brush/manual redaction"
+                        }
+                        preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error saving image to gallery", e)
@@ -748,7 +812,8 @@ class PreviewViewModel(
     override fun onCleared() {
         super.onCleared()
         pipeline.close()
-        historyStack.forEach { it.bitmap.recycle() }
+        cleanBitmap?.recycle()
+        cleanBitmap = null
         historyStack.clear()
     }
 }

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.example.zenscan.data.PreferencesManager
 import com.example.zenscan.databinding.ItemRecentRedactionBinding
 import java.io.File
 import java.text.SimpleDateFormat
@@ -13,6 +14,7 @@ import java.util.Date
 import java.util.Locale
 
 class RedactionHistoryAdapter(
+    private val preferencesManager: PreferencesManager,
     private val onItemClick: (File) -> Unit,
     private val onItemLongClick: (File) -> Unit
 ) : ListAdapter<File, RedactionHistoryAdapter.ViewHolder>(DiffCallback()) {
@@ -72,7 +74,33 @@ class RedactionHistoryAdapter(
 
         private fun parseFilenameMetadata(file: File): Pair<String, String> {
             val name = file.name
-            // Protocol check: ZenScan_1779287415835_3_redactions.jpg
+            
+            // 1. Try to read metadata from secure EncryptedSharedPreferences
+            val secureMetadata = preferencesManager.getHistoryMetadata(name)
+            
+            // Format the date from timestamp safely if possible
+            var formattedDate = "Recent Redaction"
+            if (name.startsWith("ZenScan_") && name.endsWith(".jpg")) {
+                try {
+                    val payload = name.removePrefix("ZenScan_").removeSuffix(".jpg")
+                    val parts = payload.split("_")
+                    if (parts.isNotEmpty()) {
+                        val timestamp = parts[0].toLongOrNull()
+                        if (timestamp != null) {
+                            val sdf = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
+                            formattedDate = sdf.format(Date(timestamp))
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Fallback handled below
+                }
+            }
+
+            if (secureMetadata != null) {
+                return Pair(formattedDate, secureMetadata)
+            }
+
+            // Protocol check: ZenScan_1779287415835_3_redactions.jpg (fallback for older items)
             if (name.startsWith("ZenScan_") && name.endsWith(".jpg")) {
                 try {
                     val payload = name.removePrefix("ZenScan_").removeSuffix(".jpg")
@@ -81,7 +109,7 @@ class RedactionHistoryAdapter(
                         val timestamp = parts[0].toLongOrNull()
                         val count = parts[1].toIntOrNull()
 
-                        val formattedDate = if (timestamp != null) {
+                        formattedDate = if (timestamp != null) {
                             val sdf = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
                             sdf.format(Date(timestamp))
                         } else {
@@ -103,8 +131,10 @@ class RedactionHistoryAdapter(
 
             // Standard fallback using system file parameters
             val sdf = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
-            val formattedDate = sdf.format(Date(file.lastModified()))
             val sizeKb = file.length() / 1024
+            if (formattedDate == "Recent Redaction") {
+                formattedDate = sdf.format(Date(file.lastModified()))
+            }
             return Pair(formattedDate, "Redacted Image (${sizeKb} KB)")
         }
     }

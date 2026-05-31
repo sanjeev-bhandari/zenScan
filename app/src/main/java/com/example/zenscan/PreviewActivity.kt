@@ -43,6 +43,10 @@ class PreviewActivity : AppCompatActivity() {
         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
 
         super.onCreate(savedInstanceState)
+        
+        // Prevent screenshots, screen recording, and recent switcher leaks
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

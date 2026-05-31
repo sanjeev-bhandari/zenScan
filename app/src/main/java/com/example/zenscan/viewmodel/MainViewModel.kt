@@ -114,9 +114,11 @@ class MainViewModel(
 
     fun deleteFile(file: File) {
         viewModelScope.launch(Dispatchers.IO) {
+            val fileName = file.name
             val success = file.delete()
             withContext(Dispatchers.Main) {
                 if (success) {
+                    preferencesManager.removeHistoryMetadata(fileName)
                     _event.emit(MainUiEvent.ShowToast("Item deleted"))
                     loadHistoryData()
                 } else {
@@ -131,7 +133,11 @@ class MainViewModel(
             val context = getApplication<Application>()
             val historyDir = File(context.filesDir, "redacted_history")
             if (historyDir.exists()) {
-                historyDir.listFiles()?.forEach { it.delete() }
+                historyDir.listFiles()?.forEach { file ->
+                    val fileName = file.name
+                    file.delete()
+                    preferencesManager.removeHistoryMetadata(fileName)
+                }
             }
             val cacheDirShared = File(context.cacheDir, "shared_images")
             if (cacheDirShared.exists()) {

@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.play.services.mlkit.document.scanner)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

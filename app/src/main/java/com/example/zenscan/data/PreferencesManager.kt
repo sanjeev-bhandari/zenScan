@@ -40,4 +40,17 @@ class PreferencesManager(context: Context) {
     fun setExportQuality(quality: Int) {
         prefs.edit().putInt("export_quality", quality).apply()
     }
+
+    // Encrypted History Metadata Registry for persistent redaction items count
+    fun getHistoryMetadata(fileName: String): String? {
+        return prefs.getString("history_meta_$fileName", null)
+    }
+
+    fun saveHistoryMetadata(fileName: String, metadata: String) {
+        prefs.edit().putString("history_meta_$fileName", metadata).apply()
+    }
+
+    fun removeHistoryMetadata(fileName: String) {
+        prefs.edit().remove("history_meta_$fileName").apply()
+    }
 }

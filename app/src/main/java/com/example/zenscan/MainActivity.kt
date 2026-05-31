@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -22,6 +23,9 @@ import com.example.zenscan.viewmodel.MainUiEvent
 import com.example.zenscan.viewmodel.MainViewModel
 import com.example.zenscan.viewmodel.ViewModelFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
@@ -76,6 +80,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var tempCameraUri: Uri? = null
+
+    // Document scanner launcher for perspective correction & edge snapping
+    private val docScannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(result.data)
+            val page = scanningResult?.pages?.firstOrNull()
+            if (page != null) {
+                val intent = Intent(this, PreviewActivity::class.java).apply {
+                    data = page.imageUri
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "No scanned page found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Document scan cancelled or failed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun startDocumentScanner() {
+        val options = GmsDocumentScannerOptions.Builder()
+            .setGalleryImportAllowed(true)
+            .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+            .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+            .build()
+
+        val scanner = GmsDocumentScanning.getClient(options)
+        scanner.getStartScanIntent(this)
+            .addOnSuccessListener { intentSender ->
+                docScannerLauncher.launch(
+                    IntentSenderRequest.Builder(intentSender).build()
+                )
+            }
+            .addOnFailureListener { e ->
+                // Fallback to standard camera if GMS Document Scanner is unavailable (e.g. no Play Services)
+                Toast.makeText(this, "Document Scanner unavailable, falling back to camera...", Toast.LENGTH_SHORT).show()
+                if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                    == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    viewModel.prepareCameraCapture()
+                } else {
+                    requestCameraPermission.launch(android.Manifest.permission.CAMERA)
+                }
+            }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Apply saved theme settings before super.onCreate to prevent flickering/state issues
@@ -143,7 +193,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViews() {
-        homeAdapter = RedactionHistoryAdapter({ file ->
+        val preferencesManager = (application as ZenScanApplication).container.preferencesManager
+        homeAdapter = RedactionHistoryAdapter(preferencesManager, { file ->
             viewModel.onFileClicked(file)
         }, { file ->
             promptDeleteFile(file)
@@ -151,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         binding.recentList.layoutManager = LinearLayoutManager(this)
         binding.recentList.adapter = homeAdapter
 
-        filesAdapter = RedactionHistoryAdapter({ file ->
+        filesAdapter = RedactionHistoryAdapter(preferencesManager, { file ->
             viewModel.onFileClicked(file)
         }, { file ->
             promptDeleteFile(file)
@@ -166,12 +217,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnCamera.setOnClickListener {
-            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                viewModel.prepareCameraCapture()
-            } else {
-                requestCameraPermission.launch(android.Manifest.permission.CAMERA)
-            }
+            startDocumentScanner()
         }
 
         // Empty state CTA click triggers Photo Picker

@@ -24,13 +24,13 @@ No internet permission. No analytics. No network calls. All ML inference runs lo
 
 ## Roadmap
 
-- [ ] **FLAG_SECURE** — Window protection on editing screens to prevent screenshots/recents leaks.
-- [ ] **Encrypted Storage** — Jetpack EncryptedSharedPreferences for persistent redaction history.
-- [ ] **Zero-Permission Photo Picker** — Use Android Photo Picker (`PickVisualMedia`) instead of storage permissions.
-- [ ] **Perspective Correction** — Document edge-snapping / skew correction before OCR.
-- [ ] **Command-Pattern Undo** — Store redaction commands (coordinates, strokes) instead of full bitmaps for memory-efficient undo/redo.
+- [x] **FLAG_SECURE** — Window protection on editing screens to prevent screenshots/recents leaks.
+- [x] **Encrypted Storage** — Jetpack EncryptedSharedPreferences for persistent redaction history.
+- [x] **Zero-Permission Photo Picker** — Use Android Photo Picker (`PickVisualMedia`) instead of storage permissions.
+- [x] **Perspective Correction** — Document edge-snapping / skew correction before OCR.
+- [x] **Command-Pattern Undo** — Store redaction commands (coordinates, strokes) instead of full bitmaps for memory-efficient undo/redo.
 - [ ] **Structured PII Regex** — Support for Tax IDs, SSNs, driver's licenses, and passport numbers.
-- [ ] **Fuzzy Proximity Matching** — Flag ambiguous digit sequences near credit card keywords (Visa, Mastercard, CC, Exp).
+- [ ] **Fuzzy Proximity Matching** — Flag ambiguous digit sequences near credit card keywords (Visa, 0Mastercard, CC, Exp).
 - [ ] **Share Target Integration** — Register as a share target so users can redact photos directly from other apps.
 - [ ] **Vector Destructive Redaction** — Ensure redaction is flattened into pixel data on export, not just a visual overlay.
 - [ ] **Temporary File Lifecycle** — Strict cache-only pipeline for unredacted originals, cleared on exit or export.
