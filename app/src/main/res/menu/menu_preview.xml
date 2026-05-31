@@ -15,4 +15,9 @@
         android:id="@+id/action_placeholder"
         android:title="@string/menu_about_safe_share"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_view_exif"
+        android:title="@string/menu_view_metadata"
+        app:showAsAction="never" />
 </menu>

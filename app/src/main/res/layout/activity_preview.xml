@@ -31,13 +31,7 @@
             android:layout_height="match_parent"
             android:background="#030712">
 
-            <!-- Image Container -->
-            <ImageView
-                android:id="@+id/imagePreview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/content_desc_preview" />
+
 
             <!-- High-fidelity AI Bounding Box Layer -->
             <com.example.zenscan.view.DetectionOverlayView

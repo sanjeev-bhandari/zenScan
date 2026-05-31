@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 class PreviewActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPreviewBinding
+    private var exifDialog: android.app.Dialog? = null
 
     private val viewModel: PreviewViewModel by viewModels {
         ViewModelFactory(application, (application as ZenScanApplication).container)
@@ -99,6 +100,10 @@ class PreviewActivity : AppCompatActivity() {
                     .show()
                 true
             }
+            R.id.action_view_exif -> {
+                viewModel.showExifMetadata(true)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -167,8 +172,8 @@ class PreviewActivity : AppCompatActivity() {
 
                         // 3. Image display and regions overlay
                         val bmp = state.bitmap
+                        binding.overlayView.bitmap = bmp
                         if (bmp != null) {
-                            binding.imagePreview.setImageBitmap(bmp)
                             if (state.detectedRegions.isNotEmpty()) {
                                 binding.overlayView.setRegions(state.detectedRegions, bmp.width, bmp.height)
                             } else {
@@ -220,6 +225,14 @@ class PreviewActivity : AppCompatActivity() {
                             binding.summaryBadge.visibility = View.GONE
                             updateToolbarSubtitle(null, isVisible = false)
                         }
+
+                        // 6. EXIF dialog visibility
+                        if (state.showExifDialog) {
+                            showExifMetadataDialog(state.exifMetadata)
+                        } else {
+                            exifDialog?.dismiss()
+                            exifDialog = null
+                        }
                     }
                 }
 
@@ -248,6 +261,41 @@ class PreviewActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showExifMetadataDialog(metadata: com.example.zenscan.model.ExifMetadata?) {
+        if (exifDialog != null && exifDialog!!.isShowing) return
+        
+        val builder = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.exif_dialog_title)
+            .setPositiveButton(R.string.exif_close) { _, _ ->
+                viewModel.showExifMetadata(false)
+            }
+            .setOnDismissListener {
+                viewModel.showExifMetadata(false)
+            }
+
+        if (metadata == null || metadata.allAttributes.isEmpty()) {
+            val view = layoutInflater.inflate(R.layout.dialog_exif_empty, null)
+            builder.setView(view)
+        } else {
+            val view = layoutInflater.inflate(R.layout.dialog_exif_list, null)
+            val container = view.findViewById<android.widget.LinearLayout>(R.id.metadata_container)
+            val subtitle = view.findViewById<android.widget.TextView>(R.id.exif_subtitle)
+            subtitle.text = getString(R.string.exif_dialog_subtitle)
+            
+            for ((label, value) in metadata.allAttributes) {
+                val itemView = layoutInflater.inflate(R.layout.item_exif_tag, container, false)
+                val textLabel = itemView.findViewById<android.widget.TextView>(R.id.tag_label)
+                val textValue = itemView.findViewById<android.widget.TextView>(R.id.tag_value)
+                textLabel.text = label
+                textValue.text = value
+                container.addView(itemView)
+            }
+            builder.setView(view)
+        }
+
+        exifDialog = builder.show()
     }
 
     private fun updateToolbarSubtitle(text: String?, isVisible: Boolean, isRoseColor: Boolean = true) {

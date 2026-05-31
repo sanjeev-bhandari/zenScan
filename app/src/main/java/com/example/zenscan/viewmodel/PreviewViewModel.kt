@@ -16,12 +16,14 @@ import android.util.Log
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zenscan.R
 import com.example.zenscan.data.PreferencesManager
 import com.example.zenscan.detection.DetectionPipeline
 import com.example.zenscan.model.DetectedRegion
+import com.example.zenscan.model.ExifMetadata
 import com.example.zenscan.model.RegionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,7 +48,9 @@ data class PreviewUiState(
     val isSummaryBadgeRoseColor: Boolean = true,
     val undoAvailable: Boolean = false,
     val redactAllAvailable: Boolean = false,
-    val isFromHistory: Boolean = false
+    val isFromHistory: Boolean = false,
+    val exifMetadata: ExifMetadata? = null,
+    val showExifDialog: Boolean = false
 )
 
 sealed interface PreviewUiEvent {
@@ -99,7 +103,16 @@ class PreviewViewModel(
                 return@launch
             }
 
-            _uiState.update { it.copy(bitmap = loadedBitmap) }
+            val parsedExif = withContext(Dispatchers.IO) {
+                loadExifFromUri(uri)
+            }
+
+            _uiState.update {
+                it.copy(
+                    bitmap = loadedBitmap,
+                    exifMetadata = parsedExif
+                )
+            }
 
             if (isFromHistory) {
                 _uiState.update { it.copy(isLoading = false) }
@@ -121,6 +134,70 @@ class PreviewViewModel(
             Log.e(TAG, "Error loading bitmap", e)
             null
         }
+    }
+
+    private fun loadExifFromUri(uri: Uri): ExifMetadata? {
+        try {
+            val context = getApplication<Application>()
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val exifInterface = ExifInterface(inputStream)
+                
+                val make = exifInterface.getAttribute(ExifInterface.TAG_MAKE)
+                val model = exifInterface.getAttribute(ExifInterface.TAG_MODEL)
+                val dateTime = exifInterface.getAttribute(ExifInterface.TAG_DATETIME)
+                
+                val latLong = FloatArray(2)
+                val hasLatLong = exifInterface.getLatLong(latLong)
+                val latitude = if (hasLatLong) latLong[0].toDouble() else null
+                val longitude = if (hasLatLong) latLong[1].toDouble() else null
+                
+                val width = exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).let { if (it == 0) null else it }
+                val height = exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).let { if (it == 0) null else it }
+                
+                val attributes = mutableListOf<Pair<String, String>>()
+                val tagsToExtract = listOf(
+                    ExifInterface.TAG_MAKE to "Camera Make",
+                    ExifInterface.TAG_MODEL to "Camera Model",
+                    ExifInterface.TAG_DATETIME to "Date & Time",
+                    ExifInterface.TAG_IMAGE_WIDTH to "Width (px)",
+                    ExifInterface.TAG_IMAGE_LENGTH to "Height (px)",
+                    ExifInterface.TAG_GPS_LATITUDE to "GPS Latitude",
+                    ExifInterface.TAG_GPS_LONGITUDE to "GPS Longitude",
+                    ExifInterface.TAG_EXPOSURE_TIME to "Exposure Time",
+                    ExifInterface.TAG_F_NUMBER to "F-Number",
+                    ExifInterface.TAG_ISO_SPEED_RATINGS to "ISO Speed",
+                    ExifInterface.TAG_FOCAL_LENGTH to "Focal Length",
+                    ExifInterface.TAG_SOFTWARE to "Software",
+                    ExifInterface.TAG_ORIENTATION to "Orientation",
+                    ExifInterface.TAG_FLASH to "Flash Setting"
+                )
+                
+                for ((tag, label) in tagsToExtract) {
+                    val value = exifInterface.getAttribute(tag)
+                    if (!value.isNullOrBlank()) {
+                        attributes.add(label to value)
+                    }
+                }
+                
+                return ExifMetadata(
+                    make = make,
+                    model = model,
+                    dateTime = dateTime,
+                    latitude = latitude,
+                    longitude = longitude,
+                    width = width,
+                    height = height,
+                    allAttributes = attributes
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error reading EXIF metadata", e)
+        }
+        return null
+    }
+
+    fun showExifMetadata(visible: Boolean) {
+        _uiState.update { it.copy(showExifDialog = visible) }
     }
 
     private fun showHistoryBadge(bitmap: Bitmap, fileName: String?) {

@@ -149,3 +149,21 @@ Successfully migrated ZenScan to a premium MVVM architecture. Refactored MainAct
 | 2026-05-21 | Added YAML frontmatter metadata block to all 8 developer skill manuals, and corrected path typo in project context. | [SKILL.md (all 8 skills)](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/.agent/skills/), [PROJECT_CONTEXT.md](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/PROJECT_CONTEXT.md) | Completed |
 | 2026-05-21 | Refined brush stroke scaling, added camera capture permissions & TakePicture contract, and programmed custom fade-in reveals for bounding boxes on overlay canvas. | [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/java/com/example/zenscan/PreviewActivity.kt), [DetectionOverlayView.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/view/DetectionOverlayView.kt) | Completed |
 | 2026-05-21 | Implemented non-blocking progress card overlay, direct history items navigation, history export duplicate prevention, and dynamic 'Redact All' state bindings. | [activity_preview.xml](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/layout/activity_preview.xml), [MainActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/java/com/example/zenscan/MainActivity.kt), [PreviewActivity.kt](file:///home/sanjeev/AndroidStudioProjects/Realsanjeev/app/src/java/com/example/zenscan/PreviewActivity.kt) | Completed |
+
+---
+
+## 7. Future Backlog (Todos)
+
+The following feature additions and gap resolutions are on the roadmap for future development cycles:
+
+- `[ ]` **No zoom/pan**: Preview image is static fitCenter — no pinch-to-zoom or pan.
+- `[ ]` **No re-detection**: Regions are fixed after first ML Kit scan; can't re-run detection.
+- `[ ]` **No Photo Picker fallback**: PickVisualMedia is API 33+; no fallback for API 24–32.
+- `[ ]` **No custom regex input**: Users can't add their own PII patterns in settings.
+- `[ ]` **No EXIF viewer**: Can't see what metadata (GPS, camera info) exists before stripping.
+- `[ ]` **No batch processing**: Only one image at a time.
+- `[ ]` **No onboarding**: No intro screens or first-launch tutorial.
+- `[ ]` **No share target**: Can't receive images from other apps via intent filter.
+- `[ ]` **No CameraX**: Using basic TakePicture contract instead of CameraX preview.
+- `[ ]` **Non-Latin OCR only**: ML Kit Latin text recognizer only; no CJK/Arabic/Cyrillic support.
+

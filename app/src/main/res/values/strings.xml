@@ -67,4 +67,12 @@
     <string name="menu_save_to_gallery">Save to Gallery</string>
     <string name="menu_strip_metadata">Strip Metadata &amp; Share</string>
     <string name="menu_about_safe_share">About Safe Share</string>
+    <string name="menu_view_metadata">View Metadata</string>
+
+    <!-- EXIF Viewer Dialog -->
+    <string name="exif_dialog_title">EXIF Metadata Viewer</string>
+    <string name="exif_dialog_subtitle">This sensitive metadata will be permanently stripped when exported or shared.</string>
+    <string name="exif_no_metadata">No EXIF Metadata Found</string>
+    <string name="exif_no_metadata_desc">This image contains no visible embedded camera, location, or date tags. It is clean and safe to share.</string>
+    <string name="exif_close">Close</string>
 </resources>

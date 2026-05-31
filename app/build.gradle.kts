@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.mlkit.face)
     implementation(libs.coil)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.exifinterface)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
