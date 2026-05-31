@@ -55,6 +55,7 @@ class RedactionHistoryAdapter(
             // Display formatted metadata parsed directly from filename
             val (dateText, detailsText) = parseFilenameMetadata(file)
             binding.fileName.text = dateText
+            binding.fileName.contentDescription = "Saved on $dateText"
             binding.redactionCount.text = detailsText
 
             // Trigger action sheet on card select

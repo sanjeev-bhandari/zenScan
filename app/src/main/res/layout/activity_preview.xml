@@ -67,28 +67,28 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 app:cardBackgroundColor="#CC1E293B"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_medium"
                 app:cardElevation="6dp"
                 app:strokeColor="#334155"
-                app:strokeWidth="1dp">
+                app:strokeWidth="@dimen/stroke_width_thin">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:paddingHorizontal="24dp"
-                    android:paddingVertical="20dp">
+                    android:paddingHorizontal="@dimen/spacing_large"
+                    android:paddingVertical="@dimen/padding_large">
 
                     <ProgressBar
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                        android:layout_width="@dimen/icon_size_large"
+                        android:layout_height="@dimen/icon_size_large"
                         android:indeterminateTint="@color/accent_blue" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/padding_medium"
                         android:text="@string/detecting_content"
                         android:textColor="@color/text_dark_primary"
                         android:textSize="14sp"
@@ -103,30 +103,30 @@
         android:id="@+id/bottomControlsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/spacing_medium"
         app:cardBackgroundColor="@color/card_bg_dark"
-        app:cardCornerRadius="28dp"
+        app:cardCornerRadius="@dimen/radius_huge"
         app:cardElevation="8dp"
         app:strokeColor="#334155"
-        app:strokeWidth="1dp">
+        app:strokeWidth="@dimen/stroke_width_thin">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp">
+            android:paddingHorizontal="@dimen/spacing_medium"
+            android:paddingVertical="@dimen/bottom_controls_padding_vertical">
 
             <!-- Undo Action -->
             <ImageButton
                 android:id="@+id/btnUndo"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
                 android:background="@drawable/badge_background"
                 android:backgroundTint="#2E3B4E"
                 android:contentDescription="@string/undo"
-                android:padding="12dp"
+                android:padding="@dimen/padding_medium"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_undo"
                 app:tint="@color/text_dark_primary" />
@@ -139,12 +139,12 @@
             <!-- Redact All (AI Highlight Magic Wand) -->
             <ImageButton
                 android:id="@+id/btnRedactAll"
-                android:layout_width="54dp"
-                android:layout_height="54dp"
+                android:layout_width="@dimen/button_redact_all_size"
+                android:layout_height="@dimen/button_redact_all_size"
                 android:background="@drawable/badge_background"
                 android:backgroundTint="#1E1B4B"
                 android:contentDescription="@string/redact_all"
-                android:padding="14dp"
+                android:padding="@dimen/margin_large"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_auto_fix"
                 app:tint="#A5B4FC" />
@@ -157,12 +157,12 @@
             <!-- Manual Brush Selection -->
             <ImageButton
                 android:id="@+id/btnBrush"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
                 android:background="@drawable/badge_background"
                 android:backgroundTint="#2E3B4E"
                 android:contentDescription="@string/brush_tool"
-                android:padding="12dp"
+                android:padding="@dimen/padding_medium"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_brush"
                 app:tint="@color/text_dark_primary" />
@@ -176,7 +176,7 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExport"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
+                android:layout_height="@dimen/button_export_height"
                 android:backgroundTint="@color/accent_blue"
                 android:contentDescription="@string/export"
                 android:text="@string/export"
@@ -184,10 +184,10 @@
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:fontFamily="sans-serif-medium"
-                app:cornerRadius="24dp"
+                app:cornerRadius="@dimen/radius_extra_large"
                 app:icon="@drawable/ic_export"
                 app:iconGravity="textStart"
-                app:iconPadding="6dp"
+                app:iconPadding="@dimen/margin_small"
                 app:iconTint="@color/white"
                 app:rippleColor="#60A5FA" />
         </LinearLayout>

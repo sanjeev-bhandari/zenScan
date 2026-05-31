@@ -2,20 +2,28 @@ package com.example.zenscan
 
 import android.content.Intent
 import android.net.Uri
-import androidx.core.content.edit
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.zenscan.databinding.ActivityMainBinding
 import com.example.zenscan.ui.RedactionHistoryAdapter
+import com.example.zenscan.viewmodel.MainUiEvent
+import com.example.zenscan.viewmodel.MainViewModel
+import com.example.zenscan.viewmodel.ViewModelFactory
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -23,6 +31,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var homeAdapter: RedactionHistoryAdapter
     private lateinit var filesAdapter: RedactionHistoryAdapter
+
+    private val viewModel: MainViewModel by viewModels {
+        ViewModelFactory(application, (application as ZenScanApplication).container)
+    }
 
     // Modern Photo Picker launcher
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -36,12 +48,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var tempCameraUri: Uri? = null
-
     // Request CAMERA permission contract
     private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
         if (isGranted) {
-            launchCamera()
+            viewModel.prepareCameraCapture()
         } else {
             Toast.makeText(this, "Camera permission is required to scan physical documents", Toast.LENGTH_LONG).show()
         }
@@ -50,8 +60,11 @@ class MainActivity : AppCompatActivity() {
     // Capture photo contract
     private val capturePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            val uri = tempCameraUri
-            if (uri != null) {
+            // tempCameraUri was sent to capturePhoto, which is stored in the viewModel's prepared Uri
+            // Wait, we need to pass the uri of the capture to PreviewActivity.
+            // Let's get the uri that we prepared. We can track it or retrieve it.
+            // Let's pass the tempCameraUri when we launch.
+            tempCameraUri?.let { uri ->
                 val intent = Intent(this, PreviewActivity::class.java).apply {
                     data = uri
                 }
@@ -62,16 +75,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var tempCameraUri: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Apply saved theme settings before super.onCreate to prevent flickering/state issues
-        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
-        val themeMode = prefs.getString("theme_mode", "system")
+        val container = (application as ZenScanApplication).container
+        val themeMode = container.preferencesManager.getThemeMode()
         val targetMode = when (themeMode) {
-            "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-            "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-            else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
+        AppCompatDelegate.setDefaultNightMode(targetMode)
 
         super.onCreate(savedInstanceState)
 
@@ -107,6 +122,7 @@ class MainActivity : AppCompatActivity() {
         setupClickListeners()
         setupNavigation()
         setupSettingsPanel()
+        observeViewModel()
 
         // Restore bottom navigation tab state (crucial for dynamic theme recreation)
         val restoredNavId = savedInstanceState?.getInt("selected_nav_id") ?: R.id.nav_home
@@ -123,12 +139,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Always refresh history logs so they sync immediately on navigation return
-        loadHistoryData()
+        viewModel.loadHistoryData()
     }
 
     private fun setupRecyclerViews() {
         homeAdapter = RedactionHistoryAdapter({ file ->
-            openHistoryFile(file)
+            viewModel.onFileClicked(file)
         }, { file ->
             promptDeleteFile(file)
         })
@@ -136,31 +152,12 @@ class MainActivity : AppCompatActivity() {
         binding.recentList.adapter = homeAdapter
 
         filesAdapter = RedactionHistoryAdapter({ file ->
-            openHistoryFile(file)
+            viewModel.onFileClicked(file)
         }, { file ->
             promptDeleteFile(file)
         })
         binding.fullHistoryList.layoutManager = LinearLayoutManager(this)
         binding.fullHistoryList.adapter = filesAdapter
-    }
-
-    private fun openHistoryFile(file: File) {
-        try {
-            val contentUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                file
-            )
-            val intent = Intent(this, PreviewActivity::class.java).apply {
-                data = contentUri
-                putExtra("is_from_history", true)
-                putExtra("history_file_name", file.name)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to open image", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun setupClickListeners() {
@@ -171,7 +168,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnCamera.setOnClickListener {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                 == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                launchCamera()
+                viewModel.prepareCameraCapture()
             } else {
                 requestCameraPermission.launch(android.Manifest.permission.CAMERA)
             }
@@ -198,7 +195,7 @@ class MainActivity : AppCompatActivity() {
                     binding.homeContainer.visibility = View.GONE
                     binding.filesContainer.visibility = View.VISIBLE
                     binding.settingsContainer.visibility = View.GONE
-                    loadHistoryData()
+                    viewModel.loadHistoryData()
                     true
                 }
                 R.id.nav_settings -> {
@@ -214,15 +211,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSettingsPanel() {
-        val prefs = getSharedPreferences("zenscan_prefs", MODE_PRIVATE)
-
-        // 0. Bind Theme Mode RadioGroup
-        val activeTheme = prefs.getString("theme_mode", "system")
-        when (activeTheme) {
-            "system" -> binding.rbThemeSystem.isChecked = true
-            "light" -> binding.rbThemeLight.isChecked = true
-            "dark" -> binding.rbThemeDark.isChecked = true
-        }
         binding.rgThemeMode.setOnCheckedChangeListener { _, checkedId ->
             val themeValue = when (checkedId) {
                 R.id.rbThemeSystem -> "system"
@@ -230,25 +218,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.rbThemeDark -> "dark"
                 else -> "system"
             }
-            prefs.edit { putString("theme_mode", themeValue) }
-
-            // Apply theme instantly
-            val targetMode = when (themeValue) {
-                "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-                "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-                else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
+            viewModel.updateThemeMode(themeValue)
         }
 
-        // 1. Bind Redaction Style RadioGroup
-        val activeStyle = prefs.getString("redaction_style", "black")
-        when (activeStyle) {
-            "black" -> binding.rbStyleBlack.isChecked = true
-            "slate" -> binding.rbStyleSlate.isChecked = true
-            "blur" -> binding.rbStyleBlur.isChecked = true
-            "pixelate" -> binding.rbStylePixelate.isChecked = true
-        }
         binding.rgRedactionStyle.setOnCheckedChangeListener { _, checkedId ->
             val styleValue = when (checkedId) {
                 R.id.rbStyleBlack -> "black"
@@ -257,16 +229,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.rbStylePixelate -> "pixelate"
                 else -> "black"
             }
-            prefs.edit { putString("redaction_style", styleValue) }
+            viewModel.updateRedactionStyle(styleValue)
         }
 
-        // 2. Bind Export Quality RadioGroup
-        val activeQuality = prefs.getInt("export_quality", 95)
-        when (activeQuality) {
-            95 -> binding.rbQualityHigh.isChecked = true
-            85 -> binding.rbQualityMedium.isChecked = true
-            70 -> binding.rbQualityLow.isChecked = true
-        }
         binding.rgExportQuality.setOnCheckedChangeListener { _, checkedId ->
             val qualityValue = when (checkedId) {
                 R.id.rbQualityHigh -> 95
@@ -274,91 +239,94 @@ class MainActivity : AppCompatActivity() {
                 R.id.rbQualityLow -> 70
                 else -> 95
             }
-            prefs.edit { putInt("export_quality", qualityValue) }
+            viewModel.updateExportQuality(qualityValue)
         }
 
-        // 3. Clear all logs button
         binding.btnClearCache.setOnClickListener {
             MaterialAlertDialogBuilder(this)
                 .setTitle("Wipe Redacted History")
                 .setMessage("Are you sure you want to permanently delete all redacted files from storage? This action cannot be undone.")
                 .setPositiveButton("Wipe All") { _, _ ->
-                    wipeAllHistoryFiles()
+                    viewModel.wipeAllHistory()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
         }
     }
 
-    private fun loadHistoryData() {
-        val historyDir = File(filesDir, "redacted_history")
-        val files = if (historyDir.exists()) {
-            historyDir.listFiles()
-                ?.filter { it.isFile && it.name.startsWith("ZenScan_") && it.name.endsWith(".jpg") }
-                ?.sortedByDescending { it.lastModified() }
-                ?: emptyList()
-        } else {
-            emptyList()
-        }
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.uiState.collectLatest { state ->
+                        // Update lists
+                        homeAdapter.updateData(state.recentFiles)
+                        filesAdapter.updateData(state.allFiles)
 
-        // Bind data models to both list levels
-        homeAdapter.updateData(files.take(3))
-        filesAdapter.updateData(files)
+                        // Update visibility
+                        if (state.isHistoryEmpty) {
+                            binding.emptyStateView.visibility = View.VISIBLE
+                            binding.fullHistoryList.visibility = View.GONE
+                        } else {
+                            binding.emptyStateView.visibility = View.GONE
+                            binding.fullHistoryList.visibility = View.VISIBLE
+                        }
 
-        // Tweak visibility configurations depending on count
-        if (files.isEmpty()) {
-            binding.emptyStateView.visibility = View.VISIBLE
-            binding.fullHistoryList.visibility = View.GONE
-        } else {
-            binding.emptyStateView.visibility = View.GONE
-            binding.fullHistoryList.visibility = View.VISIBLE
-        }
-    }
+                        // Sync active settings UI check-states
+                        when (state.themeMode) {
+                            "system" -> if (!binding.rbThemeSystem.isChecked) binding.rbThemeSystem.isChecked = true
+                            "light" -> if (!binding.rbThemeLight.isChecked) binding.rbThemeLight.isChecked = true
+                            "dark" -> if (!binding.rbThemeDark.isChecked) binding.rbThemeDark.isChecked = true
+                        }
 
-    private fun shareHistoryFile(file: File) {
-        try {
-            // Secure sharing solution: Copy persistent history file to the authorized shared cache folder first
-            val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
-            // Clean up previous temporary exports to conserve user device space
-            sharedDir.listFiles()?.forEach { it.delete() }
+                        // Apply default system/theme values instantly if updated from state
+                        val targetMode = when (state.themeMode) {
+                            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+                            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                        }
+                        if (AppCompatDelegate.getDefaultNightMode() != targetMode) {
+                            AppCompatDelegate.setDefaultNightMode(targetMode)
+                        }
 
-            val tempSharedFile = File(sharedDir, file.name)
-            file.inputStream().use { input ->
-                tempSharedFile.outputStream().use { output ->
-                    input.copyTo(output)
+                        when (state.redactionStyle) {
+                            "black" -> if (!binding.rbStyleBlack.isChecked) binding.rbStyleBlack.isChecked = true
+                            "slate" -> if (!binding.rbStyleSlate.isChecked) binding.rbStyleSlate.isChecked = true
+                            "blur" -> if (!binding.rbStyleBlur.isChecked) binding.rbStyleBlur.isChecked = true
+                            "pixelate" -> if (!binding.rbStylePixelate.isChecked) binding.rbStylePixelate.isChecked = true
+                        }
+
+                        when (state.exportQuality) {
+                            95 -> if (!binding.rbQualityHigh.isChecked) binding.rbQualityHigh.isChecked = true
+                            85 -> if (!binding.rbQualityMedium.isChecked) binding.rbQualityMedium.isChecked = true
+                            70 -> if (!binding.rbQualityLow.isChecked) binding.rbQualityLow.isChecked = true
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.event.collect { event ->
+                        when (event) {
+                            is MainUiEvent.ShowToast -> {
+                                Toast.makeText(this@MainActivity, event.message, Toast.LENGTH_SHORT).show()
+                            }
+                            is MainUiEvent.OpenHistoryFile -> {
+                                val intent = Intent(this@MainActivity, PreviewActivity::class.java).apply {
+                                    data = event.uri
+                                    putExtra("is_from_history", true)
+                                    putExtra("history_file_name", event.file.name)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                startActivity(intent)
+                            }
+                            is MainUiEvent.LaunchCamera -> {
+                                tempCameraUri = event.uri
+                                capturePhoto.launch(event.uri)
+                            }
+                        }
+                    }
                 }
             }
-
-            val contentUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                tempSharedFile
-            )
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "image/jpeg"
-                putExtra(Intent.EXTRA_STREAM, contentUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(shareIntent, "Share Redacted Image"))
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to share image", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-    private fun launchCamera() {
-        try {
-            val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
-            val tempFile = File(sharedDir, "camera_capture_${System.currentTimeMillis()}.jpg")
-            val contentUri = FileProvider.getUriForFile(
-                this,
-                "${packageName}.fileprovider",
-                tempFile
-            )
-            tempCameraUri = contentUri
-            capturePhoto.launch(contentUri)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Failed to initialize camera storage: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -367,28 +335,9 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Delete History Item")
             .setMessage("Do you want to permanently delete this redacted photo from your offline history?")
             .setPositiveButton("Delete") { _, _ ->
-                if (file.delete()) {
-                    Toast.makeText(this, "Item deleted", Toast.LENGTH_SHORT).show()
-                    loadHistoryData()
-                } else {
-                    Toast.makeText(this, "Failed to delete item", Toast.LENGTH_SHORT).show()
-                }
+                viewModel.deleteFile(file)
             }
             .setNegativeButton("Cancel", null)
             .show()
-    }
-
-    private fun wipeAllHistoryFiles() {
-        val historyDir = File(filesDir, "redacted_history")
-        if (historyDir.exists()) {
-            historyDir.listFiles()?.forEach { it.delete() }
-        }
-        val cacheDirShared = File(cacheDir, "shared_images")
-        if (cacheDirShared.exists()) {
-            cacheDirShared.listFiles()?.forEach { it.delete() }
-        }
-
-        Toast.makeText(this, R.string.clear_cache_success, Toast.LENGTH_SHORT).show()
-        loadHistoryData()
     }
 }
