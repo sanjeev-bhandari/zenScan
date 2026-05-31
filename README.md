@@ -31,6 +31,6 @@ No internet permission. No analytics. No network calls. All ML inference runs lo
 - [x] **Command-Pattern Undo** — Store redaction commands (coordinates, strokes) instead of full bitmaps for memory-efficient undo/redo.
 - [ ] **Structured PII Regex** — Support for Tax IDs, SSNs, driver's licenses, and passport numbers.
 - [ ] **Fuzzy Proximity Matching** — Flag ambiguous digit sequences near credit card keywords (Visa, 0Mastercard, CC, Exp).
-- [ ] **Share Target Integration** — Register as a share target so users can redact photos directly from other apps.
-- [ ] **Vector Destructive Redaction** — Ensure redaction is flattened into pixel data on export, not just a visual overlay.
+- [x] **Share Target Integration** — Register as a share target so users can redact photos directly from other apps.
+- [x] **Vector Destructive Redaction** — Ensure redaction is flattened into pixel data on export, not just a visual overlay.
 - [ ] **Temporary File Lifecycle** — Strict cache-only pipeline for unredacted originals, cleared on exit or export.

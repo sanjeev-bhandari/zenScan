@@ -59,6 +59,7 @@ class RedactionHistoryAdapter(
             binding.fileName.text = dateText
             binding.fileName.contentDescription = "Saved on $dateText"
             binding.redactionCount.text = detailsText
+            binding.root.contentDescription = "Redacted image saved on $dateText. $detailsText."
 
             // Trigger action sheet on card select
             binding.root.setOnClickListener {

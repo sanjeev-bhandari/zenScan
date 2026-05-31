@@ -2,6 +2,7 @@ package com.example.zenscan
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -49,6 +50,30 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         } else {
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Fallback Photo Picker launcher for older/custom devices
+    private val pickMediaFallback = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            val intent = Intent(this, PreviewActivity::class.java).apply {
+                data = uri
+            }
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun launchPhotoPicker() {
+        try {
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } catch (e: Exception) {
+            try {
+                pickMediaFallback.launch("image/*")
+            } catch (ex: Exception) {
+                Toast.makeText(this, "No photo picker application found", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -177,12 +202,47 @@ class MainActivity : AppCompatActivity() {
         // Restore bottom navigation tab state (crucial for dynamic theme recreation)
         val restoredNavId = savedInstanceState?.getInt("selected_nav_id") ?: R.id.nav_home
         binding.bottomNavigation.selectedItemId = restoredNavId
+
+        // Handle incoming share intents (Receive images shared from other apps)
+        if (savedInstanceState == null) {
+            handleIncomingShareIntent(intent)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (::binding.isInitialized) {
             outState.putInt("selected_nav_id", binding.bottomNavigation.selectedItemId)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingShareIntent(intent)
+    }
+
+    private fun handleIncomingShareIntent(intent: Intent?) {
+        if (intent == null) return
+        val action = intent.action
+        val type = intent.type
+        if (Intent.ACTION_SEND == action && type != null) {
+            if (type.startsWith("image/")) {
+                val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+                }
+                if (imageUri != null) {
+                    val previewIntent = Intent(this, PreviewActivity::class.java).apply {
+                        data = imageUri
+                    }
+                    startActivity(previewIntent)
+                } else {
+                    Toast.makeText(this, "Failed to retrieve shared image", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -213,7 +273,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.btnGallery.setOnClickListener {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            launchPhotoPicker()
         }
 
         binding.btnCamera.setOnClickListener {
@@ -222,7 +282,7 @@ class MainActivity : AppCompatActivity() {
 
         // Empty state CTA click triggers Photo Picker
         binding.btnEmptyStateAction.setOnClickListener {
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            launchPhotoPicker()
         }
     }
 

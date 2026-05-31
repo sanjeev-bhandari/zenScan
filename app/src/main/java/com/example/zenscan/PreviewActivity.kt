@@ -306,11 +306,9 @@ class PreviewActivity : AppCompatActivity() {
         if (isVisible && !text.isNullOrEmpty()) {
             supportActionBar?.subtitle = text
             if (isRoseColor) {
-                // Light rose/red for sensitive items detected (#FDA4AF)
-                binding.toolbar.setSubtitleTextColor(android.graphics.Color.parseColor("#FDA4AF"))
+                binding.toolbar.setSubtitleTextColor(resources.getColor(R.color.sensitive_alert_subtitle, theme))
             } else {
-                // Light green for all clear / protected (#A7F3D0)
-                binding.toolbar.setSubtitleTextColor(android.graphics.Color.parseColor("#A7F3D0"))
+                binding.toolbar.setSubtitleTextColor(resources.getColor(R.color.protected_success_subtitle, theme))
             }
         } else {
             supportActionBar?.subtitle = null

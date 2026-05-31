@@ -645,6 +645,23 @@ class PreviewViewModel(
         return result
     }
 
+    private fun getFlattenedBitmap(): Bitmap? {
+        val currentBitmap = _uiState.value.bitmap ?: return null
+        val result = try {
+            currentBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        } catch (e: OutOfMemoryError) {
+            return null
+        }
+
+        val activeRegions = _uiState.value.detectedRegions.filter { it.isRedacted }
+        if (activeRegions.isNotEmpty()) {
+            val style = preferencesManager.getRedactionStyle()
+            redactBitmapInPlace(result, activeRegions, style)
+        }
+
+        return result
+    }
+
     fun exportAndShareImage(showMetadataToast: Boolean = false) {
         val bitmap = _uiState.value.bitmap
         if (bitmap == null) {
@@ -662,6 +679,7 @@ class PreviewViewModel(
             }
 
             var exceptionMessage: String? = null
+            var tempFlattenedBitmap: Bitmap? = null
             val sharedFile = withContext(Dispatchers.IO) {
                 try {
                     val context = getApplication<Application>()
@@ -671,20 +689,25 @@ class PreviewViewModel(
                     val file = File(sharedDir, "zenscan_redacted_${System.currentTimeMillis()}.jpg")
                     val quality = preferencesManager.getExportQuality()
 
+                    tempFlattenedBitmap = getFlattenedBitmap()
+                    val bitmapToSave = tempFlattenedBitmap ?: bitmap
+
                     FileOutputStream(file).use { out ->
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                        bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, out)
                     }
 
                     if (!_uiState.value.isFromHistory) {
                         val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg"
+                        val activeCount = _uiState.value.detectedRegions.count { it.isRedacted }
+                        val totalRedactedCount = appliedRedactionsCount + activeCount
+                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${totalRedactedCount}_items.jpg"
                         val historyFile = File(historyDir, historyFileName)
                         FileOutputStream(historyFile).use { outHistory ->
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                            bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
                         }
 
-                        val detailsText = if (appliedRedactionsCount > 0) {
-                            "$appliedRedactionsCount sensitive item(s) protected"
+                        val detailsText = if (totalRedactedCount > 0) {
+                            "$totalRedactedCount sensitive item(s) protected"
                         } else {
                             "Custom brush/manual redaction"
                         }
@@ -694,6 +717,8 @@ class PreviewViewModel(
                 } catch (e: Exception) {
                     exceptionMessage = "Export error: " + e.toString()
                     null
+                } finally {
+                    tempFlattenedBitmap?.recycle()
                 }
             }
 
@@ -732,6 +757,7 @@ class PreviewViewModel(
             var isSuccess = false
             var savedPath: String? = null
 
+            var tempFlattenedBitmap: Bitmap? = null
             withContext(Dispatchers.IO) {
                 try {
                     val context = getApplication<Application>()
@@ -756,9 +782,12 @@ class PreviewViewModel(
 
                     val imageUri = resolver.insert(imageCollection, contentValues)
                     if (imageUri != null) {
+                        tempFlattenedBitmap = getFlattenedBitmap()
+                        val bitmapToSave = tempFlattenedBitmap ?: bitmap
+
                         resolver.openOutputStream(imageUri).use { out ->
                             if (out != null) {
-                                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
+                                bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, out)
                                 isSuccess = true
                             }
                         }
@@ -770,25 +799,29 @@ class PreviewViewModel(
                         }
 
                         savedPath = "Pictures/ZenScan/$filename"
-                    }
 
-                    if (!_uiState.value.isFromHistory) {
-                        val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${appliedRedactionsCount}_items.jpg"
-                        val historyFile = File(historyDir, historyFileName)
-                        FileOutputStream(historyFile).use { outHistory ->
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
-                        }
+                        if (!_uiState.value.isFromHistory) {
+                            val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
+                            val activeCount = _uiState.value.detectedRegions.count { it.isRedacted }
+                            val totalRedactedCount = appliedRedactionsCount + activeCount
+                            val historyFileName = "ZenScan_${System.currentTimeMillis()}_${totalRedactedCount}_items.jpg"
+                            val historyFile = File(historyDir, historyFileName)
+                            FileOutputStream(historyFile).use { outHistory ->
+                                bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+                            }
 
-                        val detailsText = if (appliedRedactionsCount > 0) {
-                            "$appliedRedactionsCount sensitive item(s) protected"
-                        } else {
-                            "Custom brush/manual redaction"
+                            val detailsText = if (totalRedactedCount > 0) {
+                                "$totalRedactedCount sensitive item(s) protected"
+                            } else {
+                                "Custom brush/manual redaction"
+                            }
+                            preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
                         }
-                        preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error saving image to gallery", e)
+                } finally {
+                    tempFlattenedBitmap?.recycle()
                 }
             }
 

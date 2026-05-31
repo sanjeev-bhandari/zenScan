@@ -69,6 +69,7 @@ class DetectionOverlayView @JvmOverloads constructor(
     private var isDragging = false
     private var lastPanX = 0f
     private var lastPanY = 0f
+    private var isZoomingOrPanning = false
 
     private val scaleGestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
@@ -269,6 +270,15 @@ class DetectionOverlayView @JvmOverloads constructor(
         val action = event.actionMasked
         val pointerCount = event.pointerCount
 
+        // If we transition to multiple fingers, abort any active brush drawing
+        if (pointerCount > 1) {
+            if (!isZoomingOrPanning) {
+                isZoomingOrPanning = true
+                brushPath.reset()
+                invalidate()
+            }
+        }
+
         if (pointerCount > 1) {
             isDragging = false
             if (action == MotionEvent.ACTION_MOVE) {
@@ -300,15 +310,43 @@ class DetectionOverlayView @JvmOverloads constructor(
                 }
                 lastPanX = sumX / pointerCount
                 lastPanY = sumY / pointerCount
+            } else if (action == MotionEvent.ACTION_POINTER_UP) {
+                // One finger is lifted, leaving pointerCount - 1 fingers on screen.
+                // We update lastPanX/lastPanY to the average of the remaining fingers.
+                val upIndex = event.actionIndex
+                var sumX = 0f
+                var sumY = 0f
+                var count = 0
+                for (i in 0 until pointerCount) {
+                    if (i != upIndex) {
+                        sumX += event.getX(i)
+                        sumY += event.getY(i)
+                        count++
+                    }
+                }
+                if (count > 0) {
+                    lastPanX = sumX / count
+                    lastPanY = sumY / count
+                }
             }
             return true
         }
 
+        val pts = floatArrayOf(event.x, event.y)
+        inverseMatrix.mapPoints(pts)
+        val bitmapX = pts[0]
+        val bitmapY = pts[1]
+
         if (isBrushMode) {
-            val pts = floatArrayOf(event.x, event.y)
-            inverseMatrix.mapPoints(pts)
-            val bitmapX = pts[0]
-            val bitmapY = pts[1]
+            // In brush mode, if we were just zooming/panning and lifted one finger,
+            // ignore brush inputs until the touch gesture is completely finished (ACTION_UP)
+            if (isZoomingOrPanning) {
+                if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                    isZoomingOrPanning = false
+                    performClick()
+                }
+                return true
+            }
 
             when (action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -332,6 +370,11 @@ class DetectionOverlayView @JvmOverloads constructor(
                     performClick()
                     return true
                 }
+                MotionEvent.ACTION_CANCEL -> {
+                    brushPath.reset()
+                    invalidate()
+                    return true
+                }
             }
             return false
         } else {
@@ -344,10 +387,20 @@ class DetectionOverlayView @JvmOverloads constructor(
                     lastPanY = event.y
 
                     isDragging = getScale() > minScale
+                    isZoomingOrPanning = false
+                    return true
+                }
+                MotionEvent.ACTION_POINTER_UP -> {
+                    // One finger is lifted from a multi-finger pan/zoom (fallback check)
+                    val upIndex = event.actionIndex
+                    val remainingIndex = if (upIndex == 0) 1 else 0
+                    lastPanX = event.getX(remainingIndex)
+                    lastPanY = event.getY(remainingIndex)
+                    isDragging = getScale() > minScale
                     return true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    if (isDragging) {
+                    if (isZoomingOrPanning || isDragging) {
                         val dx = event.x - lastPanX
                         val dy = event.y - lastPanY
                         imageMatrix.postTranslate(dx, dy)
@@ -360,22 +413,25 @@ class DetectionOverlayView @JvmOverloads constructor(
                     return true
                 }
                 MotionEvent.ACTION_UP -> {
-                    val dx = event.x - lastTouchX
-                    val dy = event.y - lastTouchY
-                    val distance = Math.sqrt((dx * dx + dy * dy).toDouble())
-                    if (distance < touchSlop) {
-                        val pts = floatArrayOf(event.x, event.y)
-                        inverseMatrix.mapPoints(pts)
-                        val bitmapX = pts[0].toInt()
-                        val bitmapY = pts[1].toInt()
-
-                        val tappedRegion = regions.find { it.boundingBox.contains(bitmapX, bitmapY) }
-                        if (tappedRegion != null) {
-                            onRegionToggled?.invoke(tappedRegion)
+                    if (!isZoomingOrPanning) {
+                        val dx = event.x - lastTouchX
+                        val dy = event.y - lastTouchY
+                        val distance = Math.sqrt((dx * dx + dy * dy).toDouble())
+                        if (distance < touchSlop) {
+                            val tappedRegion = regions.find { it.boundingBox.contains(bitmapX.toInt(), bitmapY.toInt()) }
+                            if (tappedRegion != null) {
+                                onRegionToggled?.invoke(tappedRegion)
+                            }
                         }
                     }
                     isDragging = false
+                    isZoomingOrPanning = false
                     performClick()
+                    return true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    isDragging = false
+                    isZoomingOrPanning = false
                     return true
                 }
             }

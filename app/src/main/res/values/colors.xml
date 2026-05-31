@@ -33,4 +33,8 @@
     <!-- Brush tool colors -->
     <color name="brush_active">#1E3A8A</color>
     <color name="brush_inactive">#2E3B4E</color>
+
+    <!-- Subtitle summaries alert colors -->
+    <color name="sensitive_alert_subtitle">#FDA4AF</color>
+    <color name="protected_success_subtitle">#A7F3D0</color>
 </resources>
