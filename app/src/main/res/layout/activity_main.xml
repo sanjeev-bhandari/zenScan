@@ -1033,16 +1033,16 @@ android:text="@string/scan_camera"
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ══ SECTION: DATA ══ -->
+                <!-- ══ SECTION: DANGER ZONE ══ -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="32dp"
                     android:layout_marginBottom="@dimen/section_header_bottom_margin"
                     android:fontFamily="sans-serif-medium"
                     android:letterSpacing="0.12"
-                    android:text="@string/section_data"
-                    android:textColor="@color/section_header_color"
+                    android:text="@string/section_danger_zone"
+                    android:textColor="@color/accent_rose"
                     android:textSize="11sp" />
 
                 <!-- Data & Privacy Actions Card -->
@@ -1053,8 +1053,8 @@ android:text="@string/scan_camera"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/border_red"
-                    app:strokeWidth="1dp">
+                    app:strokeColor="@color/accent_rose"
+                    app:strokeWidth="1.5dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -1078,7 +1078,7 @@ android:text="@string/scan_camera"
                                 <ImageView
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
-                                    android:src="@drawable/ic_shield"
+                                    android:src="@drawable/ic_warning"
                                     android:contentDescription="@null"
                                     app:tint="@color/accent_rose" />
                             </FrameLayout>

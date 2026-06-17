@@ -339,10 +339,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnClearCache.setOnClickListener {
+            val fileCount = viewModel.uiState.value.allFiles.size
+            val title = if (fileCount > 0) {
+                "Delete $fileCount history files?"
+            } else {
+                "Delete history files?"
+            }
             MaterialAlertDialogBuilder(this)
-                .setTitle("Wipe Redacted History")
-                .setMessage("Are you sure you want to permanently delete all redacted files from storage? This action cannot be undone.")
-                .setPositiveButton("Wipe All") { _, _ ->
+                .setTitle(title)
+                .setMessage("This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
                     viewModel.wipeAllHistory()
                 }
                 .setNegativeButton("Cancel", null)

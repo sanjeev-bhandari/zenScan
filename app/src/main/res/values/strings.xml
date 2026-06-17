@@ -44,14 +44,15 @@
     <string name="section_appearance">APPEARANCE</string>
     <string name="section_privacy">PRIVACY &amp; EXPORT</string>
     <string name="section_data">DATA</string>
+    <string name="section_danger_zone">DANGER ZONE</string>
 
     <!-- Preference Panel Settings -->
     <string name="redaction_style">Redaction Style</string>
     <string name="redaction_style_desc">Choose visual appearance for masked sensitive data.</string>
     <string name="export_quality">JPEG Compression Quality</string>
     <string name="export_quality_desc">Configure size vs image clarity trade-off.</string>
-    <string name="clear_cache">Wipe All History</string>
-    <string name="clear_cache_desc">Permanently wipe all redacted history files from storage.</string>
+    <string name="clear_cache">&#9888; Wipe All History</string>
+    <string name="clear_cache_desc">Permanently remove all redacted files.</string>
     <string name="clear_cache_success">Redacted history cleared successfully</string>
     <string name="style_black">Solid Black Block</string>
     <string name="style_slate">Dark Slate Gray</string>
