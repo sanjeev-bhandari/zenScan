@@ -267,7 +267,7 @@ class PreviewActivity : AppCompatActivity() {
         }
     }
 
-    private fun showExifMetadataDialog(metadata: com.example.zenscan.model.ExifMetadata?) {
+    private fun showExifMetadataDialog(metadata: List<Pair<String, String>>?) {
         if (exifDialog != null && exifDialog!!.isShowing) return
         
         val builder = MaterialAlertDialogBuilder(this)
@@ -279,7 +279,7 @@ class PreviewActivity : AppCompatActivity() {
                 viewModel.showExifMetadata(false)
             }
 
-        if (metadata == null || metadata.allAttributes.isEmpty()) {
+        if (metadata.isNullOrEmpty()) {
             val view = layoutInflater.inflate(R.layout.dialog_exif_empty, null)
             builder.setView(view)
         } else {
@@ -288,7 +288,7 @@ class PreviewActivity : AppCompatActivity() {
             val subtitle = view.findViewById<android.widget.TextView>(R.id.exif_subtitle)
             subtitle.text = getString(R.string.exif_dialog_subtitle)
             
-            for ((label, value) in metadata.allAttributes) {
+            for ((label, value) in metadata) {
                 val itemView = layoutInflater.inflate(R.layout.item_exif_tag, container, false)
                 val textLabel = itemView.findViewById<android.widget.TextView>(R.id.tag_label)
                 val textValue = itemView.findViewById<android.widget.TextView>(R.id.tag_value)

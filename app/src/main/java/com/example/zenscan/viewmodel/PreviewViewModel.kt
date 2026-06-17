@@ -23,7 +23,6 @@ import com.example.zenscan.R
 import com.example.zenscan.data.PreferencesManager
 import com.example.zenscan.detection.DetectionPipeline
 import com.example.zenscan.model.DetectedRegion
-import com.example.zenscan.model.ExifMetadata
 import com.example.zenscan.model.RegionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,7 +48,7 @@ data class PreviewUiState(
     val undoAvailable: Boolean = false,
     val redactAllAvailable: Boolean = false,
     val isFromHistory: Boolean = false,
-    val exifMetadata: ExifMetadata? = null,
+    val exifMetadata: List<Pair<String, String>>? = null,
     val showExifDialog: Boolean = false
 )
 
@@ -146,25 +145,11 @@ class PreviewViewModel(
         }
     }
 
-    private fun loadExifFromUri(uri: Uri): ExifMetadata? {
+    private fun loadExifFromUri(uri: Uri): List<Pair<String, String>>? {
         try {
             val context = getApplication<Application>()
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val exifInterface = ExifInterface(inputStream)
-                
-                val make = exifInterface.getAttribute(ExifInterface.TAG_MAKE)
-                val model = exifInterface.getAttribute(ExifInterface.TAG_MODEL)
-                val dateTime = exifInterface.getAttribute(ExifInterface.TAG_DATETIME)
-                
-                val latLong = FloatArray(2)
-                val hasLatLong = exifInterface.getLatLong(latLong)
-                val latitude = if (hasLatLong) latLong[0].toDouble() else null
-                val longitude = if (hasLatLong) latLong[1].toDouble() else null
-                
-                val width = exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0).let { if (it == 0) null else it }
-                val height = exifInterface.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0).let { if (it == 0) null else it }
-                
-                val attributes = mutableListOf<Pair<String, String>>()
                 val tagsToExtract = listOf(
                     ExifInterface.TAG_MAKE to "Camera Make",
                     ExifInterface.TAG_MODEL to "Camera Model",
@@ -181,24 +166,9 @@ class PreviewViewModel(
                     ExifInterface.TAG_ORIENTATION to "Orientation",
                     ExifInterface.TAG_FLASH to "Flash Setting"
                 )
-                
-                for ((tag, label) in tagsToExtract) {
-                    val value = exifInterface.getAttribute(tag)
-                    if (!value.isNullOrBlank()) {
-                        attributes.add(label to value)
-                    }
+                return tagsToExtract.mapNotNull { (tag, label) ->
+                    exifInterface.getAttribute(tag)?.takeIf { it.isNotBlank() }?.let { label to it }
                 }
-                
-                return ExifMetadata(
-                    make = make,
-                    model = model,
-                    dateTime = dateTime,
-                    latitude = latitude,
-                    longitude = longitude,
-                    width = width,
-                    height = height,
-                    allAttributes = attributes
-                )
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error reading EXIF metadata", e)
@@ -597,51 +567,12 @@ class PreviewViewModel(
     }
 
     private fun blurBitmap(src: Bitmap, radius: Int): Bitmap {
-        val width = src.width
-        val height = src.height
-        val pixels = IntArray(width * height)
-        src.getPixels(pixels, 0, width, 0, 0, width, height)
-
-        val temp = IntArray(width * height)
-
-        // 1. Horizontal Pass
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                var r = 0; var g = 0; var b = 0; var count = 0
-                for (dx in -radius..radius) {
-                    val nx = x + dx
-                    if (nx in 0 until width) {
-                        val p = pixels[y * width + nx]
-                        r += (p shr 16) and 0xFF
-                        g += (p shr 8) and 0xFF
-                        b += p and 0xFF
-                        count++
-                    }
-                }
-                temp[y * width + x] = (0xFF shl 24) or ((r / count) shl 16) or ((g / count) shl 8) or (b / count)
-            }
-        }
-
-        // 2. Vertical Pass
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                var r = 0; var g = 0; var b = 0; var count = 0
-                for (dy in -radius..radius) {
-                    val ny = y + dy
-                    if (ny in 0 until height) {
-                        val p = temp[ny * width + x]
-                        r += (p shr 16) and 0xFF
-                        g += (p shr 8) and 0xFF
-                        b += p and 0xFF
-                        count++
-                    }
-                }
-                pixels[y * width + x] = (0xFF shl 24) or ((r / count) shl 16) or ((g / count) shl 8) or (b / count)
-            }
-        }
-
-        val result = createBitmap(width, height)
-        result.setPixels(pixels, 0, width, 0, 0, width, height)
+        val scale = (1f / radius).coerceAtLeast(0.05f)
+        val w = (src.width * scale).toInt().coerceAtLeast(1)
+        val h = (src.height * scale).toInt().coerceAtLeast(1)
+        val tiny = Bitmap.createScaledBitmap(src, w, h, true)
+        val result = Bitmap.createScaledBitmap(tiny, src.width, src.height, true)
+        tiny.recycle()
         return result
     }
 
