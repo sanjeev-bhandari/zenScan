@@ -40,6 +40,11 @@
     <string name="empty_files_desc">Exported, secure files will appear here for quick offline sharing.</string>
     <string name="start_redacting">Start Redacting</string>
 
+    <!-- Settings Section Headers -->
+    <string name="section_appearance">APPEARANCE</string>
+    <string name="section_privacy">PRIVACY &amp; EXPORT</string>
+    <string name="section_data">DATA</string>
+
     <!-- Preference Panel Settings -->
     <string name="redaction_style">Redaction Style</string>
     <string name="redaction_style_desc">Choose visual appearance for masked sensitive data.</string>

@@ -39,4 +39,13 @@
     
     <!-- Stroke widths -->
     <dimen name="stroke_width_thin">1dp</dimen>
+
+    <!-- Settings screen -->
+    <dimen name="radio_option_min_height">56dp</dimen>
+    <dimen name="preview_swatch_size">40dp</dimen>
+    <dimen name="preview_swatch_corner">6dp</dimen>
+    <dimen name="section_header_top_margin">24dp</dimen>
+    <dimen name="section_header_bottom_margin">8dp</dimen>
+    <dimen name="card_inner_padding">24dp</dimen>
+    <dimen name="card_inter_spacing">20dp</dimen>
 </resources>

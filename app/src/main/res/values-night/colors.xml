@@ -10,9 +10,12 @@
     <color name="card_bg">@color/card_bg_dark</color>
     <color name="border_color">#334155</color>
     <color name="ripple_color">#334155</color>
-    <color name="badge_blue_bg">#1E293B</color>
-    <color name="badge_green_bg">#064E3B</color>
-    <color name="badge_red_bg">#7F1D1D</color>
-    <color name="badge_logo_bg">#1E293B</color>
-    <color name="border_red">#7F1D1D</color>
+    <color name="badge_blue_bg">#262563EB</color>
+    <color name="badge_green_bg">#2610B981</color>
+    <color name="badge_red_bg">#26F43F5E</color>
+    <color name="badge_logo_bg">#262563EB</color>
+    <color name="border_red">#33F43F5E</color>
+    <!-- Settings: Selected row highlight -->
+    <color name="selected_option_bg">#1A3B82F6</color>
+    <color name="section_header_color">#94A3B8</color>
 </resources>

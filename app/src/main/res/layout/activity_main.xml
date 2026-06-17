@@ -347,13 +347,25 @@ android:text="@string/scan_camera"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
                 android:paddingTop="20dp"
-                android:paddingBottom="24dp">
+                android:paddingBottom="32dp">
 
-                <!-- Theme Mode Section -->
+                <!-- ══ SECTION: APPEARANCE ══ -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12"
+                    android:text="@string/section_appearance"
+                    android:textColor="@color/section_header_color"
+                    android:textSize="11sp" />
+
+                <!-- Theme Mode Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/card_inter_spacing"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
@@ -364,7 +376,7 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_inner_padding">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -399,7 +411,7 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif-medium"
                                     android:text="@string/theme_mode"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="15sp" />
+                                    android:textSize="16sp" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -408,56 +420,176 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif"
                                     android:text="@string/theme_mode_desc"
                                     android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
+                                    android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Radio Group Selector -->
-                        <RadioGroup
-                            android:id="@+id/rgThemeMode"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@color/border_color" />
+
+                        <!-- Theme preview rows -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
                             android:orientation="vertical">
 
-                            <RadioButton
-                                android:id="@+id/rbThemeSystem"
+                            <LinearLayout
+                                android:id="@+id/rowThemeSystem"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
                                 android:paddingVertical="8dp"
-                                android:text="@string/theme_system"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
 
-                            <RadioButton
-                                android:id="@+id/rbThemeLight"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
-                                android:text="@string/theme_light"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
+                                <ImageView
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:src="@drawable/theme_preview_system"
+                                    android:scaleType="fitXY"
+                                    android:contentDescription="@null"
+                                    android:clipToOutline="true" />
 
-                            <RadioButton
-                                android:id="@+id/rbThemeDark"
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/theme_system"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="14sp" />
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeSystem"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
+
+                            <LinearLayout
+                                android:id="@+id/rowThemeLight"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
                                 android:paddingVertical="8dp"
-                                android:text="@string/theme_dark"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
-                        </RadioGroup>
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <ImageView
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:src="@drawable/theme_preview_light"
+                                    android:scaleType="fitXY"
+                                    android:contentDescription="@null"
+                                    android:clipToOutline="true" />
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/theme_light"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="14sp" />
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeLight"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
+
+                            <LinearLayout
+                                android:id="@+id/rowThemeDark"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="8dp"
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <ImageView
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:src="@drawable/theme_preview_dark"
+                                    android:scaleType="fitXY"
+                                    android:contentDescription="@null"
+                                    android:clipToOutline="true" />
+
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:text="@string/theme_dark"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="14sp" />
+
+                                <RadioButton
+                                    android:id="@+id/rbThemeDark"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Redaction Style Section -->
+                <!-- ══ SECTION: PRIVACY & EXPORT ══ -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12"
+                    android:text="@string/section_privacy"
+                    android:textColor="@color/section_header_color"
+                    android:textSize="11sp" />
+
+                <!-- Redaction Style Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/card_inter_spacing"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
@@ -468,7 +600,7 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_inner_padding">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -483,15 +615,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="@color/badge_blue_bg"
                                 android:padding="8dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_brush"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_blue" />
-                        </FrameLayout>
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_brush"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_blue" />
+                            </FrameLayout>
 
-                        <LinearLayout
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"
@@ -503,7 +635,7 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif-medium"
                                     android:text="@string/redaction_style"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="15sp" />
+                                    android:textSize="16sp" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -512,66 +644,258 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif"
                                     android:text="@string/redaction_style_desc"
                                     android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
+                                    android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Radio Group Selector -->
-                        <RadioGroup
-                            android:id="@+id/rgRedactionStyle"
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@color/border_color" />
+
+                        <!-- Redaction style rows with swatches -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
                             android:orientation="vertical">
 
-                            <RadioButton
-                                android:id="@+id/rbStyleBlack"
+                            <!-- Solid Black Block -->
+                            <LinearLayout
+                                android:id="@+id/rowStyleBlack"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
                                 android:paddingVertical="8dp"
-                                android:text="@string/style_black"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
 
-                            <RadioButton
-                                android:id="@+id/rbStyleSlate"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
-                                android:text="@string/style_slate"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
+                                <View
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:background="@drawable/redaction_preview_black" />
 
-                            <RadioButton
-                                android:id="@+id/rbStyleBlur"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
-                                android:text="@string/style_blur"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
 
-                            <RadioButton
-                                android:id="@+id/rbStylePixelate"
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/style_black"
+                                        android:textColor="@color/text_primary"
+                                        android:textSize="14sp" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif"
+                                        android:text="Fully opaque black fill"
+                                        android:textColor="@color/text_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+
+                                <RadioButton
+                                    android:id="@+id/rbStyleBlack"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
+
+                            <!-- Dark Slate Gray -->
+                            <LinearLayout
+                                android:id="@+id/rowStyleSlate"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
                                 android:paddingVertical="8dp"
-                                android:text="@string/style_pixelate"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_blue" />
-                        </RadioGroup>
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <View
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:background="@drawable/redaction_preview_slate" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/style_slate"
+                                        android:textColor="@color/text_primary"
+                                        android:textSize="14sp" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif"
+                                        android:text="Subtle dark gray overlay"
+                                        android:textColor="@color/text_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+
+                                <RadioButton
+                                    android:id="@+id/rbStyleSlate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
+
+                            <!-- Gaussian Pixel Blur -->
+                            <LinearLayout
+                                android:id="@+id/rowStyleBlur"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="8dp"
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <View
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:background="@drawable/redaction_preview_blur" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/style_blur"
+                                        android:textColor="@color/text_primary"
+                                        android:textSize="14sp" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif"
+                                        android:text="Softened gaussian blur effect"
+                                        android:textColor="@color/text_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+
+                                <RadioButton
+                                    android:id="@+id/rbStyleBlur"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
+
+                            <!-- Retro Pixelate -->
+                            <LinearLayout
+                                android:id="@+id/rowStylePixelate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingHorizontal="10dp"
+                                android:paddingVertical="8dp"
+                                android:background="@drawable/selected_option_bg"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <View
+                                    android:layout_width="@dimen/preview_swatch_size"
+                                    android:layout_height="@dimen/preview_swatch_size"
+                                    android:background="@drawable/redaction_preview_pixelate" />
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="14dp"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/style_pixelate"
+                                        android:textColor="@color/text_primary"
+                                        android:textSize="14sp" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif"
+                                        android:text="Retro mosaic pixel art censor"
+                                        android:textColor="@color/text_secondary"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+
+                                <RadioButton
+                                    android:id="@+id/rbStylePixelate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:buttonTint="@color/accent_blue"
+                                    android:clickable="false"
+                                    android:focusable="false" />
+                            </LinearLayout>
+
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- JPEG Export Quality Section -->
+                <!-- JPEG Export Quality Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/card_inter_spacing"
                     app:cardBackgroundColor="@color/card_bg"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
@@ -582,7 +906,7 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_inner_padding">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -597,15 +921,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="@color/badge_green_bg"
                                 android:padding="8dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_export"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_green" />
-                        </FrameLayout>
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_export"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_green" />
+                            </FrameLayout>
 
-                        <LinearLayout
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"
@@ -617,7 +941,7 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif-medium"
                                     android:text="@string/export_quality"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="15sp" />
+                                    android:textSize="16sp" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -626,52 +950,102 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif"
                                     android:text="@string/export_quality_desc"
                                     android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
+                                    android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
 
-                        <!-- Radio Group Selector -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="20dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@color/border_color" />
+
                         <RadioGroup
                             android:id="@+id/rgExportQuality"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
                             android:orientation="vertical">
 
                             <RadioButton
                                 android:id="@+id/rbQualityHigh"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:button="@null"
+                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                                android:drawableTint="@color/accent_green"
+                                android:gravity="center_vertical"
+                                android:paddingVertical="14dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:background="@drawable/selected_option_bg"
                                 android:text="@string/quality_high"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_green" />
+                                android:textSize="14sp" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
 
                             <RadioButton
                                 android:id="@+id/rbQualityMedium"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:button="@null"
+                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                                android:drawableTint="@color/accent_green"
+                                android:gravity="center_vertical"
+                                android:paddingVertical="14dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:background="@drawable/selected_option_bg"
                                 android:text="@string/quality_medium"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_green" />
+                                android:textSize="14sp" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:layout_marginHorizontal="10dp"
+                                android:background="@color/border_color" />
 
                             <RadioButton
                                 android:id="@+id/rbQualityLow"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:paddingVertical="8dp"
+                                android:minHeight="@dimen/radio_option_min_height"
+                                android:button="@null"
+                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                                android:drawableTint="@color/accent_green"
+                                android:gravity="center_vertical"
+                                android:paddingVertical="14dp"
+                                android:paddingStart="10dp"
+                                android:paddingEnd="10dp"
+                                android:background="@drawable/selected_option_bg"
                                 android:text="@string/quality_low"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:buttonTint="@color/accent_green" />
+                                android:textSize="14sp" />
                         </RadioGroup>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Data & Privacy Actions -->
+                <!-- ══ SECTION: DATA ══ -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.12"
+                    android:text="@string/section_data"
+                    android:textColor="@color/section_header_color"
+                    android:textSize="11sp" />
+
+                <!-- Data & Privacy Actions Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -686,7 +1060,7 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/card_inner_padding">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -701,15 +1075,15 @@ android:text="@string/scan_camera"
                                 android:backgroundTint="@color/badge_red_bg"
                                 android:padding="8dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_shield"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_rose" />
-                        </FrameLayout>
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_shield"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_rose" />
+                            </FrameLayout>
 
-                        <LinearLayout
+                            <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="14dp"
@@ -721,7 +1095,7 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif-medium"
                                     android:text="@string/clear_cache"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="15sp" />
+                                    android:textSize="16sp" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -730,7 +1104,7 @@ android:text="@string/scan_camera"
                                     android:fontFamily="sans-serif"
                                     android:text="@string/clear_cache_desc"
                                     android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
+                                    android:textSize="12sp" />
                             </LinearLayout>
                         </LinearLayout>
 
@@ -738,12 +1112,12 @@ android:text="@string/scan_camera"
                             android:id="@+id/btnClearCache"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="20dp"
                             android:backgroundTint="@color/accent_rose"
                             android:text="@string/wipe_history_files"
                             android:textColor="@color/white"
                             app:cornerRadius="14dp"
-                            android:paddingVertical="10dp"
+                            android:paddingVertical="12dp"
                             android:elevation="0dp"
                             style="@style/Widget.MaterialComponents.Button" />
                     </LinearLayout>
@@ -769,5 +1143,6 @@ android:text="@string/scan_camera"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

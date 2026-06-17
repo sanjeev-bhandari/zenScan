@@ -317,26 +317,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupSettingsPanel() {
-        binding.rgThemeMode.setOnCheckedChangeListener { _, checkedId ->
-            val themeValue = when (checkedId) {
-                R.id.rbThemeSystem -> "system"
-                R.id.rbThemeLight -> "light"
-                R.id.rbThemeDark -> "dark"
-                else -> "system"
-            }
-            viewModel.updateThemeMode(themeValue)
-        }
+        // Theme row click listeners (custom rows replace RadioGroup)
+        binding.rowThemeSystem.setOnClickListener { viewModel.updateThemeMode("system") }
+        binding.rowThemeLight.setOnClickListener { viewModel.updateThemeMode("light") }
+        binding.rowThemeDark.setOnClickListener { viewModel.updateThemeMode("dark") }
 
-        binding.rgRedactionStyle.setOnCheckedChangeListener { _, checkedId ->
-            val styleValue = when (checkedId) {
-                R.id.rbStyleBlack -> "black"
-                R.id.rbStyleSlate -> "slate"
-                R.id.rbStyleBlur -> "blur"
-                R.id.rbStylePixelate -> "pixelate"
-                else -> "black"
-            }
-            viewModel.updateRedactionStyle(styleValue)
-        }
+        // Redaction style row click listeners
+        binding.rowStyleBlack.setOnClickListener { viewModel.updateRedactionStyle("black") }
+        binding.rowStyleSlate.setOnClickListener { viewModel.updateRedactionStyle("slate") }
+        binding.rowStyleBlur.setOnClickListener { viewModel.updateRedactionStyle("blur") }
+        binding.rowStylePixelate.setOnClickListener { viewModel.updateRedactionStyle("pixelate") }
 
         binding.rgExportQuality.setOnCheckedChangeListener { _, checkedId ->
             val qualityValue = when (checkedId) {
@@ -360,6 +350,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Sync theme RadioButton checked states to reflect the active theme value. */
+    private fun syncThemeSelection(themeMode: String) {
+        binding.rbThemeSystem.isChecked = themeMode == "system"
+        binding.rbThemeLight.isChecked = themeMode == "light"
+        binding.rbThemeDark.isChecked = themeMode == "dark"
+    }
+
+    /** Sync redaction style RadioButton checked states to reflect the active style value. */
+    private fun syncRedactionSelection(redactionStyle: String) {
+        binding.rbStyleBlack.isChecked = redactionStyle == "black"
+        binding.rbStyleSlate.isChecked = redactionStyle == "slate"
+        binding.rbStyleBlur.isChecked = redactionStyle == "blur"
+        binding.rbStylePixelate.isChecked = redactionStyle == "pixelate"
+    }
+
     private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -379,11 +384,8 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         // Sync active settings UI check-states
-                        when (state.themeMode) {
-                            "system" -> if (!binding.rbThemeSystem.isChecked) binding.rbThemeSystem.isChecked = true
-                            "light" -> if (!binding.rbThemeLight.isChecked) binding.rbThemeLight.isChecked = true
-                            "dark" -> if (!binding.rbThemeDark.isChecked) binding.rbThemeDark.isChecked = true
-                        }
+                        syncThemeSelection(state.themeMode)
+                        syncRedactionSelection(state.redactionStyle)
 
                         // Apply default system/theme values instantly if updated from state
                         val targetMode = when (state.themeMode) {
@@ -393,13 +395,6 @@ class MainActivity : AppCompatActivity() {
                         }
                         if (AppCompatDelegate.getDefaultNightMode() != targetMode) {
                             AppCompatDelegate.setDefaultNightMode(targetMode)
-                        }
-
-                        when (state.redactionStyle) {
-                            "black" -> if (!binding.rbStyleBlack.isChecked) binding.rbStyleBlack.isChecked = true
-                            "slate" -> if (!binding.rbStyleSlate.isChecked) binding.rbStyleSlate.isChecked = true
-                            "blur" -> if (!binding.rbStyleBlur.isChecked) binding.rbStyleBlur.isChecked = true
-                            "pixelate" -> if (!binding.rbStylePixelate.isChecked) binding.rbStylePixelate.isChecked = true
                         }
 
                         when (state.exportQuality) {

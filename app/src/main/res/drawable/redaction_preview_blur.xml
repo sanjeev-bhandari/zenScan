@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gaussian Pixel Blur swatch — simulated with layered blurred rectangles -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base: medium gray -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#94A3B8" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <!-- Overlay stripe 1 -->
+    <item android:top="4dp" android:bottom="4dp" android:left="4dp" android:right="22dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#70CBD5E1" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <!-- Overlay stripe 2 -->
+    <item android:top="4dp" android:bottom="4dp" android:left="22dp" android:right="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#5064748B" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+    <!-- Top shimmer band -->
+    <item android:bottom="28dp" android:left="4dp" android:right="4dp" android:top="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#40F1F5F9" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+</layer-list>

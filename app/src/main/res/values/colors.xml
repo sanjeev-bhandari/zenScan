@@ -30,6 +30,10 @@
     <color name="badge_logo_bg">#0F172A</color>
     <color name="border_red">#FEE2E2</color>
     
+    <!-- Settings: Selected row highlight -->
+    <color name="selected_option_bg">#0D2563EB</color>
+    <color name="section_header_color">#6B7280</color>
+
     <!-- Brush tool colors -->
     <color name="brush_active">#1E3A8A</color>
     <color name="brush_inactive">#2E3B4E</color>

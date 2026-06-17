@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- System Default theme thumbnail: split half light / half dark -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base rounded container -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#E2E8F0" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Dark half (right side) -->
+    <item android:left="20dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#1E293B" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Light top bar strip -->
+    <item android:right="20dp" android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#CBD5E1" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Dark top bar strip -->
+    <item android:left="20dp" android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#0F172A" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</layer-list>

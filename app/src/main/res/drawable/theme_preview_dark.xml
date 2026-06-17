@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark Theme thumbnail -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Dark app body -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0B0F19" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Top nav/header bar -->
+    <item android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#0F172A" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Content card suggestion -->
+    <item android:top="14dp" android:left="5dp" android:right="5dp" android:bottom="18dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#1E293B" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <!-- Bottom nav bar -->
+    <item android:top="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#1E293B" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <!-- Blue accent dot to represent active state -->
+    <item android:top="30dp" android:left="14dp" android:right="26dp" android:bottom="4dp">
+        <shape android:shape="oval">
+            <solid android:color="#2563EB" />
+        </shape>
+    </item>
+</layer-list>

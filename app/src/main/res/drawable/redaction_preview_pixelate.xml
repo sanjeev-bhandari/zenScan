@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Retro Pixelate swatch — alternating dark/light blocks in a 4×3 grid pattern -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base: dark charcoal -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#1E293B" />
+            <corners android:radius="6dp" />
+        </shape>
+    </item>
+    <!-- Row 1 block A -->
+    <item android:left="2dp" android:right="28dp" android:top="2dp" android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#334155" />
+        </shape>
+    </item>
+    <!-- Row 1 block B -->
+    <item android:left="14dp" android:right="16dp" android:top="2dp" android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#475569" />
+        </shape>
+    </item>
+    <!-- Row 1 block C -->
+    <item android:left="26dp" android:right="2dp" android:top="2dp" android:bottom="28dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#334155" />
+        </shape>
+    </item>
+    <!-- Row 2 block A -->
+    <item android:left="2dp" android:right="28dp" android:top="14dp" android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#60A5FA" />
+        </shape>
+    </item>
+    <!-- Row 2 block B -->
+    <item android:left="14dp" android:right="16dp" android:top="14dp" android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#1E293B" />
+        </shape>
+    </item>
+    <!-- Row 2 block C -->
+    <item android:left="26dp" android:right="2dp" android:top="14dp" android:bottom="16dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#60A5FA" />
+        </shape>
+    </item>
+    <!-- Row 3 block A -->
+    <item android:left="2dp" android:right="28dp" android:top="26dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#334155" />
+        </shape>
+    </item>
+    <!-- Row 3 block B -->
+    <item android:left="14dp" android:right="16dp" android:top="26dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#475569" />
+        </shape>
+    </item>
+    <!-- Row 3 block C -->
+    <item android:left="26dp" android:right="2dp" android:top="26dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#334155" />
+        </shape>
+    </item>
+</layer-list>
