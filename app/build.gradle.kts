@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.zenscan"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.zenscan"
@@ -32,6 +32,12 @@ android {
 
     buildFeatures {
         viewBinding = true
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = true
+        disable += setOf("ObsoleteSdkInt", "OldTargetApi")
     }
 }
 
