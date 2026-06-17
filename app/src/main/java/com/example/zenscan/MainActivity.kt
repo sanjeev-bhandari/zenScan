@@ -354,6 +354,10 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton("Cancel", null)
                 .show()
         }
+
+        binding.cardCustomRules.setOnClickListener {
+            showCustomFiltersDialog()
+        }
     }
 
     /** Sync theme RadioButton checked states to reflect the active theme value. */
@@ -446,5 +450,100 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun showCustomFiltersDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_custom_filters, null)
+        val container = dialogView.findViewById<android.widget.LinearLayout>(R.id.rulesContainer)
+        val emptyText = dialogView.findViewById<android.widget.TextView>(R.id.tvEmptyRules)
+        val btnAdd = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnAddFilter)
+        val btnCancel = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancel)
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnAdd.setOnClickListener {
+            dialog.dismiss()
+            showAddCustomFilterDialog()
+        }
+
+        fun populateRules() {
+            container.removeAllViews()
+            val rules = viewModel.uiState.value.customRules
+            if (rules.isEmpty()) {
+                emptyText.visibility = View.VISIBLE
+            } else {
+                emptyText.visibility = View.GONE
+                for (rule in rules) {
+                    val itemView = layoutInflater.inflate(R.layout.item_custom_filter, container, false)
+                    val tvLabel = itemView.findViewById<android.widget.TextView>(R.id.tvFilterLabel)
+                    val tvPattern = itemView.findViewById<android.widget.TextView>(R.id.tvFilterPattern)
+                    val tvBadge = itemView.findViewById<android.widget.TextView>(R.id.tvFilterTypeBadge)
+                    val btnDelete = itemView.findViewById<android.widget.ImageButton>(R.id.btnDeleteRule)
+
+                    tvLabel.text = rule.label
+                    tvPattern.text = rule.pattern
+                    tvBadge.text = if (rule.isRegex) "REGEX" else "KEYWORD"
+
+                    btnDelete.setOnClickListener {
+                        viewModel.deleteCustomRule(rule.id)
+                        populateRules()
+                    }
+                    container.addView(itemView)
+                }
+            }
+        }
+
+        populateRules()
+        dialog.show()
+    }
+
+    private fun showAddCustomFilterDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_custom_filter, null)
+        val etPattern = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etPattern)
+        val etLabel = dialogView.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etLabel)
+        val rgFilterType = dialogView.findViewById<android.widget.RadioGroup>(R.id.rgFilterType)
+        val tvValidationError = dialogView.findViewById<android.widget.TextView>(R.id.tvValidationError)
+        val btnConfirm = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmAdd)
+        val btnCancel = dialogView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnCancelAdd)
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+            showCustomFiltersDialog()
+        }
+
+        btnConfirm.setOnClickListener {
+            val pattern = etPattern.text?.toString() ?: ""
+            val label = etLabel.text?.toString() ?: ""
+            val isRegex = rgFilterType.checkedRadioButtonId == R.id.rbTypeRegex
+
+            if (pattern.trim().isEmpty()) {
+                tvValidationError.text = getString(R.string.error_empty_pattern)
+                tvValidationError.visibility = View.VISIBLE
+                return@setOnClickListener
+            }
+
+            if (isRegex) {
+                try {
+                    Regex(pattern)
+                } catch (e: Exception) {
+                    tvValidationError.text = getString(R.string.error_invalid_regex)
+                    tvValidationError.visibility = View.VISIBLE
+                    return@setOnClickListener
+                }
+            }
+
+            viewModel.addCustomRule(pattern, isRegex, label)
+            dialog.dismiss()
+            showCustomFiltersDialog()
+        }
+
+        dialog.show()
     }
 }

@@ -81,4 +81,20 @@
     <string name="exif_no_metadata">No EXIF Metadata Found</string>
     <string name="exif_no_metadata_desc">This image contains no visible embedded camera, location, or date tags. It is clean and safe to share.</string>
     <string name="exif_close">Close</string>
+
+    <!-- Custom Text Filters -->
+    <string name="section_custom_rules">CUSTOM SCAN RULES</string>
+    <string name="custom_filters">Custom Text Filters</string>
+    <string name="custom_filters_desc">Define custom keywords or regex patterns to redact automatically.</string>
+    <string name="custom_filters_dialog_desc">Create rules to auto-censor specific words, codes, or custom ID formats during scanning.</string>
+    <string name="custom_filters_empty">No custom filters added yet.\nAdd rules below to detect them automatically.</string>
+    <string name="add_filter_btn">Add Filter</string>
+    <string name="add_custom_filter_title">Add Custom Filter</string>
+    <string name="filter_pattern_hint">Pattern (e.g. SecretWord or \\b\\d{4}\\b)</string>
+    <string name="filter_type_label">MATCHING TYPE</string>
+    <string name="filter_type_keyword">Plain Keyword</string>
+    <string name="filter_type_regex">Regex Pattern</string>
+    <string name="filter_label_hint">Filter Label (e.g. Confidential, PIN)</string>
+    <string name="error_empty_pattern">Pattern cannot be empty</string>
+    <string name="error_invalid_regex">Invalid regular expression pattern</string>
 </resources>

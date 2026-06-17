@@ -3,6 +3,9 @@ package com.example.zenscan.data
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.zenscan.model.CustomFilterRule
+import org.json.JSONArray
+import org.json.JSONObject
 
 class PreferencesManager(context: Context) {
 
@@ -52,5 +55,42 @@ class PreferencesManager(context: Context) {
 
     fun removeHistoryMetadata(fileName: String) {
         prefs.edit().remove("history_meta_$fileName").apply()
+    }
+
+    // Custom Redaction Rules Storage
+    fun getCustomRules(): List<CustomFilterRule> {
+        val jsonStr = prefs.getString("custom_redaction_rules", null) ?: return emptyList()
+        return try {
+            val array = JSONArray(jsonStr)
+            val list = mutableListOf<CustomFilterRule>()
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                list.add(
+                    CustomFilterRule(
+                        id = obj.getString("id"),
+                        pattern = obj.getString("pattern"),
+                        isRegex = obj.getBoolean("isRegex"),
+                        label = obj.getString("label")
+                    )
+                )
+            }
+            list
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveCustomRules(rules: List<CustomFilterRule>) {
+        val array = JSONArray()
+        for (rule in rules) {
+            val obj = JSONObject().apply {
+                put("id", rule.id)
+                put("pattern", rule.pattern)
+                put("isRegex", rule.isRegex)
+                put("label", rule.label)
+            }
+            array.put(obj)
+        }
+        prefs.edit().putString("custom_redaction_rules", array.toString()).apply()
     }
 }

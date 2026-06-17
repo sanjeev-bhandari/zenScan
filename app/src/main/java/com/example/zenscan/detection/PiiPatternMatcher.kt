@@ -1,5 +1,6 @@
 package com.example.zenscan.detection
 
+import com.example.zenscan.model.CustomFilterRule
 import com.example.zenscan.model.RegexMatch
 
 object PiiPatternMatcher {
@@ -35,7 +36,7 @@ object PiiPatternMatcher {
             .map { RegexMatch(it.value, it.range.first, it.range.last + 1) }
             .toList()
 
-    fun findPII(text: String): List<Pair<RegexMatch, String>> {
+    fun findPII(text: String, customRules: List<CustomFilterRule> = emptyList()): List<Pair<RegexMatch, String>> {
         val results = mutableListOf<Pair<RegexMatch, String>>()
         val creditCardMatches = findCreditCards(text)
         results.addAll(creditCardMatches.map { it to LABEL_CREDIT_CARD })
@@ -47,6 +48,19 @@ object PiiPatternMatcher {
             }
         }
         results.addAll(phoneMatches.map { it to LABEL_PHONE })
+
+        // Process custom user-defined rules
+        for (rule in customRules) {
+            try {
+                val pattern = if (rule.isRegex) rule.pattern else Regex.escape(rule.pattern)
+                Regex(pattern, RegexOption.IGNORE_CASE).findAll(text).forEach { matchResult ->
+                    results.add(RegexMatch(matchResult.value, matchResult.range.first, matchResult.range.last + 1) to rule.label)
+                }
+            } catch (e: Exception) {
+                // Ignore matching exceptions (e.g. invalid regex patterns)
+            }
+        }
+
         return results
     }
 

@@ -6,6 +6,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zenscan.data.PreferencesManager
+import com.example.zenscan.model.CustomFilterRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,8 @@ data class MainUiState(
     val themeMode: String = "system",
     val redactionStyle: String = "black",
     val exportQuality: Int = 95,
-    val isHistoryEmpty: Boolean = true
+    val isHistoryEmpty: Boolean = true,
+    val customRules: List<CustomFilterRule> = emptyList()
 )
 
 sealed interface MainUiEvent {
@@ -50,7 +52,8 @@ class MainViewModel(
             it.copy(
                 themeMode = preferencesManager.getThemeMode(),
                 redactionStyle = preferencesManager.getRedactionStyle(),
-                exportQuality = preferencesManager.getExportQuality()
+                exportQuality = preferencesManager.getExportQuality(),
+                customRules = preferencesManager.getCustomRules()
             )
         }
         loadHistoryData()
@@ -170,6 +173,38 @@ class MainViewModel(
                     _event.emit(MainUiEvent.ShowToast("Failed to initialize camera storage: ${e.message}"))
                 }
             }
+        }
+    }
+
+    // Custom Filters Management
+    fun loadCustomRules() {
+        val rules = preferencesManager.getCustomRules()
+        _uiState.update { it.copy(customRules = rules) }
+    }
+
+    fun addCustomRule(pattern: String, isRegex: Boolean, label: String) {
+        val currentRules = preferencesManager.getCustomRules().toMutableList()
+        val cleanedLabel = label.trim().ifBlank { "CUSTOM" }
+        val newRule = CustomFilterRule(
+            id = System.currentTimeMillis().toString(),
+            pattern = pattern.trim(),
+            isRegex = isRegex,
+            label = cleanedLabel
+        )
+        currentRules.add(newRule)
+        preferencesManager.saveCustomRules(currentRules)
+        _uiState.update { it.copy(customRules = currentRules) }
+        viewModelScope.launch {
+            _event.emit(MainUiEvent.ShowToast("Filter added successfully"))
+        }
+    }
+
+    fun deleteCustomRule(ruleId: String) {
+        val currentRules = preferencesManager.getCustomRules().filter { it.id != ruleId }
+        preferencesManager.saveCustomRules(currentRules)
+        _uiState.update { it.copy(customRules = currentRules) }
+        viewModelScope.launch {
+            _event.emit(MainUiEvent.ShowToast("Filter removed"))
         }
     }
 }

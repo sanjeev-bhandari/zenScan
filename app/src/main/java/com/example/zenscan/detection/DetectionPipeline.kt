@@ -3,6 +3,7 @@ package com.example.zenscan.detection
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
+import com.example.zenscan.model.CustomFilterRule
 import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegionType
 import com.example.zenscan.model.TextBlockBounds
@@ -20,12 +21,12 @@ class DetectionPipeline {
     private val textClient = TextRecognitionClient()
     private val faceClient = FaceDetectionClient()
 
-    suspend fun detect(bitmap: Bitmap): List<DetectedRegion> {
+    suspend fun detect(bitmap: Bitmap, customRules: List<CustomFilterRule> = emptyList()): List<DetectedRegion> {
         Log.d(TAG, "detect() started, bitmap=${bitmap.width}x${bitmap.height}")
         val textBlocks = recognizeText(bitmap)
         Log.d(TAG, "recognizeText() returned ${textBlocks.size} blocks")
         currentCoroutineContext().ensureActive()
-        val piiRegions = detectPII(textBlocks)
+        val piiRegions = detectPII(textBlocks, customRules)
         Log.d(TAG, "detectPII() found ${piiRegions.size} regions")
         currentCoroutineContext().ensureActive()
         val faceRegions = detectFaces(bitmap)
@@ -46,7 +47,7 @@ class DetectionPipeline {
             )
         }
 
-    private fun detectPII(textBlocks: List<TextBlockBounds>): List<DetectedRegion> {
+    private fun detectPII(textBlocks: List<TextBlockBounds>, customRules: List<CustomFilterRule>): List<DetectedRegion> {
         val builder = StringBuilder()
         val blockIndex = mutableListOf<Pair<Int, TextBlockBounds>>()
         for (block in textBlocks) {
@@ -61,7 +62,7 @@ class DetectionPipeline {
         }
         val fullText = builder.toString()
 
-        val matches = PiiPatternMatcher.findPII(fullText)
+        val matches = PiiPatternMatcher.findPII(fullText, customRules)
         if (matches.isEmpty()) return emptyList()
 
         return matches.mapNotNull { (match, label) ->

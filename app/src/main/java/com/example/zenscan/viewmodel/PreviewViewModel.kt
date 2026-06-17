@@ -160,7 +160,7 @@ class PreviewViewModel(
                     ExifInterface.TAG_GPS_LONGITUDE to "GPS Longitude",
                     ExifInterface.TAG_EXPOSURE_TIME to "Exposure Time",
                     ExifInterface.TAG_F_NUMBER to "F-Number",
-                    ExifInterface.TAG_ISO_SPEED_RATINGS to "ISO Speed",
+                    ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY to "ISO Speed",
                     ExifInterface.TAG_FOCAL_LENGTH to "Focal Length",
                     ExifInterface.TAG_SOFTWARE to "Software",
                     ExifInterface.TAG_ORIENTATION to "Orientation",
@@ -217,8 +217,9 @@ class PreviewViewModel(
     private fun runDetection(bitmap: Bitmap) {
         viewModelScope.launch {
             try {
+                val customRules = preferencesManager.getCustomRules()
                 val regions = withContext(Dispatchers.Default) {
-                    pipeline.detect(bitmap)
+                    pipeline.detect(bitmap, customRules)
                 }
 
                 _uiState.update {
