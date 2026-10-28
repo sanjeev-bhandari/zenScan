@@ -28,9 +28,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
+import androidx.core.content.FileProvider
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,13 +44,17 @@ class MainActivity : AppCompatActivity() {
         ViewModelFactory(application, (application as ZenScanApplication).container)
     }
 
+    private fun openPreview(uri: Uri) {
+        startActivity(Intent(this, PreviewActivity::class.java).apply {
+            data = uri
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        })
+    }
+
     // Modern Photo Picker launcher
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
-            val intent = Intent(this, PreviewActivity::class.java).apply {
-                data = uri
-            }
-            startActivity(intent)
+            openPreview(uri)
         } else {
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
         }
@@ -57,10 +63,7 @@ class MainActivity : AppCompatActivity() {
     // Fallback Photo Picker launcher for older/custom devices
     private val pickMediaFallback = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
-            val intent = Intent(this, PreviewActivity::class.java).apply {
-                data = uri
-            }
-            startActivity(intent)
+            openPreview(uri)
         } else {
             Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show()
         }
@@ -90,12 +93,7 @@ class MainActivity : AppCompatActivity() {
     // Capture photo contract
     private val capturePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            tempCameraUri?.let { uri ->
-                val intent = Intent(this, PreviewActivity::class.java).apply {
-                    data = uri
-                }
-                startActivity(intent)
-            }
+            tempCameraUri?.let { openPreview(it) }
         } else {
             tempCameraUri?.let { uri ->
                 try {
@@ -118,10 +116,7 @@ class MainActivity : AppCompatActivity() {
             val scanningResult = GmsDocumentScanningResult.fromActivityResultIntent(result.data)
             val page = scanningResult?.pages?.firstOrNull()
             if (page != null) {
-                val intent = Intent(this, PreviewActivity::class.java).apply {
-                    data = page.imageUri
-                }
-                startActivity(intent)
+                openPreview(page.imageUri)
             } else {
                 Toast.makeText(this, "No scanned page found", Toast.LENGTH_SHORT).show()
             }
@@ -157,16 +152,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply saved theme settings before super.onCreate to prevent flickering/state issues
-        val container = (application as ZenScanApplication).container
-        val themeMode = container.preferencesManager.getThemeMode()
-        val targetMode = when (themeMode) {
-            "light" -> AppCompatDelegate.MODE_NIGHT_NO
-            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
-        AppCompatDelegate.setDefaultNightMode(targetMode)
-
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -240,24 +225,46 @@ class MainActivity : AppCompatActivity() {
         if (intent == null) return
         val action = intent.action
         val type = intent.type
-        if (Intent.ACTION_SEND == action && type != null) {
-            if (type.startsWith("image/")) {
-                val imageUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                } else {
-                    @Suppress("DEPRECATION")
-                    intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
-                }
-                if (imageUri != null) {
-                    val previewIntent = Intent(this, PreviewActivity::class.java).apply {
-                        data = imageUri
-                    }
-                    startActivity(previewIntent)
-                } else {
-                    Toast.makeText(this, "Failed to retrieve shared image", Toast.LENGTH_SHORT).show()
-                }
+        if (Intent.ACTION_SEND == action && type != null && type.startsWith("image/")) {
+            val imageUri = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+            }) ?: intent.data ?: intent.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
+
+            if (imageUri != null) {
+                stageSharedImageAndLaunch(imageUri)
+            } else {
+                Toast.makeText(this, "Failed to retrieve shared image", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun stageSharedImageAndLaunch(sourceUri: Uri) {
+        val targetUri = try {
+            val sharedDir = File(cacheDir, "shared_images").apply { mkdirs() }
+            val targetFile = File(sharedDir, "shared_${System.currentTimeMillis()}.jpg")
+            val copied = contentResolver.openInputStream(sourceUri)?.use { input ->
+                FileOutputStream(targetFile).use { output ->
+                    input.copyTo(output) > 0
+                }
+            } ?: false
+
+            if (copied && targetFile.exists() && targetFile.length() > 0) {
+                FileProvider.getUriForFile(
+                    this,
+                    "${applicationContext.packageName}.file_provider",
+                    targetFile
+                )
+            } else {
+                sourceUri
+            }
+        } catch (e: Exception) {
+            sourceUri
+        }
+
+        openPreview(targetUri)
     }
 
     override fun onResume() {
@@ -395,8 +402,8 @@ class MainActivity : AppCompatActivity() {
                 launch {
                     viewModel.uiState.collectLatest { state ->
                         // Update lists
-                        homeAdapter.updateData(state.recentFiles)
-                        filesAdapter.updateData(state.allFiles)
+                        homeAdapter.submitList(state.recentFiles)
+                        filesAdapter.submitList(state.allFiles)
 
                         // Update visibility
                         if (state.isHistoryEmpty) {

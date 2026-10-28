@@ -58,8 +58,6 @@ dependencies {
     // ZenScan AI & Image Dependencies
     implementation(libs.mlkit.text)
     implementation(libs.mlkit.face)
-    implementation(libs.coil)
-    implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.exifinterface)
     implementation(libs.play.services.mlkit.document.scanner)
 

@@ -95,4 +95,41 @@ class DetectionPipelineTest {
         assertEquals(120, result[0].boundingBox.right)
         assertEquals(60, result[0].boundingBox.bottom)
     }
+
+    @Test
+    fun scaleRect_identityReturnsSameRect() {
+        val rect = createRect(10, 20, 50, 80)
+        val scaled = pipeline.scaleRect(rect, 1.0f, 1.0f, 1000, 1000)
+        assertEquals(rect.left, scaled.left)
+        assertEquals(rect.top, scaled.top)
+        assertEquals(rect.right, scaled.right)
+        assertEquals(rect.bottom, scaled.bottom)
+    }
+
+    @Test
+    fun scaleRect_emptyRectReturnsImmediately() {
+        val rect = createRect(0, 0, 0, 0)
+        val scaled = pipeline.scaleRect(rect, 2.0f, 2.0f, 1000, 1000)
+        assertTrue(scaled.right <= scaled.left || scaled.bottom <= scaled.top)
+    }
+
+    @Test
+    fun scaleRect_scalesUpCoordinatesAccurately() {
+        val rect = createRect(10, 20, 50, 60)
+        val scaled = pipeline.scaleRect(rect, 2.0f, 3.0f, 1000, 1000)
+        assertEquals(20, scaled.left)
+        assertEquals(60, scaled.top)
+        assertEquals(100, scaled.right)
+        assertEquals(180, scaled.bottom)
+    }
+
+    @Test
+    fun scaleRect_clampsToMaxDimensions() {
+        val rect = createRect(80, 80, 120, 120)
+        val scaled = pipeline.scaleRect(rect, 2.0f, 2.0f, 200, 200)
+        assertEquals(160, scaled.left)
+        assertEquals(160, scaled.top)
+        assertEquals(200, scaled.right)
+        assertEquals(200, scaled.bottom)
+    }
 }

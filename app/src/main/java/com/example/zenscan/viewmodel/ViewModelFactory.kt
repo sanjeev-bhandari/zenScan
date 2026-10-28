@@ -3,6 +3,7 @@ package com.example.zenscan.viewmodel
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.zenscan.detection.DetectionPipeline
 import com.example.zenscan.di.AppContainer
 
 class ViewModelFactory(
@@ -23,7 +24,7 @@ class ViewModelFactory(
                 PreviewViewModel(
                     application = application,
                     preferencesManager = container.preferencesManager,
-                    pipeline = container.createDetectionPipeline()
+                    pipeline = DetectionPipeline()
                 ) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

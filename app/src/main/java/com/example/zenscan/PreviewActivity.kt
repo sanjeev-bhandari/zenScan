@@ -32,16 +32,6 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply saved theme settings before super.onCreate to prevent flickering/state issues
-        val container = (application as ZenScanApplication).container
-        val themeMode = container.preferencesManager.getThemeMode()
-        val targetMode = when (themeMode) {
-            "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-            "dark" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-            else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(targetMode)
-
         super.onCreate(savedInstanceState)
         
         // Prevent screenshots, screen recording, and recent switcher leaks
