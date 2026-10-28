@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pixelate swatch — uniform 4x4 neutral mosaic grid -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/preview_swatch_size"
+    android:height="@dimen/preview_swatch_size"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+    <path
+        android:fillColor="#1C1F23"
+        android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z" />
+    <path
+        android:fillColor="#444950"
+        android:pathData="M4,4h8v8h-8zM20,4h8v8h-8zM12,12h8v8h-8zM28,12h8v8h-8zM4,20h8v8h-8zM20,20h8v8h-8zM12,28h8v8h-8zM28,28h8v8h-8z" />
+    <path
+        android:fillColor="#8A9099"
+        android:pathData="M12,4h8v8h-8zM4,12h8v8h-8zM20,12h8v8h-8zM12,20h8v8h-8zM28,20h8v8h-8zM20,28h8v8h-8z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z"
+        android:strokeWidth="1"
+        android:strokeColor="@color/border_color" />
+</vector>

@@ -1,13 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ZenScan</string>
-    <string name="app_subtitle">ZenScan Privacy Redactor</string>
-    <string name="app_description">Secure, on-device AI redaction. Protect your files, credit cards, emails, and faces before sharing.</string>
+    <string name="app_description">Detect and permanently redact sensitive details before sharing.</string>
 
-    <string name="detecting_content">Detecting sensitive content…</string>
+    <string name="detecting_content">Scanning document…</string>
     <string name="no_image_provided">No image provided</string>
-    <string name="failed_to_load_image">Failed to load image</string>
-    <string name="detection_failed">Detection failed</string>
-    <string name="no_sensitive_found">No sensitive content detected</string>
     <string name="nav_home">Home</string>
     <string name="nav_files">Files</string>
     <string name="nav_settings">Settings</string>
@@ -16,49 +13,86 @@
         <item quantity="one">Found %d sensitive item</item>
         <item quantity="other">Found %d sensitive items</item>
     </plurals>
-    <string name="select_photo">Select Photo</string>
-    <string name="select_photo_desc">Import screenshot or picture from gallery.</string>
-    <string name="scan_camera">Scan Camera</string>
-    <string name="scan_camera_desc">Capture and crop physical documents.</string>
-    <string name="wipe_history_files">Wipe All History Files</string>
-    <string name="info">Info</string>
+    <string name="select_photo">Select from Gallery</string>
+    <string name="select_photo_desc">Choose photos to redact</string>
+    <string name="scan_camera">Scan Document</string>
+    <string name="scan_camera_desc">Capture and secure files</string>
+    <string name="wipe_history_files">Clear History</string>
     <string name="content_desc_thumbnail">Redacted image thumbnail</string>
-    <string name="content_desc_preview">Image preview</string>
 
     <string name="undo">Undo</string>
     <string name="redact_all">Redact All</string>
-    <string name="brush_tool">Brush</string>
+    <string name="brush_tool">Brush Tool</string>
     <string name="export">Export</string>
     <string name="recent_redactions">Recent Redactions</string>
 
     <!-- Header Titles -->
-    <string name="processed_files_title">Processed Files</string>
-    <string name="settings_title">Preferences</string>
+    <string name="processed_files_title">Files</string>
+    <string name="settings_title">Settings</string>
 
     <!-- Empty State -->
-    <string name="empty_files_title">No Redacted Files Yet</string>
-    <string name="empty_files_desc">Exported, secure files will appear here for quick offline sharing.</string>
-    <string name="start_redacting">Start Redacting</string>
+    <string name="empty_files_title">No redacted files yet</string>
+    <string name="empty_files_desc">Exported files are saved offline here for quick access.</string>
+    <string name="start_redacting">Select Photo</string>
+
+    <!-- Settings Section Headers -->
+    <string name="section_appearance">Appearance</string>
+    <string name="section_privacy">Redaction &amp; Export</string>
+    <string name="section_danger_zone">Storage &amp; History</string>
 
     <!-- Preference Panel Settings -->
     <string name="redaction_style">Redaction Style</string>
-    <string name="redaction_style_desc">Choose visual appearance for masked sensitive data.</string>
-    <string name="export_quality">JPEG Compression Quality</string>
-    <string name="export_quality_desc">Configure size vs image clarity trade-off.</string>
-    <string name="clear_cache">Wipe All History</string>
-    <string name="clear_cache_desc">Permanently wipe all redacted history files from storage.</string>
-    <string name="clear_cache_success">Redacted history cleared successfully</string>
-    <string name="style_black">Solid Black Block</string>
-    <string name="style_slate">Dark Slate Gray</string>
-    <string name="style_blur">Gaussian Pixel Blur</string>
-    <string name="quality_high">High Quality (95%)</string>
-    <string name="quality_medium">Medium Balanced (85%)</string>
-    <string name="quality_low">Max Compression (70%)</string>
+    <string name="export_quality">Export Quality</string>
+    <string name="clear_cache">Redacted History</string>
+    <string name="clear_cache_desc">Permanently delete saved copies and temporary exports from this device.</string>
+    <string name="brush_mode_active_hint">Brush mode · Drag over image to redact</string>
+    <string name="style_black">Solid Black</string>
+    <string name="style_black_desc">Opaque black fill</string>
+    <string name="style_slate">Charcoal Gray</string>
+    <string name="style_slate_desc">Dark neutral fill</string>
+    <string name="style_blur">Gaussian Blur</string>
+    <string name="style_blur_desc">Diffused pixel blur</string>
+    <string name="style_pixelate">Pixelate</string>
+    <string name="style_pixelate_desc">Coarse mosaic blocks</string>
+    <string name="quality_high">High (95%)</string>
+    <string name="quality_medium">Balanced (85%)</string>
+    <string name="quality_low">Compact (70%)</string>
 
     <!-- Theme Settings -->
-    <string name="theme_mode">App Theme</string>
-    <string name="theme_mode_desc">Control whether ZenScan uses dark, light, or system default colors.</string>
-    <string name="theme_system">System Default</string>
-    <string name="theme_light">Light Theme</string>
-    <string name="theme_dark">Dark Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- Overflow menu options -->
+    <string name="menu_rescan">Re-scan Image</string>
+    <string name="menu_save_to_gallery">Save to Gallery</string>
+    <string name="menu_strip_metadata">Strip Metadata &amp; Share</string>
+    <string name="menu_about_safe_share">About Safe Share</string>
+    <string name="menu_view_metadata">View EXIF Metadata</string>
+
+    <!-- EXIF Viewer Dialog -->
+    <string name="exif_dialog_title">EXIF Metadata</string>
+    <string name="exif_dialog_subtitle">All embedded metadata is automatically stripped when exporting or sharing.</string>
+    <string name="exif_no_metadata">No EXIF Metadata</string>
+    <string name="exif_no_metadata_desc">This image contains no embedded camera, location, or timestamp tags.</string>
+    <string name="exif_close">Close</string>
+
+    <!-- Custom Text Filters -->
+    <string name="section_custom_rules">Detection Rules</string>
+    <string name="custom_filters">Custom Text Filters</string>
+    <string name="custom_filters_desc">Automatically match custom words or regex patterns</string>
+    <string name="custom_filters_dialog_desc">Add keywords or regular expressions to automatically flag during document scanning.</string>
+    <string name="custom_filters_empty">No custom filters added yet.</string>
+    <string name="add_filter_btn">Add Filter</string>
+    <string name="add_custom_filter_title">New Custom Filter</string>
+    <string name="filter_pattern_hint">Pattern (e.g. Confidential or \\b\\d{4}\\b)</string>
+    <string name="filter_type_label">Match Type</string>
+    <string name="filter_type_keyword">Keyword</string>
+    <string name="filter_type_regex">Regular expression</string>
+    <string name="filter_label_hint">Label (e.g. Account ID)</string>
+    <string name="error_empty_pattern">Pattern cannot be empty</string>
+    <string name="error_invalid_regex">Invalid regular expression</string>
+    <string name="delete_filter">Delete filter</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
 </resources>

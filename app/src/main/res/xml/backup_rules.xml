@@ -6,8 +6,9 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Exclude encrypted preferences whose KeyStore keys do not transfer across devices -->
+    <exclude domain="sharedpref" path="zenscan_encrypted_prefs.xml" />
+    <exclude domain="sharedpref" path="zenscan_prefs.xml" />
+    <!-- Exclude private user images in history -->
+    <exclude domain="file" path="redacted_history" />
 </full-backup-content>

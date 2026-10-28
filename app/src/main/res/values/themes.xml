@@ -1,29 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ZenScan" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryVariant">@color/primary_dark</item>
+    <style name="Theme.ZenScan" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_blue</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="colorSecondaryVariant">@color/accent_blue</item>
+        <item name="colorPrimaryContainer">@color/badge_blue_bg</item>
+        <item name="colorOnPrimaryContainer">@color/text_primary</item>
+        <item name="colorSecondary">@color/accent_green</item>
         <item name="colorOnSecondary">@color/white</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
-        <item name="alertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
-    </style>
-
-    <style name="ThemeOverlay.ZenScan.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="colorPrimary">@color/dialog_button_text</item>
-    </style>
-
-    <style name="Theme.ZenScan.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+        <item name="colorSecondaryContainer">@color/badge_green_bg</item>
+        <item name="colorOnSecondaryContainer">@color/text_primary</item>
+        <item name="colorError">@color/accent_rose</item>
+        <item name="colorErrorContainer">@color/badge_red_bg</item>
+        <item name="colorOnErrorContainer">@color/text_primary</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_container</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorSurfaceContainer">@color/surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/card_bg</item>
+        <item name="colorOutline">@color/border_color</item>
+        <item name="colorOutlineVariant">@color/border_color</item>
+        <item name="android:colorBackground">@color/window_background</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
     </style>
 
-    <style name="Theme.ZenScan.Editor" parent="Theme.ZenScan.NoActionBar">
+    <style name="ThemeOverlay.ZenScan.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/dialog_button_text</item>
+        <item name="colorSurface">@color/card_bg</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+    </style>
+
+    <style name="Theme.ZenScan.NoActionBar" parent="Theme.ZenScan" />
+
+    <style name="Theme.ZenScan.Editor" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#8AB4F8</item>
+        <item name="colorOnPrimary">#062E6F</item>
+        <item name="colorSurface">@color/card_bg_dark</item>
+        <item name="colorOnSurface">@color/text_dark_primary</item>
+        <item name="android:colorBackground">@color/bg_dark</item>
         <item name="android:windowBackground">@color/bg_dark</item>
-        <item name="android:statusBarColor">@color/bg_dark</item>
-        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.ZenScan.MaterialAlertDialog</item>
     </style>
 </resources>

@@ -3,25 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginBottom="@dimen/margin_medium"
+    android:clickable="true"
+    android:focusable="true"
     app:cardBackgroundColor="@color/card_bg"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="@dimen/radius_medium"
     app:cardElevation="0dp"
+    app:rippleColor="@color/ripple_color"
     app:strokeColor="@color/border_color"
-    app:strokeWidth="1dp">
+    app:strokeWidth="@dimen/stroke_width_thin">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="@dimen/padding_medium">
 
         <!-- Round corner thumbnail holder -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:cardCornerRadius="10dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            app:cardCornerRadius="@dimen/radius_small"
             app:cardElevation="0dp"
             app:strokeWidth="0dp">
 
@@ -37,7 +40,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
+            android:layout_marginStart="@dimen/margin_large"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -53,18 +56,18 @@
                 android:id="@+id/redactionCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="@dimen/margin_tiny"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
         </LinearLayout>
 
         <!-- Accent Shield Icon Holder -->
         <FrameLayout
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@drawable/badge_background"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:background="@drawable/bg_circle_badge"
             android:backgroundTint="@color/badge_green_bg"
-            android:padding="8dp">
+            android:padding="@dimen/padding_small">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -73,6 +76,14 @@
                 android:contentDescription="@null"
                 app:tint="@color/accent_green" />
         </FrameLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="@null"
+            app:tint="@color/text_secondary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

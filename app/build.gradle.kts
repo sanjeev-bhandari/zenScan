@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "com.example.zenscan"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.zenscan"
-        minSdk = 24
-        targetSdk = 37
+        minSdk = 26
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -19,6 +19,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -33,7 +34,15 @@ android {
     buildFeatures {
         viewBinding = true
     }
-    buildToolsVersion = "36.1.0"
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = true
+    }
 }
 
 dependencies {
@@ -41,17 +50,15 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.recyclerview)
 
     // ZenScan AI & Image Dependencies
     implementation(libs.mlkit.text)
     implementation(libs.mlkit.face)
-    implementation(libs.coil)
+    implementation(libs.androidx.exifinterface)
+    implementation(libs.play.services.mlkit.document.scanner)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

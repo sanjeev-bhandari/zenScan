@@ -1,25 +1,32 @@
 package com.example.zenscan.ui
 
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import com.example.zenscan.data.PreferencesManager
 import com.example.zenscan.databinding.ItemRecentRedactionBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class RedactionHistoryAdapter(
+    private val preferencesManager: PreferencesManager,
     private val onItemClick: (File) -> Unit,
     private val onItemLongClick: (File) -> Unit
 ) : ListAdapter<File, RedactionHistoryAdapter.ViewHolder>(DiffCallback()) {
 
-    fun updateData(newFiles: List<File>) {
-        submitList(newFiles)
-    }
+    private val adapterScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private class DiffCallback : DiffUtil.ItemCallback<File>() {
         override fun areItemsTheSame(oldItem: File, newItem: File): Boolean =
@@ -42,69 +49,67 @@ class RedactionHistoryAdapter(
         holder.bind(getItem(position))
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.clear()
+    }
+
     inner class ViewHolder(
         private val binding: ItemRecentRedactionBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        private var decodeJob: Job? = null
+
         fun bind(file: File) {
-            // Load thumbnail using Coil library securely
-            binding.thumbnail.load(file) {
-                crossfade(true)
+            decodeJob?.cancel()
+            val path = file.absolutePath
+            binding.thumbnail.tag = path
+            binding.thumbnail.setImageBitmap(null)
+
+            decodeJob = adapterScope.launch {
+                val bmp = withContext(Dispatchers.IO) {
+                    val opts = BitmapFactory.Options().apply { inSampleSize = 8 }
+                    BitmapFactory.decodeFile(path, opts)
+                }
+                if (binding.thumbnail.tag == path) {
+                    binding.thumbnail.setImageBitmap(bmp)
+                }
             }
 
-            // Display formatted metadata parsed directly from filename
             val (dateText, detailsText) = parseFilenameMetadata(file)
             binding.fileName.text = dateText
+            binding.fileName.contentDescription = "Saved on $dateText"
             binding.redactionCount.text = detailsText
+            binding.root.contentDescription = "Redacted image saved on $dateText. $detailsText."
 
-            // Trigger action sheet on card select
-            binding.root.setOnClickListener {
-                onItemClick(file)
-            }
-
-            // Trigger delete option on long click
+            binding.root.setOnClickListener { onItemClick(file) }
             binding.root.setOnLongClickListener {
                 onItemLongClick(file)
                 true
             }
         }
 
+        fun clear() {
+            decodeJob?.cancel()
+            decodeJob = null
+        }
+
         private fun parseFilenameMetadata(file: File): Pair<String, String> {
             val name = file.name
-            // Protocol check: ZenScan_1779287415835_3_redactions.jpg
-            if (name.startsWith("ZenScan_") && name.endsWith(".jpg")) {
-                try {
-                    val payload = name.removePrefix("ZenScan_").removeSuffix(".jpg")
-                    val parts = payload.split("_")
-                    if (parts.size >= 3) {
-                        val timestamp = parts[0].toLongOrNull()
-                        val count = parts[1].toIntOrNull()
+            val parts = name.removePrefix("ZenScan_").removeSuffix(".jpg").split("_")
+            val timestamp = parts.getOrNull(0)?.toLongOrNull() ?: file.lastModified()
+            val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy · h:mm a", Locale.getDefault())
+            val dateText = Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .format(formatter)
 
-                        val formattedDate = if (timestamp != null) {
-                            val sdf = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
-                            sdf.format(Date(timestamp))
-                        } else {
-                            "Recent Redaction"
-                        }
-
-                        val details = if (count != null && count > 0) {
-                            "$count sensitive item(s) protected"
-                        } else {
-                            "Custom brush/manual redaction"
-                        }
-
-                        return Pair(formattedDate, details)
-                    }
-                } catch (e: Exception) {
-                    // Fallback to basic processing below
+            val metadata = preferencesManager.getHistoryMetadata(name)
+                ?: parts.getOrNull(1)?.toIntOrNull()?.let { count ->
+                    if (count > 0) "$count sensitive item(s) protected" else "Custom brush/manual redaction"
                 }
-            }
+                ?: "Redacted Image (${file.length() / 1024} KB)"
 
-            // Standard fallback using system file parameters
-            val sdf = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
-            val formattedDate = sdf.format(Date(file.lastModified()))
-            val sizeKb = file.length() / 1024
-            return Pair(formattedDate, "Redacted Image (${sizeKb} KB)")
+            return Pair(dateText, metadata)
         }
     }
 }

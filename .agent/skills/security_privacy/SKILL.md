@@ -35,7 +35,7 @@ Android applications operate inside private sandbox directories. To share our re
 ```xml
 <provider
     android:name="androidx.core.content.FileProvider"
-    android:authorities="com.example.zenscan.fileprovider"
+    android:authorities="com.example.zenscan.file_provider"
     android:exported="false"
     android:grantUriPermissions="true">
     <meta-data
@@ -49,7 +49,7 @@ Defines the specific sub-folders exposed to inter-app sharing. External apps can
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <!-- Expose ONLY the cache/shared_images folder via com.example.zenscan.fileprovider -->
+    <!-- Expose ONLY the cache/shared_images folder via com.example.zenscan.file_provider -->
     <cache-path name="shared_images" path="shared_images/" />
 </paths>
 ```
@@ -63,7 +63,7 @@ When launching the Android Share Sheet, the system URI is compiled safely using 
 ```kotlin
 val contentUri = FileProvider.getUriForFile(
     this@PreviewActivity,
-    "com.example.zenscan.fileprovider",
+    "com.example.zenscan.file_provider",
     sharedFile
 )
 
