@@ -1,32 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Gaussian Pixel Blur swatch — simulated with layered blurred rectangles -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Base: medium gray -->
-    <item>
-        <shape android:shape="rectangle">
-            <solid android:color="#94A3B8" />
-            <corners android:radius="6dp" />
-        </shape>
-    </item>
-    <!-- Overlay stripe 1 -->
-    <item android:top="4dp" android:bottom="4dp" android:left="4dp" android:right="22dp">
-        <shape android:shape="rectangle">
-            <solid android:color="#70CBD5E1" />
-            <corners android:radius="3dp" />
-        </shape>
-    </item>
-    <!-- Overlay stripe 2 -->
-    <item android:top="4dp" android:bottom="4dp" android:left="22dp" android:right="4dp">
-        <shape android:shape="rectangle">
-            <solid android:color="#5064748B" />
-            <corners android:radius="3dp" />
-        </shape>
-    </item>
-    <!-- Top shimmer band -->
-    <item android:bottom="28dp" android:left="4dp" android:right="4dp" android:top="4dp">
-        <shape android:shape="rectangle">
-            <solid android:color="#40F1F5F9" />
-            <corners android:radius="3dp" />
-        </shape>
-    </item>
-</layer-list>
+<!-- Gaussian Pixel Blur swatch — soft diffused horizontal bands simulating blurred text -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="@dimen/preview_swatch_size"
+    android:height="@dimen/preview_swatch_size"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+    <!-- Frosted slate base -->
+    <path
+        android:fillColor="#64748B"
+        android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z" />
+    <!-- Outer soft blur halo -->
+    <path
+        android:fillColor="#5594A3B8"
+        android:pathData="M9,7h22a4,4 0,0 1,0 8H9a4,4 0,0 1,0 -8zM7,16h26a4,4 0,0 1,0 8H7a4,4 0,0 1,0 -8zM10,25h18a4,4 0,0 1,0 8H10a4,4 0,0 1,0 -8z" />
+    <!-- Inner diffused core bands -->
+    <path
+        android:fillColor="#99E2E8F0"
+        android:pathData="M11,9h18a2,2 0,0 1,0 4H11a2,2 0,0 1,0 -4zM9,18h22a2,2 0,0 1,0 4H9a2,2 0,0 1,0 -4zM12,27h14a2,2 0,0 1,0 4H12a2,2 0,0 1,0 -4z" />
+    <!-- Outer border -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z"
+        android:strokeWidth="1"
+        android:strokeColor="@color/border_color" />
+</vector>
