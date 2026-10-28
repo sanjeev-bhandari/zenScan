@@ -782,7 +782,7 @@ android:text="@string/scan_camera"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="sans-serif"
-                                        android:text="Fully opaque black fill"
+                                        android:text="@string/style_black_desc"
                                         android:textColor="@color/text_secondary"
                                         android:textSize="12sp" />
                                 </LinearLayout>
@@ -840,7 +840,7 @@ android:text="@string/scan_camera"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="sans-serif"
-                                        android:text="Subtle dark gray overlay"
+                                        android:text="@string/style_slate_desc"
                                         android:textColor="@color/text_secondary"
                                         android:textSize="12sp" />
                                 </LinearLayout>
@@ -898,7 +898,7 @@ android:text="@string/scan_camera"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="sans-serif"
-                                        android:text="Softened gaussian blur effect"
+                                        android:text="@string/style_blur_desc"
                                         android:textColor="@color/text_secondary"
                                         android:textSize="12sp" />
                                 </LinearLayout>
@@ -956,7 +956,7 @@ android:text="@string/scan_camera"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:fontFamily="sans-serif"
-                                        android:text="Retro mosaic pixel art censor"
+                                        android:text="@string/style_pixelate_desc"
                                         android:textColor="@color/text_secondary"
                                         android:textSize="12sp" />
                                 </LinearLayout>

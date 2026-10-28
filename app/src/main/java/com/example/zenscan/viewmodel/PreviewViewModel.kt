@@ -7,13 +7,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
@@ -90,6 +90,7 @@ class PreviewViewModel(
     private var cleanBitmap: Bitmap? = null
     private val historyStack = mutableListOf<RedactionHistoryState>()
     private var appliedRedactionsCount = 0
+    private var isSavedToHistoryInSession = false
 
     fun initImage(uri: Uri, isFromHistory: Boolean, historyFileName: String?) {
         _uiState.update { it.copy(isFromHistory = isFromHistory) }
@@ -133,13 +134,76 @@ class PreviewViewModel(
         }
     }
 
+    fun rescanImage() {
+        val bmp = cleanBitmap ?: return
+        _uiState.update { it.copy(isLoading = true) }
+        runDetection(bmp)
+    }
+
     private suspend fun loadBitmapFromUri(uri: Uri): Bitmap? = withContext(Dispatchers.IO) {
         try {
             val context = getApplication<Application>()
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
+
+            // 1. Read EXIF orientation before stripping
+            var orientation = ExifInterface.ORIENTATION_NORMAL
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                try {
+                    val exif = ExifInterface(stream)
+                    orientation = exif.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL
+                    )
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to read EXIF orientation", e)
+                }
             }
-        } catch (e: Exception) {
+
+            // 2. Sample size downscaling to prevent OOM on massive (e.g. 108MP) images
+            val boundsOptions = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, boundsOptions)
+            }
+
+            val maxDimension = 3072 // Safe max editing dimension
+            val maxSide = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
+            val inSampleSize = if (maxSide > maxDimension) {
+                Integer.highestOneBit(maxSide / maxDimension).coerceAtLeast(1)
+            } else {
+                1
+            }
+
+            val decodeOptions = BitmapFactory.Options().apply {
+                this.inSampleSize = inSampleSize
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+            }
+
+            val rawBitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+                BitmapFactory.decodeStream(stream, null, decodeOptions)
+            } ?: return@withContext null
+
+            // 3. Rotate bitmap if required by EXIF orientation tag
+            val matrix = Matrix()
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(-1f, 1f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, -1f)
+                else -> { /* No rotation needed */ }
+            }
+
+            if (!matrix.isIdentity) {
+                val rotated = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.width, rawBitmap.height, matrix, true)
+                if (rotated != rawBitmap) {
+                    rawBitmap.recycle()
+                }
+                rotated
+            } else {
+                rawBitmap
+            }
+        } catch (e: Throwable) {
             Log.e(TAG, "Error loading bitmap", e)
             null
         }
@@ -283,7 +347,8 @@ class PreviewViewModel(
             )
         )
 
-        if (historyStack.size > 25) {
+        // Strict limit of 15 states to protect RAM
+        while (historyStack.size > 15) {
             historyStack.removeAt(0)
         }
         _uiState.update { it.copy(undoAvailable = historyStack.size > 1) }
@@ -339,7 +404,7 @@ class PreviewViewModel(
             try {
                 val lastState = historyStack.lastOrNull()
                 val currentCommands = lastState?.commands ?: emptyList()
-                val newCommands = currentCommands + RedactionCommand.DrawBrushStroke(path, strokeWidth)
+                val newCommands = currentCommands + RedactionCommand.DrawBrushStroke(Path(path), strokeWidth)
 
                 appliedRedactionsCount++
 
@@ -523,7 +588,7 @@ class PreviewViewModel(
             if (redactionStyle == "blur") {
                 try {
                     val cropped = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
-                    val blurred = blurBitmap(cropped, 10)
+                    val blurred = blurBitmap(cropped, 16)
                     canvas.drawBitmap(blurred, left.toFloat(), top.toFloat(), null)
                     blurred.recycle()
                     cropped.recycle()
@@ -537,7 +602,7 @@ class PreviewViewModel(
             } else if (redactionStyle == "pixelate") {
                 try {
                     val cropped = Bitmap.createBitmap(bitmap, left, top, right - left, bottom - top)
-                    val pixelated = pixelateBitmap(cropped, 12)
+                    val pixelated = pixelateBitmap(cropped, 16)
                     canvas.drawBitmap(pixelated, left.toFloat(), top.toFloat(), null)
                     pixelated.recycle()
                     cropped.recycle()
@@ -557,7 +622,8 @@ class PreviewViewModel(
     private fun pixelateBitmap(src: Bitmap, pixelSize: Int): Bitmap {
         val width = src.width
         val height = src.height
-        val safePixelSize = pixelSize.coerceIn(1, minOf(width, height))
+        // Enforce safe minimum pixel block size so underlying characters cannot be reconstructed
+        val safePixelSize = pixelSize.coerceAtLeast(16).coerceIn(1, minOf(width, height))
         val scaledWidth = (width / safePixelSize).coerceAtLeast(1)
         val scaledHeight = (height / safePixelSize).coerceAtLeast(1)
 
@@ -568,7 +634,8 @@ class PreviewViewModel(
     }
 
     private fun blurBitmap(src: Bitmap, radius: Int): Bitmap {
-        val scale = (1f / radius).coerceAtLeast(0.05f)
+        // Enforce aggressive downscaling with bilinear interpolation to obliterate fine text features
+        val scale = (1f / radius.coerceAtLeast(12)).coerceAtLeast(0.04f)
         val w = (src.width * scale).toInt().coerceAtLeast(1)
         val h = (src.height * scale).toInt().coerceAtLeast(1)
         val tiny = Bitmap.createScaledBitmap(src, w, h, true)
@@ -628,23 +695,7 @@ class PreviewViewModel(
                         bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, out)
                     }
 
-                    if (!_uiState.value.isFromHistory) {
-                        val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                        val activeCount = _uiState.value.detectedRegions.count { it.isRedacted }
-                        val totalRedactedCount = appliedRedactionsCount + activeCount
-                        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${totalRedactedCount}_items.jpg"
-                        val historyFile = File(historyDir, historyFileName)
-                        FileOutputStream(historyFile).use { outHistory ->
-                            bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
-                        }
-
-                        val detailsText = if (totalRedactedCount > 0) {
-                            "$totalRedactedCount sensitive item(s) protected"
-                        } else {
-                            "Custom brush/manual redaction"
-                        }
-                        preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
-                    }
+                    saveToRedactedHistory(context, bitmapToSave, quality)
                     file
                 } catch (e: Exception) {
                     exceptionMessage = "Export error: " + e.toString()
@@ -732,23 +783,7 @@ class PreviewViewModel(
 
                         savedPath = "Pictures/ZenScan/$filename"
 
-                        if (!_uiState.value.isFromHistory) {
-                            val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
-                            val activeCount = _uiState.value.detectedRegions.count { it.isRedacted }
-                            val totalRedactedCount = appliedRedactionsCount + activeCount
-                            val historyFileName = "ZenScan_${System.currentTimeMillis()}_${totalRedactedCount}_items.jpg"
-                            val historyFile = File(historyDir, historyFileName)
-                            FileOutputStream(historyFile).use { outHistory ->
-                                bitmapToSave.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
-                            }
-
-                            val detailsText = if (totalRedactedCount > 0) {
-                                "$totalRedactedCount sensitive item(s) protected"
-                            } else {
-                                "Custom brush/manual redaction"
-                            }
-                            preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
-                        }
+                        saveToRedactedHistory(context, bitmapToSave, quality)
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error saving image to gallery", e)
@@ -766,6 +801,26 @@ class PreviewViewModel(
                 _event.emit(PreviewUiEvent.ShowToast("Failed to save image to gallery"))
             }
         }
+    }
+
+    private fun saveToRedactedHistory(context: Context, bitmap: Bitmap, quality: Int) {
+        if (_uiState.value.isFromHistory || isSavedToHistoryInSession) return
+        val historyDir = File(context.filesDir, "redacted_history").apply { mkdirs() }
+        val activeCount = _uiState.value.detectedRegions.count { it.isRedacted }
+        val totalRedactedCount = appliedRedactionsCount + activeCount
+        val historyFileName = "ZenScan_${System.currentTimeMillis()}_${totalRedactedCount}_items.jpg"
+        val historyFile = File(historyDir, historyFileName)
+        FileOutputStream(historyFile).use { outHistory ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outHistory)
+        }
+
+        val detailsText = if (totalRedactedCount > 0) {
+            "$totalRedactedCount sensitive item(s) protected"
+        } else {
+            "Custom brush/manual redaction"
+        }
+        preferencesManager.saveHistoryMetadata(historyFileName, detailsText)
+        isSavedToHistoryInSession = true
     }
 
     private fun updateRedactAllButtonState() {

@@ -55,9 +55,13 @@
     <string name="clear_cache_desc">Permanently remove all redacted files.</string>
     <string name="clear_cache_success">Redacted history cleared successfully</string>
     <string name="style_black">Solid Black Block</string>
+    <string name="style_black_desc">Fully opaque black fill</string>
     <string name="style_slate">Dark Slate Gray</string>
+    <string name="style_slate_desc">Subtle dark gray overlay</string>
     <string name="style_blur">Gaussian Pixel Blur</string>
+    <string name="style_blur_desc">Softened gaussian blur effect</string>
     <string name="style_pixelate">Retro Pixelate</string>
+    <string name="style_pixelate_desc">Retro mosaic pixel art censor</string>
     <string name="quality_high">High Quality (95%)</string>
     <string name="quality_medium">Medium Balanced (85%)</string>
     <string name="quality_low">Max Compression (70%)</string>
@@ -70,6 +74,7 @@
     <string name="theme_dark">Dark Theme</string>
 
     <!-- Overflow menu options -->
+    <string name="menu_rescan">Re-scan Image</string>
     <string name="menu_save_to_gallery">Save to Gallery</string>
     <string name="menu_strip_metadata">Strip Metadata &amp; Share</string>
     <string name="menu_about_safe_share">About Safe Share</string>
@@ -97,4 +102,7 @@
     <string name="filter_label_hint">Filter Label (e.g. Confidential, PIN)</string>
     <string name="error_empty_pattern">Pattern cannot be empty</string>
     <string name="error_invalid_regex">Invalid regular expression pattern</string>
+    <string name="delete_filter">Delete filter</string>
+    <string name="cancel">Cancel</string>
+    <string name="add">Add</string>
 </resources>

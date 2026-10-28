@@ -180,4 +180,124 @@ class PiiPatternMatcherTest {
         val results = PiiPatternMatcher.findPII("Just some random text without sensitive info")
         assertTrue(results.isEmpty())
     }
+
+    // --- Enhanced Security & Validation Tests ---
+
+    @Test
+    fun isValidCreditCard_rejectsAllZeros() {
+        // All zeros passes naive Luhn (sum=0, 0%10==0), but is not a valid credit card
+        assertFalse(PiiPatternMatcher.isValidCreditCard("0000000000000000"))
+    }
+
+    @Test
+    fun isValidCreditCard_rejectsAllSameDigits() {
+        assertFalse(PiiPatternMatcher.isValidCreditCard("1111111111111111"))
+    }
+
+    @Test
+    fun findSSNs_validSSN() {
+        val text = "User SSN is 123-45-6789"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertEquals(1, ssns.size)
+        assertEquals("123-45-6789", ssns[0].text)
+    }
+
+    @Test
+    fun findSSNs_invalidArea000() {
+        val text = "Invalid: 000-45-6789"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertTrue(ssns.isEmpty())
+    }
+
+    @Test
+    fun findSSNs_invalidArea666() {
+        val text = "Invalid: 666-45-6789"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertTrue(ssns.isEmpty())
+    }
+
+    @Test
+    fun findSSNs_invalidArea900() {
+        val text = "Invalid: 912-45-6789"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertTrue(ssns.isEmpty())
+    }
+
+    @Test
+    fun findSSNs_invalidGroup00() {
+        val text = "Invalid: 123-00-6789"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertTrue(ssns.isEmpty())
+    }
+
+    @Test
+    fun findSSNs_invalidSerial0000() {
+        val text = "Invalid: 123-45-0000"
+        val ssns = PiiPatternMatcher.findSSNs(text)
+        assertTrue(ssns.isEmpty())
+    }
+
+    @Test
+    fun findPhone_doesNotMatchIsoDate() {
+        val text = "Signed on 2026-05-20 in document."
+        val phones = PiiPatternMatcher.findPhoneNumbers(text)
+        assertTrue("ISO date should not be recognized as a phone number", phones.isEmpty())
+    }
+
+    @Test
+    fun findPII_customKeyword() {
+        val text = "Invoice status: TOP_SECRET_CODE confirmed."
+        val customRule = com.example.zenscan.model.CustomFilterRule(
+            id = "1",
+            pattern = "TOP_SECRET_CODE",
+            isRegex = false,
+            label = "CONFIDENTIAL"
+        )
+        val results = PiiPatternMatcher.findPII(text, listOf(customRule))
+        assertEquals(1, results.size)
+        assertEquals("CONFIDENTIAL", results[0].second)
+        assertEquals("TOP_SECRET_CODE", results[0].first.text)
+    }
+
+    @Test
+    fun findPII_customRegex() {
+        val text = "Employee ID is EMP-9921 active."
+        val customRule = com.example.zenscan.model.CustomFilterRule(
+            id = "2",
+            pattern = """EMP-\d{4}""",
+            isRegex = true,
+            label = "EMPLOYEE_ID"
+        )
+        val results = PiiPatternMatcher.findPII(text, listOf(customRule))
+        assertEquals(1, results.size)
+        assertEquals("EMPLOYEE_ID", results[0].second)
+        assertEquals("EMP-9921", results[0].first.text)
+    }
+
+    @Test
+    fun findPII_customRegexInvalidSyntaxHandledSafely() {
+        val text = "Some test text"
+        val invalidRule = com.example.zenscan.model.CustomFilterRule(
+            id = "3",
+            pattern = "[invalid(regex",
+            isRegex = true,
+            label = "ERROR_TEST"
+        )
+        // Should not throw or crash
+        val results = PiiPatternMatcher.findPII(text, listOf(invalidRule))
+        assertTrue(results.isEmpty())
+    }
+
+    @Test
+    fun findPII_customRegexEmptyPatternHandledSafely() {
+        val text = "Some test text"
+        val emptyRule = com.example.zenscan.model.CustomFilterRule(
+            id = "4",
+            pattern = "",
+            isRegex = true,
+            label = "EMPTY"
+        )
+        val results = PiiPatternMatcher.findPII(text, listOf(emptyRule))
+        assertTrue(results.isEmpty())
+    }
 }

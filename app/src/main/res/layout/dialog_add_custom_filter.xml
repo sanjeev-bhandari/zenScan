@@ -115,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:text="Cancel"
+            android:text="@string/cancel"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:textColor="@color/text_secondary" />
 
@@ -124,7 +124,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/accent_blue"
-            android:text="Add"
+            android:text="@string/add"
             android:textColor="@color/white"
             app:cornerRadius="12dp" />
     </LinearLayout>

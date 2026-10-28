@@ -34,12 +34,16 @@ class DetectionOverlayView @JvmOverloads constructor(
     // Image bitmap to draw and its matrix state
     var bitmap: Bitmap? = null
         set(value) {
+            val dimensionsChanged = field == null || value == null ||
+                    field?.width != value.width || field?.height != value.height
             field = value
             if (value != null) {
                 bitmapWidth = value.width
                 bitmapHeight = value.height
             }
-            resetMatrix()
+            if (dimensionsChanged) {
+                resetMatrix()
+            }
             invalidate()
         }
 
@@ -52,6 +56,8 @@ class DetectionOverlayView @JvmOverloads constructor(
 
     // Manual Brush Drawing Engine
     private val brushPath = Path()
+    private var lastBrushX = 0f
+    private var lastBrushY = 0f
     private val brushPaint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
@@ -163,7 +169,7 @@ class DetectionOverlayView @JvmOverloads constructor(
     private val reuseRect = RectF()
     private val reuseBadgeRect = RectF()
 
-    private var animationProgress = 0f
+    private var animationProgress = 1f
     private var animator: android.animation.ValueAnimator? = null
 
     private fun getScale(): Float {
@@ -171,7 +177,7 @@ class DetectionOverlayView @JvmOverloads constructor(
         return matrixValues[Matrix.MSCALE_X]
     }
 
-    private fun resetMatrix() {
+    fun resetMatrix() {
         val bmp = bitmap ?: return
         if (width == 0 || height == 0) return
 
@@ -235,20 +241,26 @@ class DetectionOverlayView @JvmOverloads constructor(
         resetMatrix()
     }
 
-    fun setRegions(regions: List<DetectedRegion>, bmpWidth: Int, bmpHeight: Int) {
+    fun setRegions(regions: List<DetectedRegion>, bmpWidth: Int, bmpHeight: Int, animate: Boolean = false) {
+        val countChanged = this.regions.size != regions.size
         this.regions = regions
         this.bitmapWidth = bmpWidth
         this.bitmapHeight = bmpHeight
 
-        animator?.cancel()
-        animator = android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 350
-            interpolator = android.view.animation.DecelerateInterpolator()
-            addUpdateListener { valueAnimator ->
-                animationProgress = valueAnimator.animatedValue as Float
-                invalidate()
+        if (animate || countChanged) {
+            animator?.cancel()
+            animator = android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 300
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addUpdateListener { valueAnimator ->
+                    animationProgress = valueAnimator.animatedValue as Float
+                    invalidate()
+                }
+                start()
             }
-            start()
+        } else {
+            animationProgress = 1f
+            invalidate()
         }
     }
 
@@ -311,8 +323,6 @@ class DetectionOverlayView @JvmOverloads constructor(
                 lastPanX = sumX / pointerCount
                 lastPanY = sumY / pointerCount
             } else if (action == MotionEvent.ACTION_POINTER_UP) {
-                // One finger is lifted, leaving pointerCount - 1 fingers on screen.
-                // We update lastPanX/lastPanY to the average of the remaining fingers.
                 val upIndex = event.actionIndex
                 var sumX = 0f
                 var sumY = 0f
@@ -338,8 +348,6 @@ class DetectionOverlayView @JvmOverloads constructor(
         val bitmapY = pts[1]
 
         if (isBrushMode) {
-            // In brush mode, if we were just zooming/panning and lifted one finger,
-            // ignore brush inputs until the touch gesture is completely finished (ACTION_UP)
             if (isZoomingOrPanning) {
                 if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                     isZoomingOrPanning = false
@@ -352,11 +360,17 @@ class DetectionOverlayView @JvmOverloads constructor(
                 MotionEvent.ACTION_DOWN -> {
                     brushPath.reset()
                     brushPath.moveTo(bitmapX, bitmapY)
+                    lastBrushX = bitmapX
+                    lastBrushY = bitmapY
                     invalidate()
                     return true
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    brushPath.lineTo(bitmapX, bitmapY)
+                    val midX = (lastBrushX + bitmapX) / 2f
+                    val midY = (lastBrushY + bitmapY) / 2f
+                    brushPath.quadTo(lastBrushX, lastBrushY, midX, midY)
+                    lastBrushX = bitmapX
+                    lastBrushY = bitmapY
                     invalidate()
                     return true
                 }
@@ -391,7 +405,6 @@ class DetectionOverlayView @JvmOverloads constructor(
                     return true
                 }
                 MotionEvent.ACTION_POINTER_UP -> {
-                    // One finger is lifted from a multi-finger pan/zoom (fallback check)
                     val upIndex = event.actionIndex
                     val remainingIndex = if (upIndex == 0) 1 else 0
                     lastPanX = event.getX(remainingIndex)
@@ -418,9 +431,35 @@ class DetectionOverlayView @JvmOverloads constructor(
                         val dy = event.y - lastTouchY
                         val distance = Math.sqrt((dx * dx + dy * dy).toDouble())
                         if (distance < touchSlop) {
-                            val tappedRegion = regions.find { it.boundingBox.contains(bitmapX.toInt(), bitmapY.toInt()) }
-                            if (tappedRegion != null) {
-                                onRegionToggled?.invoke(tappedRegion)
+                            val currentScale = getScale()
+                            val slopOnBitmap = 20f / currentScale
+
+                            // Find all regions whose bounding box or badge contains the tapped coordinates
+                            val candidates = regions.filter { region ->
+                                val r = region.boundingBox
+                                val inBox = bitmapX >= (r.left - slopOnBitmap) &&
+                                        bitmapX <= (r.right + slopOnBitmap) &&
+                                        bitmapY >= (r.top - slopOnBitmap) &&
+                                        bitmapY <= (r.bottom + slopOnBitmap)
+
+                                val badgeHeight = (26f + 16f) / currentScale
+                                val badgeWidth = (region.label.length * 16f + 28f) / currentScale
+                                val inBadge = bitmapX >= (r.left - slopOnBitmap) &&
+                                        bitmapX <= (r.left + badgeWidth + slopOnBitmap) &&
+                                        bitmapY >= (r.top - badgeHeight - slopOnBitmap) &&
+                                        bitmapY <= (r.top + slopOnBitmap)
+
+                                inBox || inBadge
+                            }
+
+                            if (candidates.isNotEmpty()) {
+                                // Select the most specific (smallest area) region
+                                val tapped = candidates.minByOrNull {
+                                    it.boundingBox.width() * it.boundingBox.height()
+                                }
+                                if (tapped != null) {
+                                    onRegionToggled?.invoke(tapped)
+                                }
                             }
                         }
                     }

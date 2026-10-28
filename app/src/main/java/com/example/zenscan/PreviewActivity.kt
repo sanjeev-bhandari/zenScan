@@ -88,6 +88,10 @@ class PreviewActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: android.view.MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_rescan -> {
+                viewModel.rescanImage()
+                true
+            }
             R.id.action_save -> {
                 viewModel.saveToGallery()
                 true
@@ -179,7 +183,7 @@ class PreviewActivity : AppCompatActivity() {
                         binding.overlayView.bitmap = bmp
                         if (bmp != null) {
                             if (state.detectedRegions.isNotEmpty()) {
-                                binding.overlayView.setRegions(state.detectedRegions, bmp.width, bmp.height)
+                                binding.overlayView.setRegions(state.detectedRegions, bmp.width, bmp.height, animate = false)
                             } else {
                                 binding.overlayView.clear()
                             }

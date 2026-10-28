@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -89,10 +90,6 @@ class MainActivity : AppCompatActivity() {
     // Capture photo contract
     private val capturePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            // tempCameraUri was sent to capturePhoto, which is stored in the viewModel's prepared Uri
-            // Wait, we need to pass the uri of the capture to PreviewActivity.
-            // Let's get the uri that we prepared. We can track it or retrieve it.
-            // Let's pass the tempCameraUri when we launch.
             tempCameraUri?.let { uri ->
                 val intent = Intent(this, PreviewActivity::class.java).apply {
                     data = uri
@@ -100,7 +97,14 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         } else {
-            Toast.makeText(this, "Camera capture cancelled or failed", Toast.LENGTH_SHORT).show()
+            tempCameraUri?.let { uri ->
+                try {
+                    contentResolver.delete(uri, null, null)
+                } catch (e: Exception) {
+                    // Ignore cleanup failure
+                }
+            }
+            Toast.makeText(this, "Camera capture cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -198,6 +202,16 @@ class MainActivity : AppCompatActivity() {
         setupNavigation()
         setupSettingsPanel()
         observeViewModel()
+
+        // Handle system back navigation to return to Home tab if on a secondary tab
+        onBackPressedDispatcher.addCallback(this) {
+            if (binding.bottomNavigation.selectedItemId != R.id.nav_home) {
+                binding.bottomNavigation.selectedItemId = R.id.nav_home
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
 
         // Restore bottom navigation tab state (crucial for dynamic theme recreation)
         val restoredNavId = savedInstanceState?.getInt("selected_nav_id") ?: R.id.nav_home

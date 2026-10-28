@@ -56,11 +56,11 @@
 
         <ImageButton
             android:id="@+id/btnDeleteRule"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete Filter"
-            android:padding="6dp"
+            android:contentDescription="@string/delete_filter"
+            android:padding="12dp"
             android:src="@drawable/ic_delete"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

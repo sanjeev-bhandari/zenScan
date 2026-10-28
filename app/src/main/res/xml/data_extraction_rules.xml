@@ -5,15 +5,15 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Exclude encrypted preferences whose KeyStore keys do not transfer across devices -->
+        <exclude domain="sharedpref" path="zenscan_encrypted_prefs.xml" />
+        <exclude domain="sharedpref" path="zenscan_prefs.xml" />
+        <!-- Exclude private user images in history -->
+        <exclude domain="file" path="redacted_history" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="zenscan_encrypted_prefs.xml" />
+        <exclude domain="sharedpref" path="zenscan_prefs.xml" />
+        <exclude domain="file" path="redacted_history" />
     </device-transfer>
-    -->
 </data-extraction-rules>

@@ -9,21 +9,33 @@ import org.json.JSONObject
 
 class PreferencesManager(context: Context) {
 
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+    private val prefs = initPrefs(context)
 
-    private val prefs = try {
-        EncryptedSharedPreferences.create(
+    private fun initPrefs(context: Context): android.content.SharedPreferences {
+        return try {
+            createEncryptedPrefs(context)
+        } catch (e: Exception) {
+            try {
+                context.deleteSharedPreferences("zenscan_encrypted_prefs")
+                createEncryptedPrefs(context)
+            } catch (ex: Exception) {
+                context.getSharedPreferences("zenscan_prefs", Context.MODE_PRIVATE)
+            }
+        }
+    }
+
+    private fun createEncryptedPrefs(context: Context): android.content.SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
             context,
             "zenscan_encrypted_prefs",
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
-    } catch (e: Exception) {
-        // Fallback in case of keystore issues (extremely rare, but good safety measure)
-        context.getSharedPreferences("zenscan_prefs", Context.MODE_PRIVATE)
     }
 
     fun getThemeMode(): String = prefs.getString("theme_mode", "system") ?: "system"
