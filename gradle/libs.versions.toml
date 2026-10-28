@@ -9,6 +9,7 @@ appcompat = "1.7.1"
 material = "1.14.0"
 constraintlayout = "2.2.1"
 lifecycleViewmodelKtx = "2.10.0"
+activityKtx = "1.9.0"
 recyclerview = "1.4.0"
 mlkitTextRecognition = "16.0.1"
 mlkitFaceDetection = "16.1.7"
@@ -26,6 +27,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
 mlkit-text = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
 mlkit-face = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkitFaceDetection" }

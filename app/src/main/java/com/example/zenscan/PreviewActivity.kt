@@ -1,16 +1,20 @@
 package com.example.zenscan
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.ImageViewCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,8 +36,9 @@ class PreviewActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        
+
         // Prevent screenshots, screen recording, and recent switcher leaks
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
 
@@ -150,23 +155,23 @@ class PreviewActivity : AppCompatActivity() {
                         // 1. Loading Indicator
                         binding.loadingIndicator.visibility = if (state.isLoading) View.VISIBLE else View.GONE
 
-                        // 2. Brush mode configurations
+                        // 2. Brush mode configurations (white circle + dark icon when active, matching mockup)
                         binding.overlayView.isBrushMode = state.isBrushMode
-                        if (state.isBrushMode) {
-                            binding.btnBrush.setBackgroundTintList(
-                                android.content.res.ColorStateList.valueOf(
-                                    resources.getColor(R.color.brush_active, theme)
-                                )
-                            )
-                            binding.btnBrush.setColorFilter(android.graphics.Color.WHITE)
+                        binding.btnBrush.isSelected = state.isBrushMode
+                        binding.brushModeBanner.visibility = if (state.isBrushMode) View.VISIBLE else View.GONE
+                        val brushIconColor = if (state.isBrushMode) {
+                            ContextCompat.getColor(this@PreviewActivity, R.color.bg_dark)
                         } else {
-                            binding.btnBrush.setBackgroundTintList(
-                                android.content.res.ColorStateList.valueOf(
-                                    resources.getColor(R.color.brush_inactive, theme)
-                                )
-                            )
-                            binding.btnBrush.setColorFilter(resources.getColor(R.color.text_dark_primary, theme))
+                            ContextCompat.getColor(this@PreviewActivity, R.color.text_dark_primary)
                         }
+                        ImageViewCompat.setImageTintList(binding.btnBrush, ColorStateList.valueOf(brushIconColor))
+                        binding.tvBrushLabel.setTextColor(
+                            if (state.isBrushMode) {
+                                ContextCompat.getColor(this@PreviewActivity, R.color.white)
+                            } else {
+                                0xFF9AA0A6.toInt()
+                            }
+                        )
 
                         // 3. Image display and regions overlay
                         val bmp = state.bitmap
@@ -181,46 +186,15 @@ class PreviewActivity : AppCompatActivity() {
 
                         // 4. Undo and Redact All button states
                         binding.btnUndo.isEnabled = state.undoAvailable
-                        binding.btnUndo.alpha = if (state.undoAvailable) 1.0f else 0.5f
+                        binding.btnUndo.alpha = if (state.undoAvailable) 1.0f else 0.4f
 
                         binding.btnRedactAll.isEnabled = state.redactAllAvailable
                         binding.btnRedactAll.alpha = if (state.redactAllAvailable) 1.0f else 0.4f
-                        if (state.redactAllAvailable) {
-                            if (binding.btnRedactAll.animation == null) {
-                                val pulseAnim = android.view.animation.ScaleAnimation(
-                                    1f, 1.06f, 1f, 1.06f,
-                                    android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f,
-                                    android.view.animation.Animation.RELATIVE_TO_SELF, 0.5f
-                                ).apply {
-                                    duration = 1000
-                                    repeatMode = android.view.animation.Animation.REVERSE
-                                    repeatCount = android.view.animation.Animation.INFINITE
-                                    interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-                                }
-                                binding.btnRedactAll.startAnimation(pulseAnim)
-                            }
-                        } else {
-                            binding.btnRedactAll.clearAnimation()
-                        }
 
-                        // 5. Summary badge settings
+                        // 5. Toolbar detection summary subtitle
                         if (state.isSummaryBadgeVisible && !state.summaryBadgeText.isNullOrEmpty()) {
-                            binding.summaryBadge.text = state.summaryBadgeText
-                            binding.summaryBadge.visibility = View.VISIBLE
-                            if (state.isFromHistory) {
-                                binding.summaryBadge.backgroundTintList =
-                                    android.content.res.ColorStateList.valueOf(
-                                        resources.getColor(R.color.accent_green, theme)
-                                    )
-                            } else {
-                                binding.summaryBadge.backgroundTintList =
-                                    android.content.res.ColorStateList.valueOf(
-                                        resources.getColor(R.color.accent_rose, theme)
-                                    )
-                            }
                             updateToolbarSubtitle(state.summaryBadgeText, isVisible = true, isRoseColor = state.isSummaryBadgeRoseColor)
                         } else {
-                            binding.summaryBadge.visibility = View.GONE
                             updateToolbarSubtitle(null, isVisible = false)
                         }
 
@@ -299,11 +273,8 @@ class PreviewActivity : AppCompatActivity() {
     private fun updateToolbarSubtitle(text: String?, isVisible: Boolean, isRoseColor: Boolean = true) {
         if (isVisible && !text.isNullOrEmpty()) {
             supportActionBar?.subtitle = text
-            if (isRoseColor) {
-                binding.toolbar.setSubtitleTextColor(resources.getColor(R.color.sensitive_alert_subtitle, theme))
-            } else {
-                binding.toolbar.setSubtitleTextColor(resources.getColor(R.color.protected_success_subtitle, theme))
-            }
+            val colorRes = if (isRoseColor) R.color.sensitive_alert_subtitle else R.color.protected_success_subtitle
+            binding.toolbar.setSubtitleTextColor(ContextCompat.getColor(this, colorRes))
         } else {
             supportActionBar?.subtitle = null
         }

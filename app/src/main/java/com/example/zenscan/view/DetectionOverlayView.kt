@@ -13,6 +13,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import androidx.core.graphics.withMatrix
 import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegionType
 
@@ -101,59 +102,59 @@ class DetectionOverlayView @JvmOverloads constructor(
 
     private val scaleDetector = ScaleGestureDetector(context, scaleGestureListener)
 
-    // Red accents for PII (Credit card, Email, Phone)
+    // Semantic crimson accents for PII (Credit card, Email, Phone, SSN)
     private val piiFillPaint = Paint().apply {
-        color = Color.argb(30, 244, 63, 94) // 12% Opacity Rose-red (#F43F5E)
+        color = Color.argb(30, 217, 48, 37) // #D93025
         style = Paint.Style.FILL
     }
 
     private val piiStrokePaint = Paint().apply {
-        color = Color.rgb(244, 63, 94) // Rose-red (#F43F5E)
+        color = Color.rgb(217, 48, 37) // #D93025
         style = Paint.Style.STROKE
         strokeWidth = 4f
         isAntiAlias = true
     }
 
     private val piiLabelBgPaint = Paint().apply {
-        color = Color.rgb(244, 63, 94) // Solid Rose-red
+        color = Color.rgb(217, 48, 37) // #D93025
         style = Paint.Style.FILL
         isAntiAlias = true
     }
 
-    // Indigo accents for Faces
+    // Cobalt accents for Faces
     private val faceFillPaint = Paint().apply {
-        color = Color.argb(30, 99, 102, 241) // 12% Opacity Indigo (#6366F1)
+        color = Color.argb(30, 27, 110, 243) // #1B6EF3
         style = Paint.Style.FILL
     }
 
     private val faceStrokePaint = Paint().apply {
-        color = Color.rgb(99, 102, 241) // Indigo (#6366F1)
+        color = Color.rgb(27, 110, 243) // #1B6EF3
         style = Paint.Style.STROKE
         strokeWidth = 4f
         isAntiAlias = true
     }
 
     private val faceLabelBgPaint = Paint().apply {
-        color = Color.rgb(99, 102, 241) // Solid Indigo
+        color = Color.rgb(27, 110, 243) // #1B6EF3
         style = Paint.Style.FILL
         isAntiAlias = true
     }
 
-    // Modern styling for bypassed (unselected) regions
+    // Neutral styling for bypassed (unselected) regions
     private val bypassedFillPaint = Paint().apply {
-        color = Color.argb(12, 100, 116, 139) // Ultra light Slate translucent fill
+        color = Color.argb(14, 110, 117, 124)
         style = Paint.Style.FILL
     }
 
     private val bypassedStrokePaint = Paint().apply {
-        color = Color.rgb(100, 116, 139) // Neutral Slate outline
+        color = Color.rgb(110, 117, 124)
         style = Paint.Style.STROKE
         strokeWidth = 3f
         isAntiAlias = true
     }
 
     private val bypassedLabelBgPaint = Paint().apply {
-        color = Color.rgb(100, 116, 139) // Neutral Slate
+        color = Color.rgb(110, 117, 124)
         style = Paint.Style.FILL
         isAntiAlias = true
     }
@@ -168,9 +169,18 @@ class DetectionOverlayView @JvmOverloads constructor(
 
     private val reuseRect = RectF()
     private val reuseBadgeRect = RectF()
+    private var cachedDashScale = -1f
+    private var cachedDashPathEffect: DashPathEffect? = null
 
     private var animationProgress = 1f
     private var animator: android.animation.ValueAnimator? = null
+
+    private fun formatRegionBadgeLabel(region: DetectedRegion): String {
+        val isFace = region.type == RegionType.FACE
+        val rawLabel = region.label.replace("_", " ")
+        val baseLabel = if (isFace) com.example.zenscan.detection.DetectionPipeline.FACE_LABEL else rawLabel.uppercase()
+        return if (region.isRedacted) "✓ $baseLabel" else "○ $baseLabel"
+    }
 
     private fun getScale(): Float {
         imageMatrix.getValues(matrixValues)
@@ -443,7 +453,8 @@ class DetectionOverlayView @JvmOverloads constructor(
                                         bitmapY <= (r.bottom + slopOnBitmap)
 
                                 val badgeHeight = (26f + 16f) / currentScale
-                                val badgeWidth = (region.label.length * 16f + 28f) / currentScale
+                                val badgeLabel = formatRegionBadgeLabel(region)
+                                val badgeWidth = ( badgeLabel.length * 16f + 28f) / currentScale
                                 val inBadge = bitmapX >= (r.left - slopOnBitmap) &&
                                         bitmapX <= (r.left + badgeWidth + slopOnBitmap) &&
                                         bitmapY >= (r.top - badgeHeight - slopOnBitmap) &&
@@ -483,110 +494,110 @@ class DetectionOverlayView @JvmOverloads constructor(
 
         val bmp = bitmap ?: return
 
-        val saveCount = canvas.save()
-        canvas.concat(imageMatrix)
+        canvas.withMatrix(imageMatrix) {
+            drawBitmap(bmp, 0f, 0f, null)
 
-        canvas.drawBitmap(bmp, 0f, 0f, null)
+            if (isBrushMode && !brushPath.isEmpty) {
+                val currentScale = getScale()
+                brushPaint.strokeWidth = 48f / currentScale
+                drawPath(brushPath, brushPaint)
+            }
 
-        if (isBrushMode && !brushPath.isEmpty) {
-            val currentScale = getScale()
-            brushPaint.strokeWidth = 48f / currentScale
-            canvas.drawPath(brushPath, brushPaint)
-        }
+            if (regions.isNotEmpty()) {
+                val currentScale = getScale()
 
-        if (regions.isNotEmpty()) {
-            val currentScale = getScale()
+                piiStrokePaint.strokeWidth = 4f / currentScale
+                faceStrokePaint.strokeWidth = 4f / currentScale
+                bypassedStrokePaint.strokeWidth = 3f / currentScale
 
-            piiStrokePaint.strokeWidth = 4f / currentScale
-            faceStrokePaint.strokeWidth = 4f / currentScale
-            bypassedStrokePaint.strokeWidth = 3f / currentScale
-
-            bypassedStrokePaint.pathEffect = DashPathEffect(
-                floatArrayOf(12f / currentScale, 12f / currentScale),
-                0f
-            )
-
-            labelTextPaint.textSize = 26f / currentScale
-
-            val badgePaddingX = 14f / currentScale
-            val badgePaddingY = 8f / currentScale
-            val badgeCornerRadius = 8f / currentScale
-            val boxCornerRadius = 16f / currentScale
-
-            val currentFillAlpha = (30 * animationProgress).toInt()
-            val currentBypassedFillAlpha = (12 * animationProgress).toInt()
-            val currentStrokeAlpha = (255 * animationProgress).toInt()
-
-            piiFillPaint.alpha = currentFillAlpha
-            piiStrokePaint.alpha = currentStrokeAlpha
-            piiLabelBgPaint.alpha = currentStrokeAlpha
-
-            faceFillPaint.alpha = currentFillAlpha
-            faceStrokePaint.alpha = currentStrokeAlpha
-            faceLabelBgPaint.alpha = currentStrokeAlpha
-
-            bypassedFillPaint.alpha = currentBypassedFillAlpha
-            bypassedStrokePaint.alpha = currentStrokeAlpha
-            bypassedLabelBgPaint.alpha = currentStrokeAlpha
-
-            labelTextPaint.alpha = currentStrokeAlpha
-
-            for (region in regions) {
-                val r = region.boundingBox
-                reuseRect.set(
-                    r.left.toFloat(),
-                    r.top.toFloat(),
-                    r.right.toFloat(),
-                    r.bottom.toFloat()
-                )
-                val rectF = reuseRect
-                val isFace = region.type == RegionType.FACE
-
-                val fillPaint: Paint
-                val strokePaint: Paint
-                val labelBgPaint: Paint
-
-                if (!region.isRedacted) {
-                    fillPaint = bypassedFillPaint
-                    strokePaint = bypassedStrokePaint
-                    labelBgPaint = bypassedLabelBgPaint
-                } else {
-                    fillPaint = if (isFace) faceFillPaint else piiFillPaint
-                    strokePaint = if (isFace) faceStrokePaint else piiStrokePaint
-                    labelBgPaint = if (isFace) faceLabelBgPaint else piiLabelBgPaint
+                if (cachedDashScale != currentScale || cachedDashPathEffect == null) {
+                    cachedDashScale = currentScale
+                    cachedDashPathEffect = DashPathEffect(
+                        floatArrayOf(12f / currentScale, 12f / currentScale),
+                        0f
+                    )
                 }
+                bypassedStrokePaint.pathEffect = cachedDashPathEffect
 
-                canvas.drawRoundRect(rectF, boxCornerRadius, boxCornerRadius, fillPaint)
-                canvas.drawRoundRect(rectF, boxCornerRadius, boxCornerRadius, strokePaint)
+                labelTextPaint.textSize = 26f / currentScale
 
-                val rawLabel = region.label.replace("_", " ")
-                val labelText = if (isFace) com.example.zenscan.detection.DetectionPipeline.FACE_LABEL else rawLabel.uppercase()
-                val textWidth = labelTextPaint.measureText(labelText)
-                val textHeight = labelTextPaint.textSize
+                val badgePaddingX = 14f / currentScale
+                val badgePaddingY = 8f / currentScale
+                val badgeCornerRadius = 8f / currentScale
+                val boxCornerRadius = 16f / currentScale
 
-                reuseBadgeRect.set(
-                    rectF.left,
-                    rectF.top - textHeight - badgePaddingY * 2f,
-                    rectF.left + textWidth + badgePaddingX * 2f,
-                    rectF.top
-                )
-                val badgeRect = reuseBadgeRect
+                val currentFillAlpha = (30 * animationProgress).toInt()
+                val currentBypassedFillAlpha = (12 * animationProgress).toInt()
+                val currentStrokeAlpha = (255 * animationProgress).toInt()
 
-                if (badgeRect.top < 0f) {
-                    badgeRect.offsetTo(badgeRect.left, rectF.top)
+                piiFillPaint.alpha = currentFillAlpha
+                piiStrokePaint.alpha = currentStrokeAlpha
+                piiLabelBgPaint.alpha = currentStrokeAlpha
+
+                faceFillPaint.alpha = currentFillAlpha
+                faceStrokePaint.alpha = currentStrokeAlpha
+                faceLabelBgPaint.alpha = currentStrokeAlpha
+
+                bypassedFillPaint.alpha = currentBypassedFillAlpha
+                bypassedStrokePaint.alpha = currentStrokeAlpha
+                bypassedLabelBgPaint.alpha = currentStrokeAlpha
+
+                labelTextPaint.alpha = currentStrokeAlpha
+
+                for (region in regions) {
+                    val r = region.boundingBox
+                    reuseRect.set(
+                        r.left.toFloat(),
+                        r.top.toFloat(),
+                        r.right.toFloat(),
+                        r.bottom.toFloat()
+                    )
+                    val rectF = reuseRect
+                    val isFace = region.type == RegionType.FACE
+
+                    val fillPaint: Paint
+                    val strokePaint: Paint
+                    val labelBgPaint: Paint
+
+                    if (!region.isRedacted) {
+                        fillPaint = bypassedFillPaint
+                        strokePaint = bypassedStrokePaint
+                        labelBgPaint = bypassedLabelBgPaint
+                    } else {
+                        fillPaint = if (isFace) faceFillPaint else piiFillPaint
+                        strokePaint = if (isFace) faceStrokePaint else piiStrokePaint
+                        labelBgPaint = if (isFace) faceLabelBgPaint else piiLabelBgPaint
+                    }
+
+                    drawRoundRect(rectF, boxCornerRadius, boxCornerRadius, fillPaint)
+                    drawRoundRect(rectF, boxCornerRadius, boxCornerRadius, strokePaint)
+
+                    val labelText = formatRegionBadgeLabel(region)
+                    val textWidth = labelTextPaint.measureText(labelText)
+                    val textHeight = labelTextPaint.textSize
+
+                    reuseBadgeRect.set(
+                        rectF.left,
+                        rectF.top - textHeight - badgePaddingY * 2f,
+                        rectF.left + textWidth + badgePaddingX * 2f,
+                        rectF.top
+                    )
+                    val badgeRect = reuseBadgeRect
+
+                    if (badgeRect.top < 0f) {
+                        badgeRect.offsetTo(badgeRect.left, rectF.top)
+                    }
+
+                    drawRoundRect(badgeRect, badgeCornerRadius, badgeCornerRadius, labelBgPaint)
+
+                    drawText(
+                        labelText,
+                        badgeRect.left + badgePaddingX,
+                        badgeRect.bottom - badgePaddingY - (2f / currentScale),
+                        labelTextPaint
+                    )
                 }
-
-                canvas.drawRoundRect(badgeRect, badgeCornerRadius, badgeCornerRadius, labelBgPaint)
-
-                canvas.drawText(
-                    labelText,
-                    badgeRect.left + badgePaddingX,
-                    badgeRect.bottom - badgePaddingY - (2f / currentScale),
-                    labelTextPaint
-                )
             }
         }
-
-        canvas.restoreToCount(saveCount)
     }
 }

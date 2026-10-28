@@ -2,17 +2,18 @@ package com.example.zenscan
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.IntentCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
@@ -152,18 +153,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Handle WindowInsets to prevent top Status Bar overlap on header bar
+        val baseTopPadding = resources.getDimensionPixelSize(R.dimen.header_padding_vertical)
         ViewCompat.setOnApplyWindowInsetsListener(binding.header) { view, windowInsets ->
             val statusInsets = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
-            val originalTopPadding = (18 * resources.displayMetrics.density).toInt()
             view.setPadding(
                 view.paddingLeft,
-                statusInsets.top + originalTopPadding,
+                statusInsets.top + baseTopPadding,
                 view.paddingRight,
                 view.paddingBottom
             )
@@ -226,12 +227,9 @@ class MainActivity : AppCompatActivity() {
         val action = intent.action
         val type = intent.type
         if (Intent.ACTION_SEND == action && type != null && type.startsWith("image/")) {
-            val imageUri = (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
-            }) ?: intent.data ?: intent.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
+            val imageUri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)
+                ?: intent.data
+                ?: intent.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri
 
             if (imageUri != null) {
                 stageSharedImageAndLaunch(imageUri)
@@ -381,19 +379,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Sync theme RadioButton checked states to reflect the active theme value. */
+    /** Sync theme RadioButton checked states and row selection highlights. */
     private fun syncThemeSelection(themeMode: String) {
-        binding.rbThemeSystem.isChecked = themeMode == "system"
-        binding.rbThemeLight.isChecked = themeMode == "light"
-        binding.rbThemeDark.isChecked = themeMode == "dark"
+        val isSystem = themeMode == "system"
+        val isLight = themeMode == "light"
+        val isDark = themeMode == "dark"
+
+        binding.rbThemeSystem.isChecked = isSystem
+        binding.rbThemeLight.isChecked = isLight
+        binding.rbThemeDark.isChecked = isDark
+
+        binding.rowThemeSystem.isSelected = isSystem
+        binding.rowThemeLight.isSelected = isLight
+        binding.rowThemeDark.isSelected = isDark
     }
 
-    /** Sync redaction style RadioButton checked states to reflect the active style value. */
+    /** Sync redaction style RadioButton checked states and row selection highlights. */
     private fun syncRedactionSelection(redactionStyle: String) {
-        binding.rbStyleBlack.isChecked = redactionStyle == "black"
-        binding.rbStyleSlate.isChecked = redactionStyle == "slate"
-        binding.rbStyleBlur.isChecked = redactionStyle == "blur"
-        binding.rbStylePixelate.isChecked = redactionStyle == "pixelate"
+        val isBlack = redactionStyle == "black"
+        val isSlate = redactionStyle == "slate"
+        val isBlur = redactionStyle == "blur"
+        val isPixelate = redactionStyle == "pixelate"
+
+        binding.rbStyleBlack.isChecked = isBlack
+        binding.rbStyleSlate.isChecked = isSlate
+        binding.rbStyleBlur.isChecked = isBlur
+        binding.rbStylePixelate.isChecked = isPixelate
+
+        binding.rowStyleBlack.isSelected = isBlack
+        binding.rowStyleSlate.isSelected = isSlate
+        binding.rowStyleBlur.isSelected = isBlur
+        binding.rowStylePixelate.isSelected = isPixelate
     }
 
     private fun observeViewModel() {
@@ -409,9 +425,13 @@ class MainActivity : AppCompatActivity() {
                         if (state.isHistoryEmpty) {
                             binding.emptyStateView.visibility = View.VISIBLE
                             binding.fullHistoryList.visibility = View.GONE
+                            binding.recentEmptyState.visibility = View.VISIBLE
+                            binding.recentList.visibility = View.GONE
                         } else {
                             binding.emptyStateView.visibility = View.GONE
                             binding.fullHistoryList.visibility = View.VISIBLE
+                            binding.recentEmptyState.visibility = View.GONE
+                            binding.recentList.visibility = View.VISIBLE
                         }
 
                         // Sync active settings UI check-states

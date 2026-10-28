@@ -2,7 +2,7 @@ package com.example.zenscan.detection
 
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
+import androidx.core.graphics.scale
 import com.example.zenscan.model.CustomFilterRule
 import com.example.zenscan.model.DetectedRegion
 import com.example.zenscan.model.RegionType
@@ -55,7 +55,7 @@ class DetectionPipeline {
             val scale = MAX_INFERENCE_DIMENSION.toFloat() / maxDim
             val targetW = (bitmap.width * scale).toInt().coerceAtLeast(1)
             val targetH = (bitmap.height * scale).toInt().coerceAtLeast(1)
-            val scaled = Bitmap.createScaledBitmap(bitmap, targetW, targetH, true)
+            val scaled = bitmap.scale(targetW, targetH, true)
             Triple(scaled, bitmap.width.toFloat() / targetW, bitmap.height.toFloat() / targetH)
         } else {
             Triple(bitmap, 1f, 1f)

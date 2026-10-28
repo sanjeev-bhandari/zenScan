@@ -8,8 +8,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.zenscan"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = 26
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -19,6 +19,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,7 +42,6 @@ android {
     lint {
         abortOnError = false
         checkReleaseBuilds = true
-        disable += setOf("ObsoleteSdkInt", "OldTargetApi")
     }
 }
 
@@ -51,8 +51,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation("androidx.activity:activity-ktx:1.9.0")
-    
+    implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.recyclerview)
 
     // ZenScan AI & Image Dependencies

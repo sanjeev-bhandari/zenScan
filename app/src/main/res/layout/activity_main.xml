@@ -6,26 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Header Bar -->
+    <!-- Clean Material 3 Top App Header -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/card_bg"
-        android:elevation="2dp"
+        android:background="@color/window_background"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="@dimen/spacing_large"
         android:paddingVertical="@dimen/header_padding_vertical"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Logo Container -->
         <FrameLayout
-            android:layout_width="@dimen/icon_size_medium"
-            android:layout_height="@dimen/icon_size_medium"
-            android:background="@drawable/badge_background"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_circle_badge"
             android:backgroundTint="@color/badge_logo_bg"
-            android:padding="@dimen/padding_small">
+            android:padding="8dp">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -39,12 +37,12 @@
             android:id="@+id/headerTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_large"
-            android:fontFamily="sans-serif-black"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="-0.01"
             android:text="@string/app_name"
             android:textColor="@color/text_primary"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textSize="22sp" />
     </LinearLayout>
 
     <!-- CONTENT WRAPPER -->
@@ -68,46 +66,29 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/spacing_large">
 
-                <!-- Welcome Banner -->
-                <LinearLayout
+                <!-- Subtitle under Header -->
+                <TextView
+                    android:id="@+id/subtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
                     android:paddingHorizontal="@dimen/spacing_large"
-                    android:paddingTop="@dimen/margin_extra_large">
+                    android:text="@string/app_description"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.25" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="sans-serif-black"
-                        android:text="@string/app_subtitle"
-                        android:textColor="@color/text_primary"
-                        android:textSize="24sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/subtitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_small"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/app_description"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
-                        android:lineSpacingMultiplier="1.2" />
-                </LinearLayout>
-
-                <!-- Action Grid -->
+                <!-- Primary Action Cards (Matches ZenScan Dashboard Mockup) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margin_extra_large"
+                    android:layout_marginTop="20dp"
                     android:orientation="horizontal"
                     android:paddingHorizontal="@dimen/padding_large">
 
-                    <!-- Gallery Select Card -->
+                    <!-- Select from Gallery Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnGallery"
                         android:layout_width="0dp"
@@ -117,7 +98,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         app:cardBackgroundColor="@color/card_bg"
-                        app:cardCornerRadius="@dimen/radius_extra_large"
+                        app:cardCornerRadius="22dp"
                         app:cardElevation="0dp"
                         app:strokeColor="@color/border_color"
                         app:strokeWidth="@dimen/stroke_width_thin"
@@ -126,116 +107,182 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="start"
+                            android:gravity="center_horizontal"
                             android:orientation="vertical"
-                            android:padding="@dimen/padding_large">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="24dp">
 
                             <FrameLayout
-                                android:layout_width="@dimen/icon_size_large"
-                                android:layout_height="@dimen/icon_size_large"
-                                android:background="@drawable/badge_background"
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/bg_circle_badge"
                                 android:backgroundTint="@color/badge_blue_bg"
-                                android:padding="@dimen/padding_medium">
+                                android:padding="16dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_gallery"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_blue" />
-                        </FrameLayout>
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_gallery"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_blue" />
+                            </FrameLayout>
 
-                        <TextView
+                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
+                                android:gravity="center"
                                 android:fontFamily="sans-serif-medium"
-android:text="@string/select_photo"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp" />
+                                android:text="@string/select_photo"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:text="@string/select_photo_desc"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
-                                android:lineSpacingMultiplier="1.1" />
+                                android:textSize="12sp"
+                                android:lineSpacingMultiplier="1.2" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Camera Scan Card -->
+                    <!-- Scan Document Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/btnCamera"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="@dimen/margin_small"
                         android:layout_weight="1"
                         android:clickable="true"
                         android:focusable="true"
                         app:cardBackgroundColor="@color/card_bg"
-                        app:cardCornerRadius="24dp"
+                        app:cardCornerRadius="22dp"
                         app:cardElevation="0dp"
                         app:strokeColor="@color/border_color"
-                        app:strokeWidth="1dp"
+                        app:strokeWidth="@dimen/stroke_width_thin"
                         app:rippleColor="@color/ripple_color">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="start"
+                            android:gravity="center_horizontal"
                             android:orientation="vertical"
-                            android:padding="20dp">
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="24dp">
 
                             <FrameLayout
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:background="@drawable/badge_background"
+                                android:layout_width="60dp"
+                                android:layout_height="60dp"
+                                android:background="@drawable/bg_circle_badge"
                                 android:backgroundTint="@color/badge_green_bg"
-                                android:padding="12dp">
+                                android:padding="16dp">
 
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_camera"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_green" />
-                        </FrameLayout>
+                                <ImageView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_camera"
+                                    android:contentDescription="@null"
+                                    app:tint="@color/accent_green" />
+                            </FrameLayout>
 
-                        <TextView
+                            <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
+                                android:gravity="center"
                                 android:fontFamily="sans-serif-medium"
-android:text="@string/scan_camera"
-                            android:textColor="@color/text_primary"
-                            android:textSize="16sp" />
+                                android:text="@string/scan_camera"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:fontFamily="sans-serif"
+                                android:gravity="center"
                                 android:text="@string/scan_camera_desc"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="11sp"
-                                android:lineSpacingMultiplier="1.1" />
+                                android:textSize="12sp"
+                                android:lineSpacingMultiplier="1.2" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Compact Recent Redactions -->
+                <!-- Recent Redactions Section -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:layout_marginTop="36dp"
+                    android:layout_marginTop="28dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="@string/recent_redactions"
                     android:textColor="@color/text_primary"
-                    android:textSize="18sp" />
+                    android:textSize="16sp" />
+
+                <!-- Empty Recent Redactions Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/recentEmptyState"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="@dimen/radius_medium"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/border_color"
+                    app:strokeWidth="@dimen/stroke_width_thin">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="18dp">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_circle_badge"
+                            android:backgroundTint="@color/surface_container"
+                            android:padding="10dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_nav_files"
+                                android:contentDescription="@null"
+                                app:tint="@color/text_secondary" />
+                        </FrameLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/empty_files_title"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/empty_files_desc"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Recents List Recycler (shows top 3 items) -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -243,8 +290,7 @@ android:text="@string/scan_camera"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginTop="12dp"
                     android:nestedScrollingEnabled="false"
                     tools:listitem="@layout/item_recent_redaction" />
 
@@ -258,9 +304,8 @@ android:text="@string/scan_camera"
             android:layout_height="match_parent"
             android:visibility="gone"
             android:paddingHorizontal="20dp"
-            android:paddingTop="16dp">
+            android:paddingTop="8dp">
 
-            <!-- Full History Recycler -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/fullHistoryList"
                 android:layout_width="match_parent"
@@ -270,7 +315,7 @@ android:text="@string/scan_camera"
                 android:scrollbars="vertical"
                 tools:listitem="@layout/item_recent_redaction" />
 
-            <!-- Beautiful Empty History State -->
+            <!-- Empty History State -->
             <LinearLayout
                 android:id="@+id/emptyStateView"
                 android:layout_width="match_parent"
@@ -282,35 +327,34 @@ android:text="@string/scan_camera"
                 android:visibility="gone">
 
                 <FrameLayout
-                    android:layout_width="84dp"
-                    android:layout_height="84dp"
-                    android:background="@drawable/badge_background"
-                    android:backgroundTint="@color/badge_blue_bg"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/bg_circle_badge"
+                    android:backgroundTint="@color/surface_container"
                     android:padding="20dp">
 
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/ic_shield"
+                        android:src="@drawable/ic_nav_files"
                         android:contentDescription="@null"
-                        app:tint="@color/accent_blue" />
+                        app:tint="@color/text_secondary" />
                 </FrameLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="16dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="@string/empty_files_title"
                     android:textColor="@color/text_primary"
-                    android:textSize="18sp" />
+                    android:textSize="17sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="6dp"
                     android:gravity="center"
-                    android:fontFamily="sans-serif"
                     android:text="@string/empty_files_desc"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
@@ -318,18 +362,13 @@ android:text="@string/scan_camera"
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnEmptyStateAction"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:backgroundTint="@color/accent_blue"
+                    android:layout_marginTop="20dp"
                     android:text="@string/start_redacting"
-                    android:textColor="@color/white"
-                    android:textSize="14sp"
-                    app:cornerRadius="16dp"
-                    android:paddingHorizontal="24dp"
-                    android:paddingVertical="12dp"
-                    android:elevation="0dp"
-                    style="@style/Widget.MaterialComponents.Button" />
+                    app:backgroundTint="@color/badge_blue_bg"
+                    android:textColor="@color/text_primary" />
             </LinearLayout>
         </FrameLayout>
 
@@ -346,28 +385,26 @@ android:text="@string/scan_camera"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
+                android:paddingTop="8dp"
                 android:paddingBottom="32dp">
 
-                <!-- ══ SECTION: APPEARANCE ══ -->
+                <!-- Section: Appearance -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="8dp"
                     android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12"
                     android:text="@string/section_appearance"
                     android:textColor="@color/section_header_color"
-                    android:textSize="11sp" />
+                    android:textSize="13sp" />
 
-                <!-- Theme Mode Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/card_inter_spacing"
+                    android:layout_marginBottom="20dp"
                     app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp">
@@ -376,225 +413,150 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="@dimen/card_inner_padding">
+                        android:padding="12dp">
 
                         <LinearLayout
+                            android:id="@+id/rowThemeSystem"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:minHeight="52dp"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                            <FrameLayout
+                            <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
-                                android:background="@drawable/badge_background"
-                                android:backgroundTint="@color/badge_blue_bg"
-                                android:padding="8dp">
+                                android:src="@drawable/theme_preview_system"
+                                android:scaleType="fitXY"
+                                android:contentDescription="@null" />
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_theme"
-                                    android:contentDescription="@null"
-                                    app:tint="@color/accent_blue" />
-                            </FrameLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
+                            <TextView
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:layout_marginStart="14dp"
-                                android:orientation="vertical">
+                                android:text="@string/theme_system"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/theme_mode"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="16sp" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:fontFamily="sans-serif"
-                                    android:text="@string/theme_mode_desc"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="12sp" />
-                            </LinearLayout>
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbThemeSystem"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
                         </LinearLayout>
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@color/border_color" />
-
-                        <!-- Theme preview rows -->
                         <LinearLayout
+                            android:id="@+id/rowThemeLight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
+                            android:minHeight="52dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                            <LinearLayout
-                                android:id="@+id/rowThemeSystem"
-                                android:layout_width="match_parent"
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/theme_preview_light"
+                                android:scaleType="fitXY"
+                                android:contentDescription="@null" />
+
+                            <TextView
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:layout_weight="1"
+                                android:layout_marginStart="14dp"
+                                android:text="@string/theme_light"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
-                                <ImageView
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:src="@drawable/theme_preview_system"
-                                    android:scaleType="fitXY"
-                                    android:contentDescription="@null"
-                                    android:clipToOutline="true" />
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/theme_system"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="14sp" />
-
-                                <RadioButton
-                                    android:id="@+id/rbThemeSystem"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
-
-                            <LinearLayout
-                                android:id="@+id/rowThemeLight"
-                                android:layout_width="match_parent"
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbThemeLight"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
+                        </LinearLayout>
 
-                                <ImageView
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:src="@drawable/theme_preview_light"
-                                    android:scaleType="fitXY"
-                                    android:contentDescription="@null"
-                                    android:clipToOutline="true" />
+                        <LinearLayout
+                            android:id="@+id/rowThemeDark"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/theme_light"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="14sp" />
+                            <ImageView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:src="@drawable/theme_preview_dark"
+                                android:scaleType="fitXY"
+                                android:contentDescription="@null" />
 
-                                <RadioButton
-                                    android:id="@+id/rbThemeLight"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
-
-                            <LinearLayout
-                                android:id="@+id/rowThemeDark"
-                                android:layout_width="match_parent"
+                            <TextView
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:layout_weight="1"
+                                android:layout_marginStart="14dp"
+                                android:text="@string/theme_dark"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
-                                <ImageView
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:src="@drawable/theme_preview_dark"
-                                    android:scaleType="fitXY"
-                                    android:contentDescription="@null"
-                                    android:clipToOutline="true" />
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/theme_dark"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="14sp" />
-
-                                <RadioButton
-                                    android:id="@+id/rbThemeDark"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
-                            </LinearLayout>
-
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbThemeDark"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ══ SECTION: CUSTOM RULES ══ -->
+                <!-- Section: Detection Rules -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="8dp"
                     android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12"
                     android:text="@string/section_custom_rules"
                     android:textColor="@color/section_header_color"
-                    android:textSize="11sp" />
+                    android:textSize="13sp" />
 
-                <!-- Custom PII Filters Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardCustomRules"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/card_inter_spacing"
+                    android:layout_marginBottom="20dp"
                     android:clickable="true"
                     android:focusable="true"
                     app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp"
@@ -605,28 +567,21 @@ android:text="@string/scan_camera"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="@dimen/card_inner_padding">
+                        android:paddingHorizontal="18dp"
+                        android:paddingVertical="16dp">
 
-                        <FrameLayout
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/badge_background"
-                            android:backgroundTint="@color/badge_blue_bg"
-                            android:padding="8dp">
-
-                            <ImageView
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:src="@drawable/ic_filter"
-                                android:contentDescription="@null"
-                                app:tint="@color/accent_blue" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_filter"
+                            android:contentDescription="@null"
+                            app:tint="@color/text_secondary" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="16dp"
                             android:orientation="vertical">
 
                             <TextView
@@ -635,46 +590,44 @@ android:text="@string/scan_camera"
                                 android:fontFamily="sans-serif-medium"
                                 android:text="@string/custom_filters"
                                 android:textColor="@color/text_primary"
-                                android:textSize="16sp" />
+                                android:textSize="15sp" />
 
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:fontFamily="sans-serif"
                                 android:text="@string/custom_filters_desc"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
+                                android:textSize="13sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             android:src="@drawable/ic_chevron_right"
                             android:contentDescription="@null"
                             app:tint="@color/text_secondary" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ══ SECTION: PRIVACY & EXPORT ══ -->
+                <!-- Section: Redaction & Export -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="8dp"
                     android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12"
                     android:text="@string/section_privacy"
                     android:textColor="@color/section_header_color"
-                    android:textSize="11sp" />
+                    android:textSize="13sp" />
 
                 <!-- Redaction Style Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/card_inter_spacing"
+                    android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp">
@@ -683,304 +636,232 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="@dimen/card_inner_padding">
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/redaction_style"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp" />
 
                         <LinearLayout
+                            android:id="@+id/rowStyleBlack"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:minHeight="52dp"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
-                            <FrameLayout
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:background="@drawable/badge_background"
-                                android:backgroundTint="@color/badge_blue_bg"
-                                android:padding="8dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_brush"
-                                    android:contentDescription="@null"
-                                    app:tint="@color/accent_blue" />
-                            </FrameLayout>
+                            <View
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:background="@drawable/redaction_preview_black" />
 
                             <LinearLayout
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:layout_marginStart="14dp"
                                 android:orientation="vertical">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/redaction_style"
+                                    android:text="@string/style_black"
                                     android:textColor="@color/text_primary"
-                                    android:textSize="16sp" />
+                                    android:textSize="15sp" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:fontFamily="sans-serif"
-                                    android:text="@string/redaction_style_desc"
+                                    android:text="@string/style_black_desc"
                                     android:textColor="@color/text_secondary"
                                     android:textSize="12sp" />
                             </LinearLayout>
+
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbStyleBlack"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
                         </LinearLayout>
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@color/border_color" />
-
-                        <!-- Redaction style rows with swatches -->
                         <LinearLayout
+                            android:id="@+id/rowStyleSlate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical">
-
-                            <!-- Solid Black Block -->
-                            <LinearLayout
-                                android:id="@+id/rowStyleBlack"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
-
-                                <View
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:background="@drawable/redaction_preview_black" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/style_black"
-                                        android:textColor="@color/text_primary"
-                                        android:textSize="14sp" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif"
-                                        android:text="@string/style_black_desc"
-                                        android:textColor="@color/text_secondary"
-                                        android:textSize="12sp" />
-                                </LinearLayout>
-
-                                <RadioButton
-                                    android:id="@+id/rbStyleBlack"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
-                            </LinearLayout>
+                            android:minHeight="52dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
                             <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:background="@drawable/redaction_preview_slate" />
 
-                            <!-- Dark Slate Gray -->
                             <LinearLayout
-                                android:id="@+id/rowStyleSlate"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:layout_weight="1"
+                                android:layout_marginStart="14dp"
+                                android:orientation="vertical">
 
-                                <View
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:background="@drawable/redaction_preview_slate" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/style_slate"
-                                        android:textColor="@color/text_primary"
-                                        android:textSize="14sp" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif"
-                                        android:text="@string/style_slate_desc"
-                                        android:textColor="@color/text_secondary"
-                                        android:textSize="12sp" />
-                                </LinearLayout>
-
-                                <RadioButton
-                                    android:id="@+id/rbStyleSlate"
+                                <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
+                                    android:text="@string/style_slate"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/style_slate_desc"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="12sp" />
                             </LinearLayout>
+
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbStyleSlate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/rowStyleBlur"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
                             <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:background="@drawable/redaction_preview_blur" />
 
-                            <!-- Gaussian Pixel Blur -->
                             <LinearLayout
-                                android:id="@+id/rowStyleBlur"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:layout_weight="1"
+                                android:layout_marginStart="14dp"
+                                android:orientation="vertical">
 
-                                <View
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:background="@drawable/redaction_preview_blur" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/style_blur"
-                                        android:textColor="@color/text_primary"
-                                        android:textSize="14sp" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif"
-                                        android:text="@string/style_blur_desc"
-                                        android:textColor="@color/text_secondary"
-                                        android:textSize="12sp" />
-                                </LinearLayout>
-
-                                <RadioButton
-                                    android:id="@+id/rbStyleBlur"
+                                <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
+                                    android:text="@string/style_blur"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/style_blur_desc"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="12sp" />
                             </LinearLayout>
+
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbStyleBlur"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/rowStylePixelate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="52dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="10dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/selected_option_bg"
+                            android:clickable="true"
+                            android:focusable="true">
 
                             <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
+                                android:layout_width="32dp"
+                                android:layout_height="32dp"
+                                android:background="@drawable/redaction_preview_pixelate" />
 
-                            <!-- Retro Pixelate -->
                             <LinearLayout
-                                android:id="@+id/rowStylePixelate"
-                                android:layout_width="match_parent"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="8dp"
-                                android:background="@drawable/selected_option_bg"
-                                android:clickable="true"
-                                android:focusable="true">
+                                android:layout_weight="1"
+                                android:layout_marginStart="14dp"
+                                android:orientation="vertical">
 
-                                <View
-                                    android:layout_width="@dimen/preview_swatch_size"
-                                    android:layout_height="@dimen/preview_swatch_size"
-                                    android:background="@drawable/redaction_preview_pixelate" />
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:layout_marginStart="14dp"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/style_pixelate"
-                                        android:textColor="@color/text_primary"
-                                        android:textSize="14sp" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif"
-                                        android:text="@string/style_pixelate_desc"
-                                        android:textColor="@color/text_secondary"
-                                        android:textSize="12sp" />
-                                </LinearLayout>
-
-                                <RadioButton
-                                    android:id="@+id/rbStylePixelate"
+                                <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:buttonTint="@color/accent_blue"
-                                    android:clickable="false"
-                                    android:focusable="false" />
+                                    android:text="@string/style_pixelate"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="15sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/style_pixelate_desc"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="12sp" />
                             </LinearLayout>
 
+                            <com.google.android.material.radiobutton.MaterialRadioButton
+                                android:id="@+id/rbStylePixelate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                app:buttonTint="@color/accent_blue"
+                                android:clickable="false"
+                                android:focusable="false" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- JPEG Export Quality Card -->
+                <!-- Export Quality Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/card_inter_spacing"
+                    android:layout_marginBottom="20dp"
                     app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeColor="@color/border_color"
                     app:strokeWidth="1dp">
@@ -989,60 +870,18 @@ android:text="@string/scan_camera"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="@dimen/card_inner_padding">
+                        android:padding="12dp">
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <FrameLayout
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:background="@drawable/badge_background"
-                                android:backgroundTint="@color/badge_green_bg"
-                                android:padding="8dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_export"
-                                    android:contentDescription="@null"
-                                    app:tint="@color/accent_green" />
-                            </FrameLayout>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/export_quality"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="16sp" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:fontFamily="sans-serif"
-                                    android:text="@string/export_quality_desc"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="12sp" />
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="20dp"
-                            android:layout_marginBottom="8dp"
-                            android:background="@color/border_color" />
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/export_quality"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp" />
 
                         <RadioGroup
                             android:id="@+id/rgExportQuality"
@@ -1050,159 +889,105 @@ android:text="@string/scan_camera"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
-                            <RadioButton
+                            <com.google.android.material.radiobutton.MaterialRadioButton
                                 android:id="@+id/rbQualityHigh"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:button="@null"
-                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                                android:drawableTint="@color/accent_green"
-                                android:gravity="center_vertical"
-                                android:paddingVertical="14dp"
-                                android:paddingStart="10dp"
-                                android:paddingEnd="10dp"
+                                android:minHeight="48dp"
+                                android:paddingHorizontal="8dp"
                                 android:background="@drawable/selected_option_bg"
+                                app:buttonTint="@color/accent_blue"
                                 android:text="@string/quality_high"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp" />
+                                android:textSize="15sp" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
-
-                            <RadioButton
+                            <com.google.android.material.radiobutton.MaterialRadioButton
                                 android:id="@+id/rbQualityMedium"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:button="@null"
-                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                                android:drawableTint="@color/accent_green"
-                                android:gravity="center_vertical"
-                                android:paddingVertical="14dp"
-                                android:paddingStart="10dp"
-                                android:paddingEnd="10dp"
+                                android:minHeight="48dp"
+                                android:paddingHorizontal="8dp"
                                 android:background="@drawable/selected_option_bg"
+                                app:buttonTint="@color/accent_blue"
                                 android:text="@string/quality_medium"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp" />
+                                android:textSize="15sp" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:layout_marginHorizontal="10dp"
-                                android:background="@color/border_color" />
-
-                            <RadioButton
+                            <com.google.android.material.radiobutton.MaterialRadioButton
                                 android:id="@+id/rbQualityLow"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:minHeight="@dimen/radio_option_min_height"
-                                android:button="@null"
-                                android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                                android:drawableTint="@color/accent_green"
-                                android:gravity="center_vertical"
-                                android:paddingVertical="14dp"
-                                android:paddingStart="10dp"
-                                android:paddingEnd="10dp"
+                                android:minHeight="48dp"
+                                android:paddingHorizontal="8dp"
                                 android:background="@drawable/selected_option_bg"
+                                app:buttonTint="@color/accent_blue"
                                 android:text="@string/quality_low"
                                 android:textColor="@color/text_primary"
-                                android:textSize="14sp" />
+                                android:textSize="15sp" />
                         </RadioGroup>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ══ SECTION: DANGER ZONE ══ -->
+                <!-- Section: Storage & History -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
-                    android:layout_marginBottom="@dimen/section_header_bottom_margin"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginBottom="8dp"
                     android:fontFamily="sans-serif-medium"
-                    android:letterSpacing="0.12"
                     android:text="@string/section_danger_zone"
-                    android:textColor="@color/accent_rose"
-                    android:textSize="11sp" />
+                    android:textColor="@color/section_header_color"
+                    android:textSize="13sp" />
 
-                <!-- Data & Privacy Actions Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="20dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:strokeColor="@color/accent_rose"
-                    app:strokeWidth="1.5dp">
+                    app:strokeColor="@color/border_color"
+                    app:strokeWidth="1dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/card_inner_padding">
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="18dp">
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:layout_weight="1"
+                            android:layout_marginEnd="12dp"
+                            android:orientation="vertical">
 
-                            <FrameLayout
-                                android:layout_width="36dp"
-                                android:layout_height="36dp"
-                                android:background="@drawable/badge_background"
-                                android:backgroundTint="@color/badge_red_bg"
-                                android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/clear_cache"
+                                android:textColor="@color/text_primary"
+                                android:textSize="15sp" />
 
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/ic_warning"
-                                    android:contentDescription="@null"
-                                    app:tint="@color/accent_rose" />
-                            </FrameLayout>
-
-                            <LinearLayout
+                            <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="@string/clear_cache"
-                                    android:textColor="@color/text_primary"
-                                    android:textSize="16sp" />
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:fontFamily="sans-serif"
-                                    android:text="@string/clear_cache_desc"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="12sp" />
-                            </LinearLayout>
+                                android:layout_marginTop="2dp"
+                                android:text="@string/clear_cache_desc"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="13sp" />
                         </LinearLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnClearCache"
-                            android:layout_width="match_parent"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
-                            android:backgroundTint="@color/accent_rose"
                             android:text="@string/wipe_history_files"
-                            android:textColor="@color/white"
-                            app:cornerRadius="14dp"
-                            android:paddingVertical="12dp"
-                            android:elevation="0dp"
-                            style="@style/Widget.MaterialComponents.Button" />
+                            android:textColor="@color/accent_rose"
+                            app:strokeColor="@color/border_red" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -1211,21 +996,28 @@ android:text="@string/scan_camera"
 
     </FrameLayout>
 
-    <!-- Bottom Navigation View -->
+    <!-- Top Hairline above Bottom Navigation -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border_color"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation" />
+
+    <!-- Material 3 Bottom Navigation Bar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
+        style="@style/Widget.Material3.BottomNavigationView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/card_bg"
-        android:elevation="8dp"
+        app:elevation="0dp"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_menu"
         app:itemIconTint="@color/nav_item_color"
         app:itemTextColor="@color/nav_item_color"
-        app:itemRippleColor="@color/ripple_color"
+        app:itemActiveIndicatorStyle="@style/Widget.Material3.BottomNavigationView.ActiveIndicator"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

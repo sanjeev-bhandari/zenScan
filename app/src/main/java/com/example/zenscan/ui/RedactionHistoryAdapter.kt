@@ -10,11 +10,14 @@ import com.example.zenscan.data.PreferencesManager
 import com.example.zenscan.databinding.ItemRecentRedactionBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class RedactionHistoryAdapter(
@@ -23,9 +26,7 @@ class RedactionHistoryAdapter(
     private val onItemLongClick: (File) -> Unit
 ) : ListAdapter<File, RedactionHistoryAdapter.ViewHolder>(DiffCallback()) {
 
-    companion object {
-        private val dateFormat = SimpleDateFormat("MMM dd, yyyy · h:mm a", Locale.getDefault())
-    }
+    private val adapterScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     private class DiffCallback : DiffUtil.ItemCallback<File>() {
         override fun areItemsTheSame(oldItem: File, newItem: File): Boolean =
@@ -48,20 +49,30 @@ class RedactionHistoryAdapter(
         holder.bind(getItem(position))
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        holder.clear()
+    }
+
     inner class ViewHolder(
         private val binding: ItemRecentRedactionBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        private var decodeJob: Job? = null
+
         fun bind(file: File) {
-            val tag = file.absolutePath
-            binding.thumbnail.tag = tag
-            CoroutineScope(Dispatchers.IO).launch {
-                val opts = BitmapFactory.Options().apply { inSampleSize = 8 }
-                val bmp = BitmapFactory.decodeFile(tag, opts)
-                withContext(Dispatchers.Main) {
-                    if (binding.thumbnail.tag == tag) {
-                        binding.thumbnail.setImageBitmap(bmp)
-                    }
+            decodeJob?.cancel()
+            val path = file.absolutePath
+            binding.thumbnail.tag = path
+            binding.thumbnail.setImageBitmap(null)
+
+            decodeJob = adapterScope.launch {
+                val bmp = withContext(Dispatchers.IO) {
+                    val opts = BitmapFactory.Options().apply { inSampleSize = 8 }
+                    BitmapFactory.decodeFile(path, opts)
+                }
+                if (binding.thumbnail.tag == path) {
+                    binding.thumbnail.setImageBitmap(bmp)
                 }
             }
 
@@ -78,11 +89,19 @@ class RedactionHistoryAdapter(
             }
         }
 
+        fun clear() {
+            decodeJob?.cancel()
+            decodeJob = null
+        }
+
         private fun parseFilenameMetadata(file: File): Pair<String, String> {
             val name = file.name
             val parts = name.removePrefix("ZenScan_").removeSuffix(".jpg").split("_")
             val timestamp = parts.getOrNull(0)?.toLongOrNull() ?: file.lastModified()
-            val dateText = dateFormat.format(Date(timestamp))
+            val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy · h:mm a", Locale.getDefault())
+            val dateText = Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .format(formatter)
 
             val metadata = preferencesManager.getHistoryMetadata(name)
                 ?: parts.getOrNull(1)?.toIntOrNull()?.let { count ->

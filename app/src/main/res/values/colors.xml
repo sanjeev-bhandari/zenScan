@@ -1,44 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand colors -->
-    <color name="primary">#0F172A</color>
-    <color name="primary_dark">#1E293B</color>
-    <color name="colorAccent">#2563EB</color>
-    <color name="dialog_button_text">#2563EB</color>
+    <!-- Core Material 3 Neutral & Brand Palette (Light) -->
+    <color name="primary_dark">#262A30</color>
+    <color name="dialog_button_text">#1B6EF3</color>
 
-    <color name="accent_blue">#2563EB</color>
-    <color name="accent_green">#10B981</color>
-    <color name="accent_rose">#F43F5E</color>
+    <color name="accent_blue">#1B6EF3</color>
+    <color name="accent_green">#1E8E3E</color>
+    <color name="accent_rose">#B3261E</color>
 
-    <color name="bg_light">#F8F9FA</color>
-    <color name="bg_dark">#0B0F19</color>
-    <color name="card_bg_dark">#1E293B</color>
+    <!-- Grounded Warm Alabaster & Carbon Surfaces -->
+    <color name="bg_light">#F6F6F3</color>
+    <color name="bg_dark">#111315</color>
+    <color name="card_bg_dark">#1C1F23</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="text_primary">#0F172A</color>
-    <color name="text_secondary">#475569</color>
-    <color name="text_dark_primary">#F8FAFC</color>
+    <color name="text_primary">#1A1C1E</color>
+    <color name="text_secondary">#5F6368</color>
+    <color name="text_dark_primary">#ECEEF0</color>
 
-    <!-- Semantic Light Colors -->
+    <!-- Semantic Light Surface Tokens -->
     <color name="window_background">@color/bg_light</color>
-    <color name="card_bg">@color/white</color>
-    <color name="border_color">#E2E8F0</color>
-    <color name="ripple_color">#F1F5F9</color>
-    <color name="badge_blue_bg">#EFF6FF</color>
-    <color name="badge_green_bg">#ECFDF5</color>
-    <color name="badge_red_bg">#FEF2F2</color>
-    <color name="badge_logo_bg">#0F172A</color>
-    <color name="border_red">#FEE2E2</color>
-    
-    <!-- Settings: Selected row highlight -->
-    <color name="selected_option_bg">#0D2563EB</color>
-    <color name="section_header_color">#6B7280</color>
+    <color name="card_bg">#FFFFFFFF</color>
+    <color name="surface_container">#ECEBE6</color>
+    <color name="border_color">#E2E2DC</color>
+    <color name="ripple_color">#1F1A1C1E</color>
 
-    <!-- Brush tool colors -->
-    <color name="brush_active">#1E3A8A</color>
-    <color name="brush_inactive">#2E3B4E</color>
+    <!-- Tonal Container Colors (M3) -->
+    <color name="badge_blue_bg">#D8E6FF</color>
+    <color name="badge_green_bg">#D4EEDB</color>
+    <color name="badge_red_bg">#F9DEDC</color>
+    <color name="badge_logo_bg">#D4EEDB</color>
+    <color name="border_red">#F2B8B5</color>
 
-    <!-- Subtitle summaries alert colors -->
-    <color name="sensitive_alert_subtitle">#FDA4AF</color>
-    <color name="protected_success_subtitle">#A7F3D0</color>
+    <!-- Settings Selection & Section Headers -->
+    <color name="selected_option_bg">#141B6EF3</color>
+    <color name="section_header_color">#1B6EF3</color>
+
+    <!-- Editor Tool Dock Colors (matches darkroom mockup) -->
+    <color name="brush_active">#FFFFFFFF</color>
+    <color name="brush_inactive">#2A2E33</color>
+
+    <!-- Editor Toolbar Status Subtitle Colors -->
+    <color name="sensitive_alert_subtitle">#F2B8B5</color>
+    <color name="protected_success_subtitle">#A8DAB5</color>
 </resources>

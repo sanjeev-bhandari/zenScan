@@ -10,7 +10,7 @@
     <FrameLayout
         android:layout_width="@dimen/icon_size_huge"
         android:layout_height="@dimen/icon_size_huge"
-        android:background="@drawable/badge_background"
+        android:background="@drawable/bg_circle_badge"
         android:backgroundTint="@color/badge_green_bg"
         android:padding="@dimen/padding_large">
 

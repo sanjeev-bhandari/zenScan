@@ -4,9 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/margin_medium"
+    android:clickable="true"
+    android:focusable="true"
     app:cardBackgroundColor="@color/card_bg"
     app:cardCornerRadius="@dimen/radius_medium"
     app:cardElevation="0dp"
+    app:rippleColor="@color/ripple_color"
     app:strokeColor="@color/border_color"
     app:strokeWidth="@dimen/stroke_width_thin">
 
@@ -62,7 +65,7 @@
         <FrameLayout
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"
-            android:background="@drawable/badge_background"
+            android:background="@drawable/bg_circle_badge"
             android:backgroundTint="@color/badge_green_bg"
             android:padding="@dimen/padding_small">
 
@@ -73,6 +76,14 @@
                 android:contentDescription="@null"
                 app:tint="@color/accent_green" />
         </FrameLayout>
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="@null"
+            app:tint="@color/text_secondary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

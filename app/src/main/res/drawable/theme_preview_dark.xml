@@ -1,33 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dark Theme thumbnail -->
+<!-- Dark Theme thumbnail (carbon neutral) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="@dimen/preview_swatch_size"
     android:height="@dimen/preview_swatch_size"
     android:viewportWidth="40"
     android:viewportHeight="40">
-    <!-- Dark app body -->
     <path
-        android:fillColor="#0B0F19"
+        android:fillColor="#111315"
         android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z" />
-    <!-- Top header bar -->
     <path
-        android:fillColor="#0F172A"
+        android:fillColor="#1C1F23"
         android:pathData="M8,1L32,1A7,7 0,0 1,39 8L39,10L1,10L1,8A7,7 0,0 1,8 1z" />
-    <!-- Content card -->
     <path
-        android:fillColor="#1E293B"
+        android:fillColor="#25282D"
         android:pathData="M9,14L31,14A3,3 0,0 1,34 17L34,23A3,3 0,0 1,31 26L9,26A3,3 0,0 1,6 23L6,17A3,3 0,0 1,9 14z"
         android:strokeWidth="1"
-        android:strokeColor="#334155" />
-    <!-- Bottom navigation bar -->
+        android:strokeColor="#2E3238" />
     <path
-        android:fillColor="#1E293B"
+        android:fillColor="#1C1F23"
         android:pathData="M1,30L39,30L39,32A7,7 0,0 1,32 39L8,39A7,7 0,0 1,1 32z" />
-    <!-- Active blue indicator dot -->
     <path
-        android:fillColor="#3B82F6"
+        android:fillColor="#8AB4F8"
         android:pathData="M13,34.5m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0" />
-    <!-- Outer border -->
     <path
         android:fillColor="#00000000"
         android:pathData="M8,0.5L32,0.5A7.5,7.5 0,0 1,39.5 8L39.5,32A7.5,7.5 0,0 1,32 39.5L8,39.5A7.5,7.5 0,0 1,0.5 32L0.5,8A7.5,7.5 0,0 1,8 0.5z"

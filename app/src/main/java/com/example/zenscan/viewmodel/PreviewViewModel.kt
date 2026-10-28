@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
@@ -573,7 +574,7 @@ class PreviewViewModel(
 
         when (redactionStyle) {
             "black" -> paint.color = Color.BLACK
-            "slate" -> paint.color = "#1E293B".toColorInt()
+            "slate" -> paint.color = "#262A30".toColorInt()
         }
 
         for (region in regions) {
@@ -627,8 +628,8 @@ class PreviewViewModel(
         val scaledWidth = (width / safePixelSize).coerceAtLeast(1)
         val scaledHeight = (height / safePixelSize).coerceAtLeast(1)
 
-        val tiny = Bitmap.createScaledBitmap(src, scaledWidth, scaledHeight, false)
-        val result = Bitmap.createScaledBitmap(tiny, width, height, false)
+        val tiny = src.scale(scaledWidth, scaledHeight, false)
+        val result = tiny.scale(width, height, false)
         tiny.recycle()
         return result
     }
@@ -638,8 +639,8 @@ class PreviewViewModel(
         val scale = (1f / radius.coerceAtLeast(12)).coerceAtLeast(0.04f)
         val w = (src.width * scale).toInt().coerceAtLeast(1)
         val h = (src.height * scale).toInt().coerceAtLeast(1)
-        val tiny = Bitmap.createScaledBitmap(src, w, h, true)
-        val result = Bitmap.createScaledBitmap(tiny, src.width, src.height, true)
+        val tiny = src.scale(w, h, true)
+        val result = tiny.scale(src.width, src.height, true)
         tiny.recycle()
         return result
     }

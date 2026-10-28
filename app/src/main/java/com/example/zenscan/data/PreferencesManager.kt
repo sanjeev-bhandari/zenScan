@@ -1,6 +1,7 @@
 package com.example.zenscan.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.example.zenscan.model.CustomFilterRule
 import org.json.JSONArray
 import org.json.JSONObject
@@ -12,32 +13,32 @@ class PreferencesManager(context: Context) {
     fun getThemeMode(): String = prefs.getString("theme_mode", "system") ?: "system"
 
     fun setThemeMode(mode: String) {
-        prefs.edit().putString("theme_mode", mode).apply()
+        prefs.edit { putString("theme_mode", mode) }
     }
 
     fun getRedactionStyle(): String = prefs.getString("redaction_style", "black") ?: "black"
 
     fun setRedactionStyle(style: String) {
-        prefs.edit().putString("redaction_style", style).apply()
+        prefs.edit { putString("redaction_style", style) }
     }
 
     fun getExportQuality(): Int = prefs.getInt("export_quality", 95)
 
     fun setExportQuality(quality: Int) {
-        prefs.edit().putInt("export_quality", quality).apply()
+        prefs.edit { putInt("export_quality", quality) }
     }
 
-    // Encrypted History Metadata Registry for persistent redaction items count
+    // History Metadata Registry for persistent redaction items count
     fun getHistoryMetadata(fileName: String): String? {
         return prefs.getString("history_meta_$fileName", null)
     }
 
     fun saveHistoryMetadata(fileName: String, metadata: String) {
-        prefs.edit().putString("history_meta_$fileName", metadata).apply()
+        prefs.edit { putString("history_meta_$fileName", metadata) }
     }
 
     fun removeHistoryMetadata(fileName: String) {
-        prefs.edit().remove("history_meta_$fileName").apply()
+        prefs.edit { remove("history_meta_$fileName") }
     }
 
     // Custom Redaction Rules Storage
@@ -74,6 +75,6 @@ class PreferencesManager(context: Context) {
             }
             array.put(obj)
         }
-        prefs.edit().putString("custom_redaction_rules", array.toString()).apply()
+        prefs.edit { putString("custom_redaction_rules", array.toString()) }
     }
 }
